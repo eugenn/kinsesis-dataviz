@@ -1,13 +1,12 @@
 package com.amazonaws.services.kinesis.samples.datavis.kcl.persistence.ddb;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.kinesis.samples.datavis.kcl.persistence.CountPersister;
-import com.amazonaws.services.kinesis.samples.datavis.kcl.persistence.PersisterThread;
 import com.amazonaws.services.kinesis.samples.datavis.model.TypeCount;
 import com.amazonaws.services.kinesis.samples.datavis.model.TypeCountComparator;
 import com.amazonaws.services.kinesis.samples.datavis.model.dynamo.BidWinCount;
 import com.amazonaws.services.kinesis.samples.datavis.model.record.BidWinRec;
 import com.amazonaws.services.kinesis.samples.datavis.utils.DynamoDBUtils;
+import com.amazonaws.services.kinesis.samples.datavis.utils.HostResolver;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -16,35 +15,18 @@ import java.util.*;
 /**
  * Created by eugennekhai on 25/08/16.
  */
-public class DynamoDBBidWinCountPersister extends GeneralCountPersister<BidWinCount> implements CountPersister<BidWinRec> {
-    private static final Log LOG = LogFactory.getLog(DynamoDBBidRqCountPersister.class);
+public class BidWinCountPersister implements CountPersister<BidWinRec, BidWinCount> {
+    private static final Log LOG = LogFactory.getLog(BidRqCountPersister.class);
 
     // Generate UTC timestamps
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
-    /**
-     * Create a new persister with a DynamoDBMapper to translate counts to items and send to Amazon DynamoDB.
-     *
-     * @param mapper Amazon DynamoDB Mapper to use.
-     */
-    public DynamoDBBidWinCountPersister(DynamoDBMapper mapper) {
-        super(mapper);
-    }
 
     @Override
-    public void initialize() {
-        // This thread is responsible for draining the queue of new counts and sending them in batches to DynamoDB
-        dynamoDBSender = new PersisterThread<>(mapper, counts);
-
-        dynamoDBSender.setDaemon(true);
-        dynamoDBSender.start();
-    }
-
-    @Override
-    public void persist(Map<BidWinRec, Long> objectCounts) {
+    public Collection<BidWinCount> persist(Map<BidWinRec, Long> objectCounts) {
         if (objectCounts.isEmpty()) {
             // short circuit to avoid creating a map when we have no objects to persist
-            return;
+            return new ArrayList<>();
         }
 
         // Use a local collection to batch writing the new counts into the queue. This will allow the queue drainer
@@ -65,7 +47,7 @@ public class DynamoDBBidWinCountPersister extends GeneralCountPersister<BidWinCo
                 bdCount.setBidRequestId(rec.getBidRequestId());
                 bdCount.setTimestamp(date);
                 bdCount.setTypeCounts(new ArrayList<TypeCount>());
-                bdCount.setHost(resolveHostname());
+                bdCount.setHost(HostResolver.resolveHostname());
 
                 countMap.put(date, bdCount);
             }
@@ -88,7 +70,7 @@ public class DynamoDBBidWinCountPersister extends GeneralCountPersister<BidWinCo
             Collections.sort(count.getTypeCounts(), new TypeCountComparator());
         }
 
-        counts.addAll(countMap.values());
+        return countMap.values();
     }
 
 }

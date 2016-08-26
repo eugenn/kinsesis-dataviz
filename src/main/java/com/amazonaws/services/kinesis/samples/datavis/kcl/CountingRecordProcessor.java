@@ -24,6 +24,7 @@ import com.amazonaws.services.kinesis.clientlibrary.types.ShutdownReason;
 import com.amazonaws.services.kinesis.model.Record;
 import com.amazonaws.services.kinesis.samples.datavis.kcl.counter.SlidingWindowCounter;
 import com.amazonaws.services.kinesis.samples.datavis.kcl.persistence.CountPersister;
+import com.amazonaws.services.kinesis.samples.datavis.kcl.persistence.ddb.GeneralCountPersister;
 import com.amazonaws.services.kinesis.samples.datavis.kcl.timing.Clock;
 import com.amazonaws.services.kinesis.samples.datavis.kcl.timing.NanoClock;
 import com.amazonaws.services.kinesis.samples.datavis.kcl.timing.Timer;
@@ -35,6 +36,7 @@ import org.apache.commons.logging.LogFactory;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -45,7 +47,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @param <T> The type of records this processor is capable of counting.
  */
-public class CountingRecordProcessor<T> implements IRecordProcessor {
+public class CountingRecordProcessor<T,C> implements IRecordProcessor {
     private static final Log LOG = LogFactory.getLog(CountingRecordProcessor.class);
 
     // Lock to use for our timer
@@ -71,7 +73,9 @@ public class CountingRecordProcessor<T> implements IRecordProcessor {
     private ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(1);
 
     // This is responsible for persisting our counts every interval
-    private CountPersister<T> persister;
+    private CountPersister<T,C> persister;
+
+    private GeneralCountPersister countPersister;
 
     private CountingRecordProcessorConfig config;
 
@@ -89,7 +93,8 @@ public class CountingRecordProcessor<T> implements IRecordProcessor {
      */
     public CountingRecordProcessor(CountingRecordProcessorConfig config,
             Class<T> recordType,
-            CountPersister<T> persister,
+            CountPersister<T, C> persister,
+                                   GeneralCountPersister countPersister,
             int computeRangeInMillis,
             int computeIntervalInMillis) {
         if (config == null) {
@@ -115,6 +120,7 @@ public class CountingRecordProcessor<T> implements IRecordProcessor {
         this.config = config;
         this.recordType = recordType;
         this.persister = persister;
+        this.countPersister = countPersister;
         this.computeRangeInMillis = computeRangeInMillis;
         this.computeIntervalInMillis = computeIntervalInMillis;
 
@@ -129,7 +135,7 @@ public class CountingRecordProcessor<T> implements IRecordProcessor {
 
         resetCheckpointAlarm();
 
-        persister.initialize();
+        countPersister.initialize();
 
         // Create a sliding window whose size is large enough to hold an entire range of individual interval counts.
         counter = new SlidingWindowCounter<>((int) (computeRangeInMillis / computeIntervalInMillis));
@@ -178,7 +184,9 @@ public class CountingRecordProcessor<T> implements IRecordProcessor {
         }
         // Persist the counts if we have a full range
         if (counts != null) {
-            persister.persist(counts);
+            BlockingQueue<C> q = countPersister.getCounts();
+
+            q.addAll(persister.persist(counts));
         }
     }
 
@@ -266,7 +274,7 @@ public class CountingRecordProcessor<T> implements IRecordProcessor {
         for (int i = 0; i < config.getCheckpointRetries(); i++) {
             try {
                 // First checkpoint our persister to guarantee all calculated counts have been persisted
-                persister.checkpoint();
+                countPersister.checkpoint();
                 checkpointer.checkpoint();
                 return;
             } catch (ShutdownException se) {

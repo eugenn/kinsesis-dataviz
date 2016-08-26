@@ -15,50 +15,34 @@
 
 package com.amazonaws.services.kinesis.samples.datavis.kcl.persistence.ddb;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.kinesis.samples.datavis.kcl.persistence.CountPersister;
-import com.amazonaws.services.kinesis.samples.datavis.kcl.persistence.PersisterThread;
 import com.amazonaws.services.kinesis.samples.datavis.model.TypeCount;
 import com.amazonaws.services.kinesis.samples.datavis.model.TypeCountComparator;
 import com.amazonaws.services.kinesis.samples.datavis.model.dynamo.BidRequestCount;
 import com.amazonaws.services.kinesis.samples.datavis.model.record.BidRequestRec;
 import com.amazonaws.services.kinesis.samples.datavis.utils.DynamoDBUtils;
+import com.amazonaws.services.kinesis.samples.datavis.utils.HostResolver;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.*;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * Persists counts to DynamoDB. This uses a separate thread to send counts to DynamoDB to decouple any network latency
  * from affecting the thread we use to update counts.
  */
-public class DynamoDBBidRqCountPersister extends GeneralCountPersister<BidRequestCount> implements CountPersister<BidRequestRec> {
-    private static final Log LOG = LogFactory.getLog(DynamoDBBidRqCountPersister.class);
-
-    /**
-     * Create a new persister with a DynamoDBMapper to translate counts to items and send to Amazon DynamoDB.
-     *
-     * @param mapper Amazon DynamoDB Mapper to use.
-     */
-    public DynamoDBBidRqCountPersister(DynamoDBMapper mapper) {
-        super(mapper);
-
-    }
+public class BidRqCountPersister implements CountPersister<BidRequestRec, BidRequestCount> {
+    private static final Log LOG = LogFactory.getLog(BidRqCountPersister.class);
+    // Generate UTC timestamps
+    protected static final TimeZone UTC = TimeZone.getTimeZone("UTC");
+    private BlockingQueue<BidRequestCount> counts;
 
     @Override
-    public void initialize() {
-        // This thread is responsible for draining the queue of new counts and sending them in batches to DynamoDB
-        dynamoDBSender = new PersisterThread<>(mapper, counts);
-
-        dynamoDBSender.setDaemon(true);
-        dynamoDBSender.start();
-    }
-
-    @Override
-    public void persist(Map<BidRequestRec, Long> objectCounts) {
+    public Collection<BidRequestCount> persist(Map<BidRequestRec, Long> objectCounts) {
         if (objectCounts.isEmpty()) {
             // short circuit to avoid creating a map when we have no objects to persist
-            return;
+            return new ArrayList<>();
         }
 
         // Use a local collection to batch writing the new counts into the queue. This will allow the queue drainer
@@ -80,7 +64,7 @@ public class DynamoDBBidRqCountPersister extends GeneralCountPersister<BidReques
                 bdCount.setWh(rec.getWh());
                 bdCount.setTimestamp(date);
                 bdCount.setTypeCounts(new ArrayList<TypeCount>());
-                bdCount.setHost(resolveHostname());
+                bdCount.setHost(HostResolver.resolveHostname());
 
                 countMap.put(date, bdCount);
             }
@@ -102,8 +86,9 @@ public class DynamoDBBidRqCountPersister extends GeneralCountPersister<BidReques
             Collections.sort(count.getTypeCounts(), new TypeCountComparator());
         }
 
-        counts.addAll(countMap.values());
+        return countMap.values();
     }
+
 
 
 }

@@ -18,19 +18,21 @@ package com.amazonaws.services.kinesis.samples.datavis.kcl;
 import com.amazonaws.services.kinesis.clientlibrary.interfaces.IRecordProcessor;
 import com.amazonaws.services.kinesis.clientlibrary.interfaces.IRecordProcessorFactory;
 import com.amazonaws.services.kinesis.samples.datavis.kcl.persistence.CountPersister;
+import com.amazonaws.services.kinesis.samples.datavis.kcl.persistence.ddb.GeneralCountPersister;
 
 /**
  * Generates {@link CountingRecordProcessor}s for counting occurrences of unique values over a given range.
  *
  * @param <T> The type of records the processors this factory creates are capable of counting.
  */
-public class CountingRecordProcessorFactory<T> implements IRecordProcessorFactory {
+public class CountingRecordProcessorFactory<T, C> implements IRecordProcessorFactory {
 
     private Class<T> recordType;
-    private CountPersister<T> persister;
+    private CountPersister<T, C> persister;
     private int computeRangeInMillis;
     private int computeIntervalInMillis;
     private CountingRecordProcessorConfig config;
+    private GeneralCountPersister countPersister;
 
     /**
      * Creates a new factory that uses the default configuration values for each
@@ -39,31 +41,32 @@ public class CountingRecordProcessorFactory<T> implements IRecordProcessorFactor
      * @see #CountingRecordProcessorFactory(Class, CountPersister, int, int, CountingRecordProcessorConfig)
      */
     public CountingRecordProcessorFactory(Class<T> recordType,
-            CountPersister<T> persister,
-            int computeRangeInMillis,
-            int computeIntervalInMillis) {
-        this(recordType, persister, computeRangeInMillis, computeIntervalInMillis, new CountingRecordProcessorConfig());
+                                          CountPersister<T,C> persister,
+                                          GeneralCountPersister countPersister,
+                                          int computeRangeInMillis,
+                                          int computeIntervalInMillis) {
+        this(recordType, persister, countPersister, computeRangeInMillis, computeIntervalInMillis, new CountingRecordProcessorConfig());
     }
 
     /**
      * Create a new factory that produces counting record processors that sum counts over a range and update those
      * counts at each interval.
      *
-     * @param recordType The type of records the processors this factory creates are capable of counting.
-     * @param persister Persister to use for storing the counts.
-     * @param computeRangeInMillis Range, in milliseconds, to compute the count across.
+     * @param recordType              The type of records the processors this factory creates are capable of counting.
+     * @param persister               Persister to use for storing the counts.
+     * @param computeRangeInMillis    Range, in milliseconds, to compute the count across.
      * @param computeIntervalInMillis Milliseconds between count updates. This is the frequency at which the persister
-     *        will be called.
-     * @param config The configuration to use for each created counting record processor.
-     *
+     *                                will be called.
+     * @param config                  The configuration to use for each created counting record processor.
      * @throws IllegalArgumentException if computeRangeInMillis or computeIntervalInMillis are not greater than 0 or
-     *         computeRangeInMillis is not evenly divisible by computeIntervalInMillis.
+     *                                  computeRangeInMillis is not evenly divisible by computeIntervalInMillis.
      */
     public CountingRecordProcessorFactory(Class<T> recordType,
-            CountPersister<T> persister,
-            int computeRangeInMillis,
-            int computeIntervalInMillis,
-            CountingRecordProcessorConfig config) {
+                                          CountPersister<T,C> persister,
+                                          GeneralCountPersister countPersister,
+                                          int computeRangeInMillis,
+                                          int computeIntervalInMillis,
+                                          CountingRecordProcessorConfig config) {
         if (recordType == null) {
             throw new NullPointerException("recordType must not be null");
         }
@@ -86,6 +89,7 @@ public class CountingRecordProcessorFactory<T> implements IRecordProcessorFactor
 
         this.recordType = recordType;
         this.persister = persister;
+        this.countPersister = countPersister;
         this.computeRangeInMillis = computeRangeInMillis;
         this.computeIntervalInMillis = computeIntervalInMillis;
         this.config = config;
@@ -100,6 +104,7 @@ public class CountingRecordProcessorFactory<T> implements IRecordProcessorFactor
         return new CountingRecordProcessor<>(config,
                 recordType,
                 persister,
+                countPersister,
                 computeRangeInMillis,
                 computeIntervalInMillis);
     }

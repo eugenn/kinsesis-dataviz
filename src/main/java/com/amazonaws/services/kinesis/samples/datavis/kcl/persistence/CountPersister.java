@@ -17,6 +17,7 @@ package com.amazonaws.services.kinesis.samples.datavis.kcl.persistence;
 
 import com.amazonaws.services.kinesis.samples.datavis.kcl.CountingRecordProcessor;
 
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -24,25 +25,14 @@ import java.util.Map;
  *
  * @param <T> Type of objects this persister can persist.
  */
-public interface CountPersister<T> {
-
-    /**
-     * Initialize this persister.
-     */
-    public void initialize();
+public interface CountPersister<T, C> {
 
     /**
      * Persist the map of objects to counts.
      *
      * @param objectCounts
      */
-    public void persist(Map<T, Long> objectCounts);
+    public Collection<C> persist(Map<T, Long> objectCounts);
 
-    /**
-     * Indicates this persister should flush its internal state and guarantee all records received from calls to
-     * {@link #persist(Map)} are completely handled.
-     *
-     * @throws InterruptedException if any thread interrupted the current thread while performing a checkpoint.
-     */
-    public void checkpoint() throws InterruptedException;
+
 }
