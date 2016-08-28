@@ -26,7 +26,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.*;
-import java.util.concurrent.BlockingQueue;
 
 /**
  * Persists counts to DynamoDB. This uses a separate thread to send counts to DynamoDB to decouple any network latency
@@ -36,7 +35,6 @@ public class BidRqCountPersister implements CountPersister<BidRequestRec, BidReq
     private static final Log LOG = LogFactory.getLog(BidRqCountPersister.class);
     // Generate UTC timestamps
     protected static final TimeZone UTC = TimeZone.getTimeZone("UTC");
-    private BlockingQueue<BidRequestCount> counts;
 
     @Override
     public Collection<BidRequestCount> persist(Map<BidRequestRec, Long> objectCounts) {

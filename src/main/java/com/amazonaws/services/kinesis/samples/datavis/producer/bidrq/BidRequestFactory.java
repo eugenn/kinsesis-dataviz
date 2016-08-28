@@ -35,7 +35,7 @@ public class BidRequestFactory {
     public BidRequestRec create() {
         String wh = getRandomWH();
 
-        return new BidRequestRec(type, wh);
+        return new BidRequestRec("", type, wh);
     }
 
     /**

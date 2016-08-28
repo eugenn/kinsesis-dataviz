@@ -1,29 +1,20 @@
 package com.amazonaws.services.kinesis.samples.datavis.model.record;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 /**
  * Created by eugennekhai on 24/08/16.
  */
-@Data
+@Getter
+@AllArgsConstructor
 public class BidRequestRec {
+    private String bidRequestId;
     private String type;
     private String wh;
 
+
     public BidRequestRec() {}
-    public BidRequestRec(String type, String wh) {
-        this.wh = wh;
-        this.type = type;
-    }
-
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
 
     @Override
     public boolean equals(Object o) {
