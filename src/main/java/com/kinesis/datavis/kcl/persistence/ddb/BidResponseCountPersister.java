@@ -1,5 +1,6 @@
 package com.kinesis.datavis.kcl.persistence.ddb;
 
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.kinesis.datavis.kcl.persistence.CountPersister;
 import com.kinesis.datavis.model.dynamo.BidResponseCount;
 import com.kinesis.datavis.model.record.BidResponseRec;
@@ -13,16 +14,20 @@ import java.util.*;
 /**
  * Created by eugennekhai on 29/08/16.
  */
-public class BidResponseCountPersister implements CountPersister<BidResponseRec, BidResponseCount> {
+public class BidResponseCountPersister extends QueueRecordPersister implements CountPersister<BidResponseRec, BidResponseCount> {
     private static final Log LOG = LogFactory.getLog(BidRqCountPersister.class);
     // Generate UTC timestamps
     protected static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
+    public BidResponseCountPersister(DynamoDBMapper dbMapper) {
+        super(dbMapper);
+    }
+
     @Override
-    public Collection<BidResponseCount> persist(Map<BidResponseRec, Long> objectCounts) {
+    public void persist(Map<BidResponseRec, Long> objectCounts) {
         if (objectCounts.isEmpty()) {
             // short circuit to avoid creating a map when we have no objects to persist
-            return new ArrayList<>();
+            return;
         }
 
         // Use a local collection to batch writing the new counts into the queue. This will allow the queue drainer
@@ -43,32 +48,17 @@ public class BidResponseCountPersister implements CountPersister<BidResponseRec,
                 bdCount.setHashKey(DynamoDBUtils.getHashKey());
                 bdCount.setBannerId(rec.getBannerId());
                 bdCount.setTimestamp(date);
-//                bdCount.setTypeCounts(new ArrayList<TypeCount>());
                 bdCount.setHost(HostResolver.resolveHostname());
 
                 countMap.put(date, bdCount);
             }
 
             bdCount.setCount(bdCount.getCount() + count.getValue());
-
-            // Add referrer to list of refcounts for this resource and time
-//            TypeCount typeCount = new TypeCount();
-//            typeCount.setType(rec.getType());
-//            typeCount.setCount(count.getValue());
-//
-//            bdCount.getTypeCounts().add(typeCount);
         }
 
-        // Top N calculation for this interval
-        // By sorting the referrer counts list in descending order the consumer of the count data can choose their own
-        // N.
-//        for (BidResponseCount count : countMap.values()) {
-//            Collections.sort(count.getTypeCounts(), new TypeCountComparator());
-//        }
+        counts.addAll(countMap.values());
 
-        return countMap.values();
     }
-
 
 
 }

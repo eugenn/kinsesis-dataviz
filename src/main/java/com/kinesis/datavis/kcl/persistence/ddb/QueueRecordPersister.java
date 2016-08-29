@@ -31,6 +31,9 @@ public class QueueRecordPersister<C> {
     @Getter
     public BlockingQueue<C> counts = new LinkedBlockingQueue<>(MAX_COUNTS_IN_MEMORY);
 
+    @Getter
+    public BlockingQueue<C> sums = new LinkedBlockingQueue<>(MAX_COUNTS_IN_MEMORY);
+
     public DynamoDBMapper mapper;
 
     // This thread is responsible for draining the queue of new counts and sending them in batches to DynamoDB

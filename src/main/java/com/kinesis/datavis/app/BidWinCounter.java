@@ -6,7 +6,6 @@ import com.amazonaws.services.kinesis.clientlibrary.interfaces.IRecordProcessorF
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;
 import com.kinesis.datavis.kcl.CountingRecordProcessorFactory;
 import com.kinesis.datavis.kcl.persistence.ddb.BidWinCountPersister;
-import com.kinesis.datavis.kcl.persistence.ddb.QueueRecordPersister;
 import com.kinesis.datavis.model.dynamo.BidWinCount;
 import com.kinesis.datavis.model.record.BidWinRec;
 import com.kinesis.datavis.utils.AppUtils;
@@ -48,16 +47,13 @@ public class BidWinCounter extends CounterApp {
         DynamoDBMapper mapper = createMapper(applicationName, streamName, countsTableName, region);
 
         // Persist counts to DynamoDB
-        QueueRecordPersister<BidWinCount> countPersister = new QueueRecordPersister<>(mapper);
-
         BidWinCountPersister persister =
-                new BidWinCountPersister();
+                new BidWinCountPersister(mapper);
 
 
         IRecordProcessorFactory recordProcessor =
                 new CountingRecordProcessorFactory<BidWinRec, BidWinCount>(BidWinRec.class,
                         persister,
-                        countPersister,
                         COMPUTE_RANGE_FOR_COUNTS_IN_MILLIS,
                         COMPUTE_INTERVAL_IN_MILLIS);
 

@@ -22,21 +22,19 @@ import com.amazonaws.services.kinesis.clientlibrary.interfaces.IRecordProcessor;
 import com.amazonaws.services.kinesis.clientlibrary.interfaces.IRecordProcessorCheckpointer;
 import com.amazonaws.services.kinesis.clientlibrary.types.ShutdownReason;
 import com.amazonaws.services.kinesis.model.Record;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kinesis.datavis.kcl.counter.SlidingWindowCounter;
 import com.kinesis.datavis.kcl.persistence.CountPersister;
-import com.kinesis.datavis.kcl.persistence.ddb.QueueRecordPersister;
 import com.kinesis.datavis.kcl.timing.Clock;
 import com.kinesis.datavis.kcl.timing.NanoClock;
 import com.kinesis.datavis.kcl.timing.Timer;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -64,7 +62,7 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
     private int computeRangeInMillis;
 
     // Counter for keeping track of counts per interval.
-    private SlidingWindowCounter<T> counter;
+    private SlidingWindowCounter<T> windowCounter;
 
     // The shard this processor is processing
     private String kinesisShardId;
@@ -74,8 +72,6 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
 
     // This is responsible for persisting our counts every interval
     private CountPersister<T,C> persister;
-
-    private QueueRecordPersister countPersister;
 
     private CountingRecordProcessorConfig config;
 
@@ -94,33 +90,12 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
     public CountingRecordProcessor(CountingRecordProcessorConfig config,
             Class<T> recordType,
             CountPersister<T, C> persister,
-                                   QueueRecordPersister countPersister,
             int computeRangeInMillis,
             int computeIntervalInMillis) {
-        if (config == null) {
-            throw new NullPointerException("config must not be null");
-        }
-        if (recordType == null) {
-            throw new NullPointerException("recordType must not be null");
-        }
-        if (persister == null) {
-            throw new NullPointerException("persister must not be null");
-        }
-        if (computeRangeInMillis <= 0) {
-            throw new IllegalArgumentException("computeRangeInMillis must be > 0");
-        }
-        if (computeIntervalInMillis <= 0) {
-            throw new IllegalArgumentException("computeIntervalInMillis must be > 0");
-        }
-        if (computeRangeInMillis % computeIntervalInMillis != 0) {
-            throw new IllegalArgumentException("compute range must be evenly divisible by compute interval to support "
-                    + "accurate intervals");
-        }
 
         this.config = config;
         this.recordType = recordType;
         this.persister = persister;
-        this.countPersister = countPersister;
         this.computeRangeInMillis = computeRangeInMillis;
         this.computeIntervalInMillis = computeIntervalInMillis;
 
@@ -135,18 +110,18 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
 
         resetCheckpointAlarm();
 
-        countPersister.initialize();
+        persister.initialize();
 
         // Create a sliding window whose size is large enough to hold an entire range of individual interval counts.
-        counter = new SlidingWindowCounter<>((int) (computeRangeInMillis / computeIntervalInMillis));
+        windowCounter = new SlidingWindowCounter<>((int) (computeRangeInMillis / computeIntervalInMillis));
 
         // Create a scheduled task that runs every computeIntervalInMillis to compute and
         // persist the counts.
         scheduledExecutor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                // Synchronize on the counter so we stop advancing the interval while we're checkpointing
-                synchronized (counter) {
+                // Synchronize on the windowCounter so we stop advancing the interval while we're checkpointing
+                synchronized (windowCounter) {
                     try {
                         advanceOneInterval();
                     } catch (Exception ex) {
@@ -156,23 +131,23 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
                 }
             }
         },
-                TimeUnit.SECONDS.toMillis(config.getInitialWindowAdvanceDelayInSeconds()),
-                computeIntervalInMillis,
+                TimeUnit.SECONDS.toMillis(config.getInitialWindowAdvanceDelayInSeconds()), computeIntervalInMillis,
                 TimeUnit.MILLISECONDS);
     }
 
     /**
-     * Advance the internal sliding window counter one interval. This will invoke our count persister if the window is
+     * Advance the internal sliding window windowCounter one interval. This will invoke our count persister if the window is
      * full.
      */
     protected void advanceOneInterval() {
         Map<T, Long> counts = null;
-        synchronized (counter) {
+        synchronized (windowCounter) {
             // Only persist the counts if we have a full range of data to report. We don't want partial
             // counts each time the process starts.
             if (shouldPersistCounts()) {
-                counts = counter.getCounts();
-                counter.pruneEmptyObjects();
+                counts = windowCounter.getCounts();
+
+                windowCounter.pruneEmptyObjects();
             } else {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(String.format("We have not collected enough interval samples to calculate across the "
@@ -180,13 +155,12 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
                 }
             }
             // Advance the window "1 tick"
-            counter.advanceWindow();
+            windowCounter.advanceWindow();
         }
         // Persist the counts if we have a full range
         if (counts != null) {
-            BlockingQueue<C> q = countPersister.getCounts();
 
-            q.addAll(persister.persist(counts));
+            persister.persist(counts);
         }
     }
 
@@ -203,17 +177,17 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
                         e);
                 continue;
             }
-            // Increment the counter for the new pair. This is synchronized because there is another thread reading from
-            // the counter to compute running totals every interval.
-            synchronized (counter) {
-                counter.increment(pair);
+            // Increment the windowCounter for the new pair. This is synchronized because there is another thread reading from
+            // the windowCounter to compute running totals every interval.
+            synchronized (windowCounter) {
+                windowCounter.increment(pair);
             }
         }
 
         // Checkpoint if it's time to!
         if (checkpointTimer.isTimeUp()) {
-            // Obtain a lock on the counter to prevent additional counts from being calculated while checkpointing.
-            synchronized (counter) {
+            // Obtain a lock on the windowCounter to prevent additional counts from being calculated while checkpointing.
+            synchronized (windowCounter) {
                 checkpoint(checkpointer);
                 resetCheckpointAlarm();
             }
@@ -226,7 +200,7 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
      * @return {@code true} if we've collected enough samples to persist a complete count for the entire range.
      */
     private boolean shouldPersistCounts() {
-        return counter.isWindowFull();
+        return windowCounter.isWindowFull();
     }
 
     @Override
@@ -243,7 +217,7 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
                 // Important to checkpoint after reaching end of shard, so we can start processing data from child
                 // shards.
                 if (reason == ShutdownReason.TERMINATE) {
-                    synchronized (counter) {
+                    synchronized (windowCounter) {
                         checkpoint(checkpointer);
                     }
                 }
@@ -274,7 +248,7 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
         for (int i = 0; i < config.getCheckpointRetries(); i++) {
             try {
                 // First checkpoint our persister to guarantee all calculated counts have been persisted
-                countPersister.checkpoint();
+                persister.checkpoint();
                 checkpointer.checkpoint();
                 return;
             } catch (ShutdownException se) {

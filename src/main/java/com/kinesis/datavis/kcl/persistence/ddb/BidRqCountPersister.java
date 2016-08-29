@@ -15,6 +15,7 @@
 
 package com.kinesis.datavis.kcl.persistence.ddb;
 
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.kinesis.datavis.kcl.persistence.CountPersister;
 import com.kinesis.datavis.model.dynamo.BidRequestCount;
 import com.kinesis.datavis.model.record.BidRequestRec;
@@ -29,16 +30,21 @@ import java.util.*;
  * Persists counts to DynamoDB. This uses a separate thread to send counts to DynamoDB to decouple any network latency
  * from affecting the thread we use to update counts.
  */
-public class BidRqCountPersister implements CountPersister<BidRequestRec, BidRequestCount> {
+public class BidRqCountPersister extends QueueRecordPersister implements CountPersister<BidRequestRec, BidRequestCount> {
     private static final Log LOG = LogFactory.getLog(BidRqCountPersister.class);
     // Generate UTC timestamps
     protected static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
+
+    public BidRqCountPersister(DynamoDBMapper dbMapper) {
+        super(dbMapper);
+    }
+
     @Override
-    public Collection<BidRequestCount> persist(Map<BidRequestRec, Long> objectCounts) {
+    public void persist(Map<BidRequestRec, Long> objectCounts) {
         if (objectCounts.isEmpty()) {
             // short circuit to avoid creating a map when we have no objects to persist
-            return new ArrayList<>();
+            return;
         }
 
         // Use a local collection to batch writing the new counts into the queue. This will allow the queue drainer
@@ -68,7 +74,8 @@ public class BidRqCountPersister implements CountPersister<BidRequestRec, BidReq
             bdCount.setCount(bdCount.getCount() + count.getValue());
         }
 
-        return countMap.values();
+        counts.addAll(countMap.values());
+
     }
 
 

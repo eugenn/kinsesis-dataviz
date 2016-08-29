@@ -48,14 +48,11 @@ public class BidResponseCounter extends CounterApp {
         DynamoDBMapper mapper = createMapper(applicationName, streamName, countsTableName, region);
 
         // Persist counts to DynamoDB
-        QueueRecordPersister<BidResponseCounter> countPersister = new QueueRecordPersister<>(mapper);
-
-        BidResponseCountPersister persister = new BidResponseCountPersister();
+        BidResponseCountPersister persister = new BidResponseCountPersister(mapper);
 
         IRecordProcessorFactory recordProcessor =
                 new CountingRecordProcessorFactory<BidResponseRec, BidResponseCount>(BidResponseRec.class,
                         persister,
-                        countPersister,
                         COMPUTE_RANGE_FOR_COUNTS_IN_MILLIS,
                         COMPUTE_INTERVAL_IN_MILLIS);
 

@@ -1,5 +1,6 @@
 package com.kinesis.datavis.kcl.persistence.ddb;
 
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.kinesis.datavis.kcl.persistence.CountPersister;
 import com.kinesis.datavis.model.dynamo.ClicksCount;
 import com.kinesis.datavis.model.record.ClicksRec;
@@ -13,16 +14,20 @@ import java.util.*;
 /**
  * Created by eugennekhai on 29/08/16.
  */
-public class ClicksCountPersister implements CountPersister<ClicksRec, ClicksCount> {
+public class ClicksCountPersister extends QueueRecordPersister implements CountPersister<ClicksRec, ClicksCount> {
     private static final Log LOG = LogFactory.getLog(BidRqCountPersister.class);
     // Generate UTC timestamps
     protected static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
+    public ClicksCountPersister(DynamoDBMapper dbMapper) {
+        super(dbMapper);
+    }
+
     @Override
-    public Collection<ClicksCount> persist(Map<ClicksRec, Long> objectCounts) {
+    public void persist(Map<ClicksRec, Long> objectCounts) {
         if (objectCounts.isEmpty()) {
             // short circuit to avoid creating a map when we have no objects to persist
-            return new ArrayList<>();
+            return;
         }
 
         // Use a local collection to batch writing the new counts into the queue. This will allow the queue drainer
@@ -52,7 +57,7 @@ public class ClicksCountPersister implements CountPersister<ClicksRec, ClicksCou
 
         }
 
-        return countMap.values();
+        counts.addAll(countMap.values());
     }
 
 

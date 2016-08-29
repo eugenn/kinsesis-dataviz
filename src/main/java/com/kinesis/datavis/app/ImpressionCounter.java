@@ -5,7 +5,6 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.kinesis.clientlibrary.interfaces.IRecordProcessorFactory;
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;
 import com.kinesis.datavis.kcl.CountingRecordProcessorFactory;
-import com.kinesis.datavis.kcl.persistence.ddb.QueueRecordPersister;
 import com.kinesis.datavis.kcl.persistence.ddb.ImpressionCountPersister;
 import com.kinesis.datavis.model.dynamo.ImpressionCount;
 import com.kinesis.datavis.model.record.ImpressionRec;
@@ -48,16 +47,13 @@ public class ImpressionCounter extends CounterApp {
         DynamoDBMapper mapper = createMapper(applicationName, streamName, countsTableName, region);
 
         // Persist counts to DynamoDB
-        QueueRecordPersister<ImpressionCount> countPersister = new QueueRecordPersister<>(mapper);
-
         ImpressionCountPersister persister =
-                new ImpressionCountPersister();
+                new ImpressionCountPersister(mapper);
 
 
         IRecordProcessorFactory recordProcessor =
                 new CountingRecordProcessorFactory<ImpressionRec, ImpressionCount>(ImpressionRec.class,
                         persister,
-                        countPersister,
                         COMPUTE_RANGE_FOR_COUNTS_IN_MILLIS,
                         COMPUTE_INTERVAL_IN_MILLIS);
 

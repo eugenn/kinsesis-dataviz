@@ -17,7 +17,6 @@ package com.kinesis.datavis.kcl.persistence;
 
 import com.kinesis.datavis.kcl.CountingRecordProcessor;
 
-import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -28,11 +27,24 @@ import java.util.Map;
 public interface CountPersister<T, C> {
 
     /**
+     * Initialize this persister.
+     */
+    public void initialize();
+
+    /**
      * Persist the map of objects to counts.
      *
      * @param objectCounts
      */
-    Collection<C> persist(Map<T, Long> objectCounts);
+    public void persist(Map<T, Long> objectCounts);
+
+    /**
+     * Indicates this persister should flush its internal state and guarantee all records received from calls to
+     * {@link #persist(Map)} are completely handled.
+     *
+     * @throws InterruptedException if any thread interrupted the current thread while performing a checkpoint.
+     */
+    public void checkpoint() throws InterruptedException;
 
 
 }

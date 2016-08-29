@@ -18,7 +18,6 @@ package com.kinesis.datavis.kcl;
 import com.amazonaws.services.kinesis.clientlibrary.interfaces.IRecordProcessor;
 import com.amazonaws.services.kinesis.clientlibrary.interfaces.IRecordProcessorFactory;
 import com.kinesis.datavis.kcl.persistence.CountPersister;
-import com.kinesis.datavis.kcl.persistence.ddb.QueueRecordPersister;
 
 /**
  * Generates {@link CountingRecordProcessor}s for counting occurrences of unique values over a given range.
@@ -32,20 +31,18 @@ public class CountingRecordProcessorFactory<T, C> implements IRecordProcessorFac
     private int computeRangeInMillis;
     private int computeIntervalInMillis;
     private CountingRecordProcessorConfig config;
-    private QueueRecordPersister countPersister;
 
     /**
      * Creates a new factory that uses the default configuration values for each
      * processor it creates.
      *
-     * @see #CountingRecordProcessorFactory(Class, CountPersister, int, int, CountingRecordProcessorConfig)
+     * @see #CountingRecordProcessorFactory(Class, CountPersister, int, int)
      */
     public CountingRecordProcessorFactory(Class<T> recordType,
                                           CountPersister<T,C> persister,
-                                          QueueRecordPersister countPersister,
                                           int computeRangeInMillis,
                                           int computeIntervalInMillis) {
-        this(recordType, persister, countPersister, computeRangeInMillis, computeIntervalInMillis, new CountingRecordProcessorConfig());
+        this(recordType, persister, computeRangeInMillis, computeIntervalInMillis, new CountingRecordProcessorConfig());
     }
 
     /**
@@ -63,33 +60,11 @@ public class CountingRecordProcessorFactory<T, C> implements IRecordProcessorFac
      */
     public CountingRecordProcessorFactory(Class<T> recordType,
                                           CountPersister<T,C> persister,
-                                          QueueRecordPersister countPersister,
                                           int computeRangeInMillis,
                                           int computeIntervalInMillis,
                                           CountingRecordProcessorConfig config) {
-        if (recordType == null) {
-            throw new NullPointerException("recordType must not be null");
-        }
-        if (persister == null) {
-            throw new NullPointerException("persister must not be null");
-        }
-        if (config == null) {
-            throw new NullPointerException("config must not be null");
-        }
-        if (computeRangeInMillis <= 0) {
-            throw new IllegalArgumentException("computeRangeInMillis must be > 0");
-        }
-        if (computeIntervalInMillis <= 0) {
-            throw new IllegalArgumentException("computeIntervalInMillis must be > 0");
-        }
-        if (computeRangeInMillis % computeIntervalInMillis != 0) {
-            throw new IllegalArgumentException("compute range must be evenly divisible by compute interval to support "
-                    + "accurate intervals");
-        }
-
         this.recordType = recordType;
         this.persister = persister;
-        this.countPersister = countPersister;
         this.computeRangeInMillis = computeRangeInMillis;
         this.computeIntervalInMillis = computeIntervalInMillis;
         this.config = config;
@@ -104,7 +79,6 @@ public class CountingRecordProcessorFactory<T, C> implements IRecordProcessorFac
         return new CountingRecordProcessor<>(config,
                 recordType,
                 persister,
-                countPersister,
                 computeRangeInMillis,
                 computeIntervalInMillis);
     }

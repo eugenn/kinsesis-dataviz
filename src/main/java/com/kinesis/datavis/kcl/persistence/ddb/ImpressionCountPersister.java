@@ -1,5 +1,6 @@
 package com.kinesis.datavis.kcl.persistence.ddb;
 
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.kinesis.datavis.kcl.persistence.CountPersister;
 import com.kinesis.datavis.model.dynamo.ImpressionCount;
 import com.kinesis.datavis.model.record.ImpressionRec;
@@ -14,16 +15,20 @@ import java.util.*;
 /**
  * Created by eugennekhai on 29/08/16.
  */
-public class ImpressionCountPersister implements CountPersister<ImpressionRec, ImpressionCount> {
+public class ImpressionCountPersister extends QueueRecordPersister implements CountPersister<ImpressionRec, ImpressionCount> {
     private static final Log LOG = LogFactory.getLog(BidRqCountPersister.class);
     // Generate UTC timestamps
     protected static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
+    public ImpressionCountPersister(DynamoDBMapper dbMapper) {
+        super(dbMapper);
+    }
+
     @Override
-    public Collection<ImpressionCount> persist(Map<ImpressionRec, Long> objectCounts) {
+    public void persist(Map<ImpressionRec, Long> objectCounts) {
         if (objectCounts.isEmpty()) {
             // short circuit to avoid creating a map when we have no objects to persist
-            return new ArrayList<>();
+            return;
         }
 
         // Use a local collection to batch writing the new counts into the queue. This will allow the queue drainer
@@ -55,7 +60,7 @@ public class ImpressionCountPersister implements CountPersister<ImpressionRec, I
 
         }
 
-        return countMap.values();
+        counts.addAll(countMap.values());
     }
 
 }

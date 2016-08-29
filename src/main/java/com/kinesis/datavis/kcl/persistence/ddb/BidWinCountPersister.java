@@ -1,5 +1,6 @@
 package com.kinesis.datavis.kcl.persistence.ddb;
 
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.kinesis.datavis.kcl.persistence.CountPersister;
 import com.kinesis.datavis.model.dynamo.BidWinCount;
 import com.kinesis.datavis.model.record.BidWinRec;
@@ -13,18 +14,21 @@ import java.util.*;
 /**
  * Created by eugennekhai on 25/08/16.
  */
-public class BidWinCountPersister implements CountPersister<BidWinRec, BidWinCount> {
+public class BidWinCountPersister extends QueueRecordPersister implements CountPersister<BidWinRec, BidWinCount> {
     private static final Log LOG = LogFactory.getLog(BidRqCountPersister.class);
 
     // Generate UTC timestamps
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
+    public BidWinCountPersister(DynamoDBMapper dbMapper) {
+        super(dbMapper);
+    }
 
     @Override
-    public Collection<BidWinCount> persist(Map<BidWinRec, Long> objectCounts) {
+    public void persist(Map<BidWinRec, Long> objectCounts) {
         if (objectCounts.isEmpty()) {
             // short circuit to avoid creating a map when we have no objects to persist
-            return new ArrayList<>();
+            return;
         }
 
         // Use a local collection to batch writing the new counts into the queue. This will allow the queue drainer
@@ -55,7 +59,7 @@ public class BidWinCountPersister implements CountPersister<BidWinRec, BidWinCou
 
         }
 
-        return countMap.values();
+        counts.addAll(countMap.values());
     }
 
 }
