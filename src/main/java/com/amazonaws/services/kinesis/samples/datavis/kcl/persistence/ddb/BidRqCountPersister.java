@@ -58,6 +58,7 @@ public class BidRqCountPersister implements CountPersister<BidRequestRec, BidReq
                 bdCount = new BidRequestCount();
                 bdCount.setHashKey(DynamoDBUtils.getHashKey());
                 bdCount.setWh(rec.getWh());
+                bdCount.setBidRequestId(rec.getBidRequestId());
                 bdCount.setTimestamp(date);
                 bdCount.setHost(HostResolver.resolveHostname());
 

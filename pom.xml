@@ -22,28 +22,39 @@
     </licenses>
 
     <properties>
-        <bidrg.aggregator.name>KCLDynamoDBTableImp</bidrg.aggregator.name>
-        <bidrq.stream>KinesisStreamImp</bidrq.stream>
-        <bidrq.counts-table>CountsDynamoDBTableImp</bidrq.counts-table>
+        <bidrg.aggregator.name>KCLDynamoDBTableBrq</bidrg.aggregator.name>
+        <bidrq.stream>KinesisStreamBrq</bidrq.stream>
+        <bidrq.counts-table>CountsDynamoDBTableBrq</bidrq.counts-table>
+        <bidrq.servlet>GetBidRqCountsServlet</bidrq.servlet>
+        <bidrq.endpoint>GetRqCounts</bidrq.endpoint>
 
         <bdwin.aggregator.name>KCLDynamoDBTableBwin</bdwin.aggregator.name>
         <bdwin.stream>KinesisStreamBwin</bdwin.stream>
         <bdwin.counts-table>CountsDynamoDBTableBwin</bdwin.counts-table>
+        <bdwin.servlet>GetBidWinCountsServlet</bdwin.servlet>
+        <bdwin.endpoint>GetWinCounts</bdwin.endpoint>
 
-        <bdresp.aggregator.name>KCLDynamoDBTableBrsp</bdresp.aggregator.name>
+        <bdwin.aggregator.name>KCLDynamoDBTableBrsp</bdwin.aggregator.name>
         <bdresp.stream>KinesisStreamBrsp</bdresp.stream>
         <bdresp.counts-table>CountsDynamoDBTableBrsp</bdresp.counts-table>
+        <bdwin.servlet>GetBidRspCountsServlet</bdwin.servlet>
+        <bdwin.endpoint>GetRspCounts</bdwin.endpoint>
 
         <impression.aggregator.name>KCLDynamoDBTableImp</impression.aggregator.name>
         <impression.stream>KinesisStreamImp</impression.stream>
         <impression.counts-table>CountsDynamoDBTableImp</impression.counts-table>
+        <impression.servlet>GetBidImpCountsServlet</impression.servlet>
+        <impression.endpoint>GetImpCounts</impression.endpoint>
 
         <clicks.aggregator.name>KCLDynamoDBTableCks</clicks.aggregator.name>
         <clicks.stream>KinesisStreamCks</clicks.stream>
         <clicks.counts-table>CountsDynamoDBTableCks</clicks.counts-table>
+        <clicks.servlet>GetClicksCountsServlet</clicks.servlet>
+        <clicks.endpoint>GetClicksCounts</clicks.endpoint>
 
         <aws.region>us-west-2</aws.region>
         <amazon-kinesis-client.version>1.2.0</amazon-kinesis-client.version>
+
         <jetty.version>8.1.9.v20130131</jetty.version>
     </properties>
 
@@ -148,7 +159,7 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <mainClass>com.amazonaws.services.kinesis.samples.datavis.app.ImpressionCounter</mainClass>
+                            <mainClass>com.amazonaws.services.kinesis.samples.datavis.app.BidRequestCounter</mainClass>
                             <arguments>
                                 <argument>${bidrg.aggregator.name}</argument>
                                 <argument>${bidrq.stream}</argument>
@@ -170,7 +181,7 @@
                         <artifactId>exec-maven-plugin</artifactId>
                         <version>1.5.0</version>
                         <configuration>
-                            <mainClass>com.amazonaws.services.kinesis.samples.datavis.writer.ImpressionStreamWriter</mainClass>
+                            <mainClass>com.amazonaws.services.kinesis.samples.datavis.writer.BidRequestStreamWriter</mainClass>
                             <arguments>
                                 <!-- Start a single thread to put records in to Amazon Kinesis -->
                                 <argument>1</argument>
@@ -192,13 +203,15 @@
                         <artifactId>exec-maven-plugin</artifactId>
                         <version>1.5.0</version>
                         <configuration>
-                            <mainClass>com.amazonaws.services.kinesis.samples.datavis.server.ImpressionWebServer</mainClass>
+                            <mainClass>com.amazonaws.services.kinesis.samples.datavis.server.WebServer</mainClass>
                             <arguments>
                                 <!-- Start Jetty on port 8080 -->
                                 <argument>8080</argument>
                                 <!-- Serve static resources from their root -->
                                 <argument>${project.basedir}/src/main/static-content/wwwroot</argument>
                                 <argument>${bidrq.counts-table}</argument>
+                                <argument>${bidrq.servlet}</argument>
+                                <argument>${bidrq.endpoint}</argument>
                                 <argument>${aws.region}</argument>
                             </arguments>
                         </configuration>

@@ -18,6 +18,11 @@ package com.amazonaws.services.kinesis.samples.datavis.utils;
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.RegionUtils;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+
+import javax.servlet.http.HttpServlet;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * A collection of utilities for the Amazon Kinesis sample application.
@@ -59,6 +64,12 @@ public class AppUtils {
             System.exit(1);
         }
         return region;
+    }
+
+    public static HttpServlet instServlet(String name, DynamoDBMapper mapper) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        Class<?> clazz = Class.forName("com.amazonaws.services.kinesis.samples.datavis.servlet." + name);
+        Constructor<?> constructor = clazz.getConstructor(DynamoDBMapper.class);
+        return (HttpServlet) constructor.newInstance(mapper);
     }
 
 }

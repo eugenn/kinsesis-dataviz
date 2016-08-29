@@ -21,6 +21,9 @@ public class BidRequestCount {
     private Date timestamp;
 
     @DynamoDBAttribute
+    private String bidRequestId;
+
+    @DynamoDBAttribute
     private String wh;
 
     // Store the hostname of the worker that updated the count

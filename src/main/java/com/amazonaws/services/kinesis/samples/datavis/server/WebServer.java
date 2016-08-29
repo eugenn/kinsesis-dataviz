@@ -6,9 +6,8 @@ import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.regions.Region;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
-import com.amazonaws.services.kinesis.samples.datavis.servlet.GetBidRspCountsServlet;
-import com.amazonaws.services.kinesis.samples.datavis.utils.DynamoDBUtils;
 import com.amazonaws.services.kinesis.samples.datavis.utils.AppUtils;
+import com.amazonaws.services.kinesis.samples.datavis.utils.DynamoDBUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
@@ -19,7 +18,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 /**
  * Created by eugennekhai on 28/08/16.
  */
-public class BidRspWebServer {
+public class WebServer {
     /**
      * Start an embedded web server.
      *
@@ -29,15 +28,17 @@ public class BidRspWebServer {
      * @throws Exception Error starting the web server.
      */
     public static void main(String[] args) throws Exception {
-        if (args.length != 4) {
-            System.err.println("Usage: " + BidWinWebServer.class
+        if (args.length != 6) {
+            System.err.println("Usage: " + WebServer.class
                     + " <port number> <directory for static content> <DynamoDB table name> <region>");
             System.exit(1);
         }
         Server server = new Server(Integer.parseInt(args[0]));
         String wwwroot = args[1];
         String countsTableName = args[2];
-        Region region = AppUtils.parseRegion(args[3]);
+        String servlet = args[3];
+        String endpoint = args[4];
+        Region region = AppUtils.parseRegion(args[5]);
 
         // Servlet context
         ServletContextHandler context =
@@ -58,8 +59,8 @@ public class BidRspWebServer {
         dynamoDB.setRegion(region);
 
         DynamoDBUtils dynamoDBUtils = new DynamoDBUtils(dynamoDB);
-        context.addServlet(new ServletHolder(new GetBidRspCountsServlet(dynamoDBUtils.createMapperForTable(countsTableName))),
-                "/GetCounts/*");
+        context.addServlet(new ServletHolder(AppUtils.instServlet(servlet, dynamoDBUtils.createMapperForTable(countsTableName))),
+                "/" + endpoint +"/*");
 
         HandlerList handlers = new HandlerList();
         handlers.addHandler(context);
@@ -71,5 +72,7 @@ public class BidRspWebServer {
         server.start();
         server.join();
     }
+
+
 }
 

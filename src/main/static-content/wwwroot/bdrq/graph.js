@@ -306,7 +306,7 @@ var UIHelper = function(data, graph) {
  * Provides easy access to count data.
  */
 var CountDataProvider = function() {
-  var _endpoint = "http://" + location.host + "/api/GetCounts";
+  var _endpoint = "http://" + location.host + "/api/GetRqCounts";
 
   /**
    * Builds a URL to fetch the number of counts for a given resource in the past
