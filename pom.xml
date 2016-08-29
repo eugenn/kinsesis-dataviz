@@ -123,7 +123,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.4</version>
+                <version>2.6</version>
                 <executions>
                     <execution>
                         <id>cloudformation-archive</id>
@@ -159,7 +159,7 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <mainClass>com.amazonaws.services.kinesis.samples.datavis.app.BidRequestCounter</mainClass>
+                            <mainClass>com.kinesis.datavis.app.BidRequestCounter</mainClass>
                             <arguments>
                                 <argument>${bidrg.aggregator.name}</argument>
                                 <argument>${bidrq.stream}</argument>
@@ -181,7 +181,7 @@
                         <artifactId>exec-maven-plugin</artifactId>
                         <version>1.5.0</version>
                         <configuration>
-                            <mainClass>com.amazonaws.services.kinesis.samples.datavis.writer.BidRequestStreamWriter</mainClass>
+                            <mainClass>com.kinesis.datavis.writer.BidRequestStreamWriter</mainClass>
                             <arguments>
                                 <!-- Start a single thread to put records in to Amazon Kinesis -->
                                 <argument>1</argument>
@@ -203,7 +203,7 @@
                         <artifactId>exec-maven-plugin</artifactId>
                         <version>1.5.0</version>
                         <configuration>
-                            <mainClass>com.amazonaws.services.kinesis.samples.datavis.server.WebServer</mainClass>
+                            <mainClass>com.kinesis.datavis.server.WebServer</mainClass>
                             <arguments>
                                 <!-- Start Jetty on port 8080 -->
                                 <argument>8080</argument>
@@ -229,7 +229,7 @@
                         <artifactId>exec-maven-plugin</artifactId>
                         <version>1.5.0</version>
                         <configuration>
-                            <mainClass>com.amazonaws.services.kinesis.samples.datavis.utils.DeleteSampleResources</mainClass>
+                            <mainClass>com.kinesis.datavis.utils.DeleteSampleResources</mainClass>
                             <arguments>
                                 <argument>${bidrg.aggregator.name}</argument>
                                 <argument>${bidrq.stream}</argument>
