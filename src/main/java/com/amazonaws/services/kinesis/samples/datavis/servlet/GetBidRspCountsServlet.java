@@ -73,6 +73,8 @@ public class GetBidRspCountsServlet extends HttpServlet {
         String resource = params.getString(PARAMETER_RESOURCE);
         int rangeInSeconds = Integer.parseInt(params.getString(PARAMETER_RANGE_IN_SECONDS));
 
+        resource = "11111111111";
+
         Calendar c = Calendar.getInstance();
         c.add(Calendar.SECOND, -1 * rangeInSeconds);
         Date startTime = c.getTime();
@@ -96,7 +98,7 @@ public class GetBidRspCountsServlet extends HttpServlet {
                         withComparisonOperator(ComparisonOperator.EQ).withAttributeValueList(new AttributeValue().withS(resource));
 
         query.setRangeKeyConditions(Collections.singletonMap("timestamp", recentUpdates));
-        query.setQueryFilter(Collections.singletonMap("bidRequestId", attrFilter));
+        query.setQueryFilter(Collections.singletonMap("bannerId", attrFilter));
 
         List<BidResponseCount> counts = mapper.query(BidResponseCount.class, query);
 

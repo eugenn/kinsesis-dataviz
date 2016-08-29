@@ -43,7 +43,7 @@ public class BidResponseCountPersister implements CountPersister<BidResponseRec,
                 // Create a new pair if this resource hasn't been seen yet in this batch
                 bdCount = new BidResponseCount();
                 bdCount.setHashKey(DynamoDBUtils.getHashKey());
-//                bdCount.setWh(rec.getWh());
+                bdCount.setBannerId(rec.getBannerId());
                 bdCount.setTimestamp(date);
                 bdCount.setTypeCounts(new ArrayList<TypeCount>());
                 bdCount.setHost(HostResolver.resolveHostname());
