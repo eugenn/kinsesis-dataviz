@@ -22,7 +22,7 @@ import com.amazonaws.regions.RegionUtils;
 /**
  * A collection of utilities for the Amazon Kinesis sample application.
  */
-public class SampleUtils {
+public class AppUtils {
 
     /**
      * Creates a new client configuration with a uniquely identifiable value for this sample application.

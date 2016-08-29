@@ -23,7 +23,7 @@ import com.amazonaws.services.kinesis.AmazonKinesis;
 import com.amazonaws.services.kinesis.AmazonKinesisClient;
 import com.amazonaws.services.kinesis.samples.datavis.producer.bidrq.BidRequestFactory;
 import com.amazonaws.services.kinesis.samples.datavis.producer.bidrq.BidRequestPutter;
-import com.amazonaws.services.kinesis.samples.datavis.utils.SampleUtils;
+import com.amazonaws.services.kinesis.samples.datavis.utils.AppUtils;
 import com.amazonaws.services.kinesis.samples.datavis.utils.StreamUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -58,11 +58,11 @@ public class BidRequestStreamWriter  {
 
         String streamName = args[1];
 
-        Region region = SampleUtils.parseRegion(args[2]);
+        Region region = AppUtils.parseRegion(args[2]);
 
         AWSCredentialsProvider credentialsProvider = new DefaultAWSCredentialsProviderChain();
 
-        ClientConfiguration clientConfig = SampleUtils.configureUserAgentForSample(new ClientConfiguration());
+        ClientConfiguration clientConfig = AppUtils.configureUserAgentForSample(new ClientConfiguration());
 
         AmazonKinesis kinesis = new AmazonKinesisClient(credentialsProvider, clientConfig);
         kinesis.setRegion(region);
@@ -76,7 +76,16 @@ public class BidRequestStreamWriter  {
         resources.add("400x600");
         resources.add("800x600");
 
-        BidRequestFactory bdFactory = new BidRequestFactory(resources, "bidrequest");
+        List<String> bidRequestIds = new ArrayList<>();
+//        bidRequestIds.add(UUID.randomUUID().toString());
+//        bidRequestIds.add(UUID.randomUUID().toString());
+//        bidRequestIds.add(UUID.randomUUID().toString());
+        bidRequestIds.add("11111111111");
+        bidRequestIds.add("22222222222");
+//        bannerIds.add("33333333333");
+        bidRequestIds.add("44444444444");
+
+        BidRequestFactory bdFactory = new BidRequestFactory(bidRequestIds, resources, "bidrequest");
 
         // Creates a stream to write to with 2 shards if it doesn't exist
         StreamUtils streamUtils = new StreamUtils(kinesis);

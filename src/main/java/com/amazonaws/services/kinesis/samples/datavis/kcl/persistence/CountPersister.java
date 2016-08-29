@@ -32,7 +32,7 @@ public interface CountPersister<T, C> {
      *
      * @param objectCounts
      */
-    public Collection<C> persist(Map<T, Long> objectCounts);
+    Collection<C> persist(Map<T, Long> objectCounts);
 
 
 }

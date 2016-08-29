@@ -9,20 +9,21 @@ import java.util.concurrent.ThreadLocalRandom;
  * Created by eugennekhai on 24/08/16.
  */
 public class BidRequestFactory {
-
-    private List<String> resources;
+    private List<String> whs;
+    private List<String> bidRequestIds;
     private String type;
 
     /**
      * Create a new generator which will use the resources and referrers provided.
      *
-     * @param resources List of resources to use when generating a pair.
+     * @param bidRequestIds List of resources to use when generating a pair.
      */
-    public BidRequestFactory(List<String> resources, String type) {
-        if (resources == null || resources.isEmpty()) {
+    public BidRequestFactory(List<String> bidRequestIds, List<String> whs,  String type) {
+        if (bidRequestIds == null || bidRequestIds.isEmpty()) {
             throw new IllegalArgumentException("At least 1 resource is required");
         }
-        this.resources = resources;
+        this.bidRequestIds = bidRequestIds;
+        this.whs = whs;
         this.type = type;
     }
 
@@ -33,9 +34,7 @@ public class BidRequestFactory {
      * @return A new pair with random resource and referrer values.
      */
     public BidRequestRec create() {
-        String wh = getRandomWH();
-
-        return new BidRequestRec("", type, wh);
+        return new BidRequestRec(getRandomId(), type, getRandomWH());
     }
 
     /**
@@ -44,8 +43,16 @@ public class BidRequestFactory {
      * @return A random resource.
      */
     protected String getRandomWH() {
-        return resources.get(ThreadLocalRandom.current().nextInt(resources.size()));
+        return whs.get(ThreadLocalRandom.current().nextInt(whs.size()));
     }
 
+    /**
+     * Gets a random resource from the collection of bidRequestIds.
+     *
+     * @return A random resource.
+     */
+    protected String getRandomId() {
+        return bidRequestIds.get(ThreadLocalRandom.current().nextInt(bidRequestIds.size()));
+    }
 
 }

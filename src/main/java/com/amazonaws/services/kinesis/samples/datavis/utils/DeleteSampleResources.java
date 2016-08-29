@@ -43,11 +43,11 @@ public class DeleteSampleResources {
         String applicationName = args[0];
         String streamName = args[1];
         String countsTableName = args[2];
-        Region region = SampleUtils.parseRegion(args[3]);
+        Region region = AppUtils.parseRegion(args[3]);
 
         AWSCredentialsProvider credentialsProvider = new DefaultAWSCredentialsProviderChain();
 
-        ClientConfiguration clientConfig = SampleUtils.configureUserAgentForSample(new ClientConfiguration());
+        ClientConfiguration clientConfig = AppUtils.configureUserAgentForSample(new ClientConfiguration());
 
         AmazonKinesis kinesis = new AmazonKinesisClient(credentialsProvider, clientConfig);
         kinesis.setRegion(region);

@@ -8,7 +8,7 @@ import com.amazonaws.services.kinesis.AmazonKinesis;
 import com.amazonaws.services.kinesis.AmazonKinesisClient;
 import com.amazonaws.services.kinesis.samples.datavis.producer.clicks.ClicksFactory;
 import com.amazonaws.services.kinesis.samples.datavis.producer.clicks.ClicksPutter;
-import com.amazonaws.services.kinesis.samples.datavis.utils.SampleUtils;
+import com.amazonaws.services.kinesis.samples.datavis.utils.AppUtils;
 import com.amazonaws.services.kinesis.samples.datavis.utils.StreamUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -56,11 +56,11 @@ public class ClicksStreamWriter {
 
         String streamName = arg2;
 
-        Region region = SampleUtils.parseRegion(arg3);
+        Region region = AppUtils.parseRegion(arg3);
 
         AWSCredentialsProvider credentialsProvider = new DefaultAWSCredentialsProviderChain();
 
-        ClientConfiguration clientConfig = SampleUtils.configureUserAgentForSample(new ClientConfiguration());
+        ClientConfiguration clientConfig = AppUtils.configureUserAgentForSample(new ClientConfiguration());
 
         AmazonKinesis kinesis = new AmazonKinesisClient(credentialsProvider, clientConfig);
         kinesis.setRegion(region);

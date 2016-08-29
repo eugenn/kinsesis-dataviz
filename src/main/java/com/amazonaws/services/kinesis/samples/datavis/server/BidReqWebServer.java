@@ -29,7 +29,7 @@ import com.amazonaws.regions.Region;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.kinesis.samples.datavis.utils.DynamoDBUtils;
-import com.amazonaws.services.kinesis.samples.datavis.utils.SampleUtils;
+import com.amazonaws.services.kinesis.samples.datavis.utils.AppUtils;
 import com.amazonaws.services.kinesis.samples.datavis.servlet.GetBidRqCountsServlet;
 
 /**
@@ -53,7 +53,7 @@ public class BidReqWebServer {
         Server server = new Server(Integer.parseInt(args[0]));
         String wwwroot = args[1];
         String countsTableName = args[2];
-        Region region = SampleUtils.parseRegion(args[3]);
+        Region region = AppUtils.parseRegion(args[3]);
 
         // Servlet context
         ServletContextHandler context =
@@ -68,7 +68,7 @@ public class BidReqWebServer {
         // Create the servlet to handle /GetCounts
         AWSCredentialsProvider credentialsProvider = new DefaultAWSCredentialsProviderChain();
 
-        ClientConfiguration clientConfig = SampleUtils.configureUserAgentForSample(new ClientConfiguration());
+        ClientConfiguration clientConfig = AppUtils.configureUserAgentForSample(new ClientConfiguration());
 
         AmazonDynamoDB dynamoDB = new AmazonDynamoDBClient(credentialsProvider, clientConfig);
         dynamoDB.setRegion(region);

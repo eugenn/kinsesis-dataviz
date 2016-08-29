@@ -14,7 +14,7 @@ import com.amazonaws.services.kinesis.clientlibrary.lib.worker.InitialPositionIn
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.Worker;
 import com.amazonaws.services.kinesis.samples.datavis.utils.DynamoDBUtils;
-import com.amazonaws.services.kinesis.samples.datavis.utils.SampleUtils;
+import com.amazonaws.services.kinesis.samples.datavis.utils.AppUtils;
 import com.amazonaws.services.kinesis.samples.datavis.utils.StreamUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,7 +35,7 @@ public class CounterApp {
     public static DynamoDBMapper createMapper(String applicationName, String streamName, String countsTableName, Region region) {
         AWSCredentialsProvider credentialsProvider = new DefaultAWSCredentialsProviderChain();
 
-        ClientConfiguration clientConfig = SampleUtils.configureUserAgentForSample(new ClientConfiguration());
+        ClientConfiguration clientConfig = AppUtils.configureUserAgentForSample(new ClientConfiguration());
 
         AmazonKinesis kinesis = new AmazonKinesisClient(credentialsProvider, clientConfig);
         kinesis.setRegion(region);
@@ -62,7 +62,7 @@ public class CounterApp {
 
         KinesisClientLibConfiguration kclConfig =
                 new KinesisClientLibConfiguration(applicationName, streamName, new DefaultAWSCredentialsProviderChain(), workerId);
-        kclConfig.withCommonClientConfig(SampleUtils.configureUserAgentForSample(new ClientConfiguration()));
+        kclConfig.withCommonClientConfig(AppUtils.configureUserAgentForSample(new ClientConfiguration()));
         kclConfig.withRegionName(region.getName());
         kclConfig.withInitialPositionInStream(InitialPositionInStream.LATEST);
 

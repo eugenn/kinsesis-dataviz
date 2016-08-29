@@ -9,7 +9,7 @@ import com.amazonaws.services.kinesis.samples.datavis.kcl.persistence.ddb.Clicks
 import com.amazonaws.services.kinesis.samples.datavis.kcl.persistence.ddb.GeneralCountPersister;
 import com.amazonaws.services.kinesis.samples.datavis.model.dynamo.ClicksCount;
 import com.amazonaws.services.kinesis.samples.datavis.model.record.ClicksRec;
-import com.amazonaws.services.kinesis.samples.datavis.utils.SampleUtils;
+import com.amazonaws.services.kinesis.samples.datavis.utils.AppUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -43,7 +43,7 @@ public class ClicksCounter extends CounterApp {
         String applicationName = args[0];
         String streamName = args[1];
         String countsTableName = args[2];
-        Region region = SampleUtils.parseRegion(args[3]);
+        Region region = AppUtils.parseRegion(args[3]);
 
         DynamoDBMapper mapper = createMapper(applicationName, streamName, countsTableName, region);
 
