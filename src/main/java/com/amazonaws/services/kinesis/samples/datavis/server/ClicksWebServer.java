@@ -6,7 +6,7 @@ import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.regions.Region;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
-import com.amazonaws.services.kinesis.samples.datavis.servlet.GetBidWinCountsServlet;
+import com.amazonaws.services.kinesis.samples.datavis.servlet.GetClicksCountsServlet;
 import com.amazonaws.services.kinesis.samples.datavis.utils.DynamoDBUtils;
 import com.amazonaws.services.kinesis.samples.datavis.utils.SampleUtils;
 import org.eclipse.jetty.server.Server;
@@ -58,7 +58,7 @@ public class ClicksWebServer {
         dynamoDB.setRegion(region);
 
         DynamoDBUtils dynamoDBUtils = new DynamoDBUtils(dynamoDB);
-        context.addServlet(new ServletHolder(new GetBidWinCountsServlet(dynamoDBUtils.createMapperForTable(countsTableName))),
+        context.addServlet(new ServletHolder(new GetClicksCountsServlet(dynamoDBUtils.createMapperForTable(countsTableName))),
                 "/GetCounts/*");
 
         HandlerList handlers = new HandlerList();

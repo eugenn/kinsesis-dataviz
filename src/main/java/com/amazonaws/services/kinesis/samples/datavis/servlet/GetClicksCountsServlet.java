@@ -72,7 +72,7 @@ public class GetClicksCountsServlet extends HttpServlet {
         // Parse query string as a single integer - the number of seconds since "now" to query for new counts
         String resource = params.getString(PARAMETER_RESOURCE);
         int rangeInSeconds = Integer.parseInt(params.getString(PARAMETER_RANGE_IN_SECONDS));
-
+        resource = "11111111111";
         Calendar c = Calendar.getInstance();
         c.add(Calendar.SECOND, -1 * rangeInSeconds);
         Date startTime = c.getTime();

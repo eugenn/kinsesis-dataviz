@@ -43,8 +43,8 @@ public class ClicksCountPersister implements CountPersister<ClicksRec, ClicksCou
                 // Create a new pair if this resource hasn't been seen yet in this batch
                 bdCount = new ClicksCount();
                 bdCount.setHashKey(DynamoDBUtils.getHashKey());
-//                bdCount.setWh(rec.getWh());
                 bdCount.setTimestamp(date);
+                bdCount.setBidRequestId(rec.getBidRequestId());
                 bdCount.setTypeCounts(new ArrayList<TypeCount>());
                 bdCount.setHost(HostResolver.resolveHostname());
 
