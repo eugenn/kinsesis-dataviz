@@ -18,7 +18,7 @@ package com.amazonaws.services.kinesis.samples.datavis.kcl;
 import com.amazonaws.services.kinesis.clientlibrary.interfaces.IRecordProcessor;
 import com.amazonaws.services.kinesis.clientlibrary.interfaces.IRecordProcessorFactory;
 import com.amazonaws.services.kinesis.samples.datavis.kcl.persistence.CountPersister;
-import com.amazonaws.services.kinesis.samples.datavis.kcl.persistence.ddb.GeneralCountPersister;
+import com.amazonaws.services.kinesis.samples.datavis.kcl.persistence.ddb.QueueRecordPersister;
 
 /**
  * Generates {@link CountingRecordProcessor}s for counting occurrences of unique values over a given range.
@@ -32,7 +32,7 @@ public class CountingRecordProcessorFactory<T, C> implements IRecordProcessorFac
     private int computeRangeInMillis;
     private int computeIntervalInMillis;
     private CountingRecordProcessorConfig config;
-    private GeneralCountPersister countPersister;
+    private QueueRecordPersister countPersister;
 
     /**
      * Creates a new factory that uses the default configuration values for each
@@ -42,7 +42,7 @@ public class CountingRecordProcessorFactory<T, C> implements IRecordProcessorFac
      */
     public CountingRecordProcessorFactory(Class<T> recordType,
                                           CountPersister<T,C> persister,
-                                          GeneralCountPersister countPersister,
+                                          QueueRecordPersister countPersister,
                                           int computeRangeInMillis,
                                           int computeIntervalInMillis) {
         this(recordType, persister, countPersister, computeRangeInMillis, computeIntervalInMillis, new CountingRecordProcessorConfig());
@@ -63,7 +63,7 @@ public class CountingRecordProcessorFactory<T, C> implements IRecordProcessorFac
      */
     public CountingRecordProcessorFactory(Class<T> recordType,
                                           CountPersister<T,C> persister,
-                                          GeneralCountPersister countPersister,
+                                          QueueRecordPersister countPersister,
                                           int computeRangeInMillis,
                                           int computeIntervalInMillis,
                                           CountingRecordProcessorConfig config) {

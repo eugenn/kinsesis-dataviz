@@ -24,7 +24,7 @@ import com.amazonaws.services.kinesis.clientlibrary.types.ShutdownReason;
 import com.amazonaws.services.kinesis.model.Record;
 import com.amazonaws.services.kinesis.samples.datavis.kcl.counter.SlidingWindowCounter;
 import com.amazonaws.services.kinesis.samples.datavis.kcl.persistence.CountPersister;
-import com.amazonaws.services.kinesis.samples.datavis.kcl.persistence.ddb.GeneralCountPersister;
+import com.amazonaws.services.kinesis.samples.datavis.kcl.persistence.ddb.QueueRecordPersister;
 import com.amazonaws.services.kinesis.samples.datavis.kcl.timing.Clock;
 import com.amazonaws.services.kinesis.samples.datavis.kcl.timing.NanoClock;
 import com.amazonaws.services.kinesis.samples.datavis.kcl.timing.Timer;
@@ -75,7 +75,7 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
     // This is responsible for persisting our counts every interval
     private CountPersister<T,C> persister;
 
-    private GeneralCountPersister countPersister;
+    private QueueRecordPersister countPersister;
 
     private CountingRecordProcessorConfig config;
 
@@ -94,7 +94,7 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
     public CountingRecordProcessor(CountingRecordProcessorConfig config,
             Class<T> recordType,
             CountPersister<T, C> persister,
-                                   GeneralCountPersister countPersister,
+                                   QueueRecordPersister countPersister,
             int computeRangeInMillis,
             int computeIntervalInMillis) {
         if (config == null) {

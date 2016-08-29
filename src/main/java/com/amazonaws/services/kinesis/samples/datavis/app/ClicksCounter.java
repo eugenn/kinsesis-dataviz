@@ -6,7 +6,7 @@ import com.amazonaws.services.kinesis.clientlibrary.interfaces.IRecordProcessorF
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;
 import com.amazonaws.services.kinesis.samples.datavis.kcl.CountingRecordProcessorFactory;
 import com.amazonaws.services.kinesis.samples.datavis.kcl.persistence.ddb.ClicksCountPersister;
-import com.amazonaws.services.kinesis.samples.datavis.kcl.persistence.ddb.GeneralCountPersister;
+import com.amazonaws.services.kinesis.samples.datavis.kcl.persistence.ddb.QueueRecordPersister;
 import com.amazonaws.services.kinesis.samples.datavis.model.dynamo.ClicksCount;
 import com.amazonaws.services.kinesis.samples.datavis.model.record.ClicksRec;
 import com.amazonaws.services.kinesis.samples.datavis.utils.AppUtils;
@@ -48,7 +48,7 @@ public class ClicksCounter extends CounterApp {
         DynamoDBMapper mapper = createMapper(applicationName, streamName, countsTableName, region);
 
         // Persist counts to DynamoDB
-        GeneralCountPersister<ClicksCount> countPersister = new GeneralCountPersister<>(mapper);
+        QueueRecordPersister<ClicksCount> countPersister = new QueueRecordPersister<>(mapper);
 
         ClicksCountPersister persister =
                 new ClicksCountPersister();

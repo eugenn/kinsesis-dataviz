@@ -13,8 +13,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 /**
  * Created by eugennekhai on 26/08/16.
  */
-public class GeneralCountPersister<C> {
-    private static final Log LOG = LogFactory.getLog(GeneralCountPersister.class);
+public class QueueRecordPersister<C> {
+    private static final Log LOG = LogFactory.getLog(QueueRecordPersister.class);
 
     // Generate UTC timestamps
     protected static final TimeZone UTC = TimeZone.getTimeZone("UTC");
@@ -37,7 +37,7 @@ public class GeneralCountPersister<C> {
     public Thread dynamoDBSender;
 
 
-    public GeneralCountPersister(DynamoDBMapper mapper) {
+    public QueueRecordPersister(DynamoDBMapper mapper) {
         if (mapper == null) {
             throw new NullPointerException("mapper must not be null");
         }

@@ -22,7 +22,7 @@ import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibC
 import com.amazonaws.services.kinesis.samples.datavis.kcl.CountingRecordProcessorFactory;
 import com.amazonaws.services.kinesis.samples.datavis.kcl.persistence.CountPersister;
 import com.amazonaws.services.kinesis.samples.datavis.kcl.persistence.ddb.BidRqCountPersister;
-import com.amazonaws.services.kinesis.samples.datavis.kcl.persistence.ddb.GeneralCountPersister;
+import com.amazonaws.services.kinesis.samples.datavis.kcl.persistence.ddb.QueueRecordPersister;
 import com.amazonaws.services.kinesis.samples.datavis.model.dynamo.BidRequestCount;
 import com.amazonaws.services.kinesis.samples.datavis.model.record.BidRequestRec;
 import com.amazonaws.services.kinesis.samples.datavis.utils.AppUtils;
@@ -67,7 +67,7 @@ public class BidRequestCounter extends CounterApp {
         // Persist counts to DynamoDB
         BidRqCountPersister persister = new BidRqCountPersister();
 
-        GeneralCountPersister<BidRequestCount> countPersister = new GeneralCountPersister<>(mapper);
+        QueueRecordPersister<BidRequestCount> countPersister = new QueueRecordPersister<>(mapper);
 
         IRecordProcessorFactory recordProcessor =
                 new CountingRecordProcessorFactory<BidRequestRec, BidRequestCount>(BidRequestRec.class,
