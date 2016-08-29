@@ -4,8 +4,9 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.kinesis.AmazonKinesis;
 import com.amazonaws.services.kinesis.model.ProvisionedThroughputExceededException;
 import com.amazonaws.services.kinesis.model.PutRecordRequest;
-import com.amazonaws.services.kinesis.samples.datavis.model.record.BidWinRec;
+import com.amazonaws.services.kinesis.samples.datavis.model.record.BidResponseRec;
 import com.amazonaws.services.kinesis.samples.datavis.producer.Putter;
+import com.amazonaws.services.kinesis.samples.datavis.utils.DynamoDBUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -20,14 +21,14 @@ import java.util.concurrent.TimeUnit;
 public class BidResponsePutter implements Putter {
     private static final Log LOG = LogFactory.getLog(BidResponsePutter.class);
 
-    private BidResponseFactory bidWinFactory;
+    private BidResponseFactory bidResponseFactory;
     private AmazonKinesis kinesis;
     private String streamName;
 
     private final ObjectMapper JSON = new ObjectMapper();
 
-    public BidResponsePutter(BidResponseFactory bidWinFactory, AmazonKinesis kinesis, String streamName) {
-        if (bidWinFactory == null) {
+    public BidResponsePutter(BidResponseFactory bidResponseFactory, AmazonKinesis kinesis, String streamName) {
+        if (bidResponseFactory == null) {
             throw new IllegalArgumentException("pairFactory must not be null");
         }
         if (kinesis == null) {
@@ -36,7 +37,7 @@ public class BidResponsePutter implements Putter {
         if (streamName == null || streamName.isEmpty()) {
             throw new IllegalArgumentException("streamName must not be null or empty");
         }
-        this.bidWinFactory = bidWinFactory;
+        this.bidResponseFactory = bidResponseFactory;
         this.kinesis = kinesis;
         this.streamName = streamName;
     }
@@ -82,7 +83,7 @@ public class BidResponsePutter implements Putter {
      * Send a single pair to Amazon Kinesis using PutRecord.
      */
     private void sendRq() {
-        BidWinRec winRec = bidWinFactory.create();
+        BidResponseRec winRec = bidResponseFactory.create();
         byte[] bytes;
         try {
             bytes = JSON.writeValueAsBytes(winRec);
@@ -94,7 +95,7 @@ public class BidResponsePutter implements Putter {
         PutRecordRequest putRecord = new PutRecordRequest();
         putRecord.setStreamName(streamName);
         // We use the resource as the partition key so we can accurately calculate totals for a given resource
-        putRecord.setPartitionKey(winRec.getBidRequestId());
+        putRecord.setPartitionKey(DynamoDBUtils.getHashKey());
         putRecord.setData(ByteBuffer.wrap(bytes));
         // Order is not important for this application so we do not send a SequenceNumberForOrdering
         putRecord.setSequenceNumberForOrdering(null);

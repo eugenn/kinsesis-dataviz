@@ -9,9 +9,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class BidResponseRec {
-    private String bidResponse;
+    private String bannerId;
     private String type;
-    private String wh;
 
     public BidResponseRec() {
     }
@@ -24,14 +23,14 @@ public class BidResponseRec {
         BidResponseRec that = (BidResponseRec) o;
 
         if (type != null ? !type.equals(that.type) : that.type != null) return false;
-        if (wh != null ? !wh.equals(that.wh) : that.wh != null) return false;
+        if (bannerId != null ? !bannerId.equals(that.bannerId) : that.bannerId != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = wh != null ? wh.hashCode() : 0;
+        int result = bannerId != null ? bannerId.hashCode() : 0;
         result = 31 * result + (type != null ? type.hashCode() : 0);
         return result;
     }
@@ -39,7 +38,7 @@ public class BidResponseRec {
     @Override
     public String toString() {
         return "BidResponseRec{" +
-                "wf='" + wh + '\'' +
+                "bannerId='" + bannerId + '\'' +
                 ", type='" + type + '\'' +
                 '}';
     }

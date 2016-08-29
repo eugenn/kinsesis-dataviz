@@ -6,6 +6,7 @@ import com.amazonaws.services.kinesis.model.ProvisionedThroughputExceededExcepti
 import com.amazonaws.services.kinesis.model.PutRecordRequest;
 import com.amazonaws.services.kinesis.samples.datavis.model.record.ClicksRec;
 import com.amazonaws.services.kinesis.samples.datavis.producer.Putter;
+import com.amazonaws.services.kinesis.samples.datavis.utils.DynamoDBUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -94,7 +95,7 @@ public class ClicksPutter implements Putter {
         PutRecordRequest putRecord = new PutRecordRequest();
         putRecord.setStreamName(streamName);
         // We use the resource as the partition key so we can accurately calculate totals for a given resource
-        putRecord.setPartitionKey(winRec.getBidRequestId());
+        putRecord.setPartitionKey(DynamoDBUtils.getHashKey());
         putRecord.setData(ByteBuffer.wrap(bytes));
         // Order is not important for this application so we do not send a SequenceNumberForOrdering
         putRecord.setSequenceNumberForOrdering(null);

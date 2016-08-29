@@ -1,8 +1,7 @@
 package com.amazonaws.services.kinesis.samples.datavis.producer.bidrsp;
 
-import com.amazonaws.services.kinesis.samples.datavis.model.record.BidWinRec;
+import com.amazonaws.services.kinesis.samples.datavis.model.record.BidResponseRec;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -10,21 +9,19 @@ import java.util.concurrent.ThreadLocalRandom;
  * Created by eugennekhai on 25/08/16.
  */
 public class BidResponseFactory {
-    private final List<BigDecimal> prices;
-    private List<String> bidRequestIds;
+    private List<String> bannerIds;
     private String type;
 
     /**
      * Create a new generator which will use the bidRequestIds and referrers provided.
      *
-     * @param bidRequestIds List of bidRequestIds to use when generating a pair.
+     * @param bannerIds List of bidRequestIds to use when generating a pair.
      */
-    public BidResponseFactory(List<String> bidRequestIds, List<BigDecimal> prices, String type) {
-        if (bidRequestIds == null || bidRequestIds.isEmpty()) {
+    public BidResponseFactory(List<String> bannerIds, String type) {
+        if (bannerIds == null || bannerIds.isEmpty()) {
             throw new IllegalArgumentException("At least 1 resource is required");
         }
-        this.bidRequestIds = bidRequestIds;
-        this.prices = prices;
+        this.bannerIds = bannerIds;
 
         this.type = type;
     }
@@ -35,8 +32,8 @@ public class BidResponseFactory {
      *
      * @return A new pair with random resource and referrer values.
      */
-    public BidWinRec create() {
-        BidWinRec winRec = new BidWinRec(getRandomId(), type, getRandomPrice());
+    public BidResponseRec create() {
+        BidResponseRec winRec = new BidResponseRec(getRandomId(), type);
 
         return winRec;
     }
@@ -47,7 +44,7 @@ public class BidResponseFactory {
      * @return A random resource.
      */
     protected String getRandomId() {
-        return bidRequestIds.get(ThreadLocalRandom.current().nextInt(bidRequestIds.size()));
+        return bannerIds.get(ThreadLocalRandom.current().nextInt(bannerIds.size()));
     }
 
     /**
@@ -55,7 +52,7 @@ public class BidResponseFactory {
      *
      * @return A random referrer.
      */
-    protected BigDecimal getRandomPrice() {
-        return prices.get(ThreadLocalRandom.current().nextInt(prices.size()));
-    }
+//    protected BigDecimal getRandomPrice() {
+//        return prices.get(ThreadLocalRandom.current().nextInt(prices.size()));
+//    }
 }

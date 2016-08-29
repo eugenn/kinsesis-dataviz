@@ -22,9 +22,9 @@
     </licenses>
 
     <properties>
-        <bidrg.aggregator.name>KCLDynamoDBTableBrq</bidrg.aggregator.name>
-        <bidrq.stream>KinesisStreamBrq</bidrq.stream>
-        <bidrq.counts-table>CountsDynamoDBTableBrq</bidrq.counts-table>
+        <bidrg.aggregator.name>KCLDynamoDBTableImp</bidrg.aggregator.name>
+        <bidrq.stream>KinesisStreamImp</bidrq.stream>
+        <bidrq.counts-table>CountsDynamoDBTableImp</bidrq.counts-table>
 
         <bdwin.aggregator.name>KCLDynamoDBTableBwin</bdwin.aggregator.name>
         <bdwin.stream>KinesisStreamBwin</bdwin.stream>
@@ -148,7 +148,7 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <mainClass>com.amazonaws.services.kinesis.samples.datavis.app.BidRequestCounter</mainClass>
+                            <mainClass>com.amazonaws.services.kinesis.samples.datavis.app.ImpressionCounter</mainClass>
                             <arguments>
                                 <argument>${bidrg.aggregator.name}</argument>
                                 <argument>${bidrq.stream}</argument>
@@ -170,7 +170,7 @@
                         <artifactId>exec-maven-plugin</artifactId>
                         <version>1.5.0</version>
                         <configuration>
-                            <mainClass>com.amazonaws.services.kinesis.samples.datavis.writer.BidRequestStreamWriter</mainClass>
+                            <mainClass>com.amazonaws.services.kinesis.samples.datavis.writer.ImpressionStreamWriter</mainClass>
                             <arguments>
                                 <!-- Start a single thread to put records in to Amazon Kinesis -->
                                 <argument>1</argument>
@@ -192,7 +192,7 @@
                         <artifactId>exec-maven-plugin</artifactId>
                         <version>1.5.0</version>
                         <configuration>
-                            <mainClass>com.amazonaws.services.kinesis.samples.datavis.server.BidReqWebServer</mainClass>
+                            <mainClass>com.amazonaws.services.kinesis.samples.datavis.server.ImpressionWebServer</mainClass>
                             <arguments>
                                 <!-- Start Jetty on port 8080 -->
                                 <argument>8080</argument>
