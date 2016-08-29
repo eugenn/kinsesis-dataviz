@@ -24,7 +24,7 @@ import com.amazonaws.services.dynamodbv2.model.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -170,10 +170,12 @@ public class DynamoDBUtils {
     }
 
     public static String getHashKey() {
-        LocalDate currentDate = LocalDate.now();
+        LocalDateTime currentDate = LocalDateTime.now();
         int m = currentDate.getMonthValue();
         int y = currentDate.getYear();
+        int d = currentDate.getDayOfMonth();
+        int h = currentDate.getHour();
 
-        return String.valueOf(y) + String.valueOf(m);
+        return String.valueOf(y) + String.valueOf(m) + String.valueOf(d) + String.valueOf(h);
     }
 }
