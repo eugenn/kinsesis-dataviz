@@ -81,7 +81,7 @@ public class BidRequestStreamWriter  {
 //        bidRequestIds.add(UUID.randomUUID().toString());
 //        bidRequestIds.add(UUID.randomUUID().toString());
         bidRequestIds.add("11111111111");
-        bidRequestIds.add("22222222222");
+//        bidRequestIds.add("22222222222");
 //        bannerIds.add("33333333333");
         bidRequestIds.add("44444444444");
 

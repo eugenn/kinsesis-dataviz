@@ -52,7 +52,7 @@
         <clicks.servlet>GetClicksCountsServlet</clicks.servlet>
         <clicks.endpoint>GetClicksCounts</clicks.endpoint>
 
-        <aws.region>us-west-2</aws.region>
+        <aws.region>eu-west-1</aws.region>
         <amazon-kinesis-client.version>1.2.0</amazon-kinesis-client.version>
 
         <jetty.version>8.1.9.v20130131</jetty.version>
