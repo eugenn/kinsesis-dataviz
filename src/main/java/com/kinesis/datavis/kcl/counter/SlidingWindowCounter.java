@@ -63,10 +63,6 @@ public class SlidingWindowCounter<ObjectType> {
         counter.increment(obj, headBucket);
     }
 
-//    public void sum(ObjectType obj, double val) {
-//        counter.sum(obj, val, headBucket);
-//    }
-
     /**
      * Get the counts for all objects across all buckets.
      * 
