@@ -5,7 +5,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.ComparisonOperator;
 import com.amazonaws.services.dynamodbv2.model.Condition;
-import com.amazonaws.services.kinesis.samples.datavis.model.dynamo.BidRequestCount;
+import com.amazonaws.services.kinesis.samples.datavis.model.dynamo.BidWinCount;
 import com.amazonaws.services.kinesis.samples.datavis.utils.DynamoDBUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
@@ -80,11 +80,11 @@ public class GetBidWinCountsServlet extends HttpServlet {
             LOG.debug(String.format("Querying for counts of resource %s since %s", resource, DATE_FORMATTER.get().format(startTime)));
         }
 
-        DynamoDBQueryExpression<BidRequestCount> query = new DynamoDBQueryExpression<>();
+        DynamoDBQueryExpression<BidWinCount> query = new DynamoDBQueryExpression<>();
 
         resource = "11111111111";
 
-        BidRequestCount hashKey = new BidRequestCount();
+        BidWinCount hashKey = new BidWinCount();
         hashKey.setHashKey(DynamoDBUtils.getHashKey());
 
         query.setHashKeyValues(hashKey);
@@ -100,7 +100,7 @@ public class GetBidWinCountsServlet extends HttpServlet {
         query.setRangeKeyConditions(Collections.singletonMap("timestamp", recentUpdates));
         query.setQueryFilter(Collections.singletonMap("bidRequestId", attrFilter));
 
-        List<BidRequestCount> counts = mapper.query(BidRequestCount.class, query);
+        List<BidWinCount> counts = mapper.query(BidWinCount.class, query);
 
         System.out.println(counts.size());
         // Return the counts as JSON

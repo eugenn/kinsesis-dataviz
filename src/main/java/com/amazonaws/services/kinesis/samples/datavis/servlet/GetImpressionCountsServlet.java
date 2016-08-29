@@ -71,6 +71,7 @@ public class GetImpressionCountsServlet extends HttpServlet {
 
         // Parse query string as a single integer - the number of seconds since "now" to query for new counts
         String resource = params.getString(PARAMETER_RESOURCE);
+        resource = "11111111111";
         int rangeInSeconds = Integer.parseInt(params.getString(PARAMETER_RANGE_IN_SECONDS));
 
         Calendar c = Calendar.getInstance();

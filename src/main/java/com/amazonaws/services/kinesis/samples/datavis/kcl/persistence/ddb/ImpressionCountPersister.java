@@ -10,6 +10,7 @@ import com.amazonaws.services.kinesis.samples.datavis.utils.HostResolver;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -43,8 +44,9 @@ public class ImpressionCountPersister implements CountPersister<ImpressionRec, I
                 // Create a new pair if this resource hasn't been seen yet in this batch
                 bdCount = new ImpressionCount();
                 bdCount.setHashKey(DynamoDBUtils.getHashKey());
-//                bdCount.setWh(rec.getWh());
                 bdCount.setTimestamp(date);
+                bdCount.setBidRequestId(rec.getBidRequestId());
+                bdCount.setTotalPrice(BigDecimal.ZERO);
                 bdCount.setTypeCounts(new ArrayList<TypeCount>());
                 bdCount.setHost(HostResolver.resolveHostname());
 
@@ -52,6 +54,7 @@ public class ImpressionCountPersister implements CountPersister<ImpressionRec, I
             }
 
             bdCount.setCount(bdCount.getCount() + count.getValue());
+            bdCount.setTotalPrice(rec.getWinPrice());
 
             // Add referrer to list of refcounts for this resource and time
             TypeCount typeCount = new TypeCount();

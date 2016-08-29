@@ -3,6 +3,8 @@ package com.amazonaws.services.kinesis.samples.datavis.model.record;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.math.BigDecimal;
+
 /**
  * Created by eugennekhai on 28/08/16.
  */
@@ -11,23 +13,9 @@ import lombok.Getter;
 public class ImpressionRec {
     private String bidRequestId;
     private String type;
-    private String wh;
+    private BigDecimal winPrice = BigDecimal.ZERO;
 
     public ImpressionRec() {
-    }
-
-    public ImpressionRec(String type, String wh) {
-        this.wh = wh;
-        this.type = type;
-    }
-
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     @Override
@@ -38,14 +26,14 @@ public class ImpressionRec {
         ImpressionRec that = (ImpressionRec) o;
 
         if (type != null ? !type.equals(that.type) : that.type != null) return false;
-        if (wh != null ? !wh.equals(that.wh) : that.wh != null) return false;
+        if (bidRequestId != null ? !bidRequestId.equals(that.bidRequestId) : that.bidRequestId != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = wh != null ? wh.hashCode() : 0;
+        int result = bidRequestId != null ? bidRequestId.hashCode() : 0;
         result = 31 * result + (type != null ? type.hashCode() : 0);
         return result;
     }
@@ -53,7 +41,7 @@ public class ImpressionRec {
     @Override
     public String toString() {
         return "ImpressionRec{" +
-                "wf='" + wh + '\'' +
+                "bidRequestId='" + bidRequestId + '\'' +
                 ", type='" + type + '\'' +
                 '}';
     }

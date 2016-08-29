@@ -36,7 +36,7 @@ public class ImpressionFactory {
      * @return A new pair with random resource and referrer values.
      */
     public ImpressionRec create() {
-        ImpressionRec impressionRec = new ImpressionRec(getRandomId(), type);
+        ImpressionRec impressionRec = new ImpressionRec(getRandomId(), type, getRandomPrice());
 
         return impressionRec;
     }
