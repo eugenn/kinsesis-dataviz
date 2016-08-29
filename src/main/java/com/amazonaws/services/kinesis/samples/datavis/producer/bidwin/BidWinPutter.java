@@ -54,7 +54,7 @@ public class BidWinPutter implements Putter {
      */
     public void sendPairs(long n, long delayBetweenRecords, TimeUnit unitForDelay) throws InterruptedException {
         for (int i = 0; i < n && !Thread.currentThread().isInterrupted(); i++) {
-            sendRq();
+            sendWin();
             Thread.sleep(unitForDelay.toMillis(delayBetweenRecords));
         }
     }
@@ -71,7 +71,7 @@ public class BidWinPutter implements Putter {
      */
     public void sendRequestsIndefinitely(long delayBetweenRecords, TimeUnit unitForDelay) throws InterruptedException {
         while (!Thread.currentThread().isInterrupted()) {
-            sendRq();
+            sendWin();
             if (delayBetweenRecords > 0) {
                 Thread.sleep(unitForDelay.toMillis(delayBetweenRecords));
             }
@@ -81,7 +81,7 @@ public class BidWinPutter implements Putter {
     /**
      * Send a single pair to Amazon Kinesis using PutRecord.
      */
-    private void sendRq() {
+    private void sendWin() {
         BidWinRec winRec = bidWinFactory.create();
         byte[] bytes;
         try {

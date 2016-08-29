@@ -15,6 +15,8 @@ public class BidWinRec {
     private String type;
     private BigDecimal winPrice = BigDecimal.ZERO;
 
+    public BidWinRec() {}
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

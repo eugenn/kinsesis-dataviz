@@ -94,7 +94,8 @@ public class GetBidWinCountsServlet extends HttpServlet {
                         .withAttributeValueList(new AttributeValue().withS(DATE_FORMATTER.get().format(startTime)));
         Condition attrFilter =
                 new Condition().
-                        withComparisonOperator(ComparisonOperator.EQ).withAttributeValueList(new AttributeValue().withS(resource));
+                        withComparisonOperator(ComparisonOperator.EQ).withAttributeValueList(new AttributeValue().
+                        withS(resource));
 
         query.setRangeKeyConditions(Collections.singletonMap("timestamp", recentUpdates));
         query.setQueryFilter(Collections.singletonMap("bidRequestId", attrFilter));
