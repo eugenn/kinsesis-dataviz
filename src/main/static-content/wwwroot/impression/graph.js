@@ -479,6 +479,7 @@ var CountData = function() {
      * @param {object} Count data returned by our data provider.
      */
     addNewData : function(newCountData) {
+      var objType = "impression";
       // Expected data format:
       // [{
       //   "resource" : "/index.html",
@@ -491,14 +492,14 @@ var CountData = function() {
         setLastUpdatedBy(countRec.host);
 
         // Reuse or create a new data series entry for this type
-        refData = data[countRec.type] || {
+        refData = data[objType] || {
               label : countRec.type,
               data : {}
             };
         // Set the count
         refData.data[countRec.timestamp] = countRec.count;
         // Update the type data
-        data[countRec.type] = refData;
+        data[objType] = refData;
         // Update our totals whenever new data is added
         //updateTotal(refCount.type);
 

@@ -491,14 +491,14 @@ var CountData = function() {
         setLastUpdatedBy(countRec.host);
 
         // Reuse or create a new data series entry for this type
-        refData = data[countRec.type] || {
+        refData = data["bidrequest"] || {
               label : countRec.type,
               data : {}
             };
         // Set the count
         refData.data[countRec.timestamp] = countRec.count;
         // Update the type data
-        data[countRec.type] = refData;
+        data["bidrequest"] = refData;
         // Update our totals whenever new data is added
         //updateTotal(refCount.type);
 
