@@ -65,7 +65,8 @@ public class BidResponseStreamWriter {
 //        bidRequestIds.add(UUID.randomUUID().toString());
         bannerIds.add("11111111111");
         bannerIds.add("22222222222");
-        bannerIds.add("33333333333");
+//        bannerIds.add("33333333333");
+        bannerIds.add("44444444444");
 
 
         BidResponseFactory responseFactory = new BidResponseFactory(bannerIds, "bidresponse");

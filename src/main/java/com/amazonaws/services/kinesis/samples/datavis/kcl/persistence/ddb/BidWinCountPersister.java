@@ -1,8 +1,6 @@
 package com.amazonaws.services.kinesis.samples.datavis.kcl.persistence.ddb;
 
 import com.amazonaws.services.kinesis.samples.datavis.kcl.persistence.CountPersister;
-import com.amazonaws.services.kinesis.samples.datavis.model.TypeCount;
-import com.amazonaws.services.kinesis.samples.datavis.model.TypeCountComparator;
 import com.amazonaws.services.kinesis.samples.datavis.model.dynamo.BidWinCount;
 import com.amazonaws.services.kinesis.samples.datavis.model.record.BidWinRec;
 import com.amazonaws.services.kinesis.samples.datavis.utils.DynamoDBUtils;
@@ -46,7 +44,6 @@ public class BidWinCountPersister implements CountPersister<BidWinRec, BidWinCou
                 bdCount.setHashKey(DynamoDBUtils.getHashKey());
                 bdCount.setBidRequestId(rec.getBidRequestId());
                 bdCount.setTimestamp(date);
-                bdCount.setTypeCounts(new ArrayList<TypeCount>());
                 bdCount.setHost(HostResolver.resolveHostname());
 
                 countMap.put(date, bdCount);
@@ -55,19 +52,7 @@ public class BidWinCountPersister implements CountPersister<BidWinRec, BidWinCou
             bdCount.setCount(bdCount.getCount() + count.getValue());
             bdCount.setTotalPrice(bdCount.getTotalPrice().add(rec.getWinPrice()));
 
-            // Add referrer to list of refcounts for this resource and time
-            TypeCount typeCount = new TypeCount();
-            typeCount.setType(rec.getType());
-            typeCount.setCount(count.getValue());
 
-            bdCount.getTypeCounts().add(typeCount);
-        }
-
-        // Top N calculation for this interval
-        // By sorting the referrer counts list in descending order the consumer of the count data can choose their own
-        // N.
-        for (BidWinCount count : countMap.values()) {
-            Collections.sort(count.getTypeCounts(), new TypeCountComparator());
         }
 
         return countMap.values();

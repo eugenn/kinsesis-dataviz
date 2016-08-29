@@ -486,26 +486,25 @@ var CountData = function() {
       //   "host" : "worker01-ec2",
       //   "typeCounts" : [{"type":"bidrequest","count":1002}]
       // }]
-      newCountData.forEach(function(count) {
-        debugger;
+      newCountData.forEach(function(countRec) {
         // Update the host who last calculated the counts
-        setLastUpdatedBy(count.host);
-        // Add individual type counts
-        count.typeCounts.forEach(function(refCount) {
-          // Reuse or create a new data series entry for this type
-          refData = data[refCount.type] || {
-            label : refCount.type,
-            data : {}
-          };
-          // Set the count
-          refData.data[count.timestamp] = refCount.count;
-          // Update the type data
-          data[refCount.type] = refData;
-          // Update our totals whenever new data is added
-          updateTotal(refCount.type);
-        });
+        setLastUpdatedBy(countRec.host);
+
+        // Reuse or create a new data series entry for this type
+        refData = data[countRec.type] || {
+              label : countRec.type,
+              data : {}
+            };
+        // Set the count
+        refData.data[countRec.timestamp] = countRec.count;
+        // Update the type data
+        data[countRec.type] = refData;
+        // Update our totals whenever new data is added
+        //updateTotal(refCount.type);
+
       });
     },
+
 
     /**
      * Removes data older than a specific time. This will also prune types
