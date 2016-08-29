@@ -4,7 +4,7 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.kinesis.AmazonKinesis;
 import com.amazonaws.services.kinesis.model.ProvisionedThroughputExceededException;
 import com.amazonaws.services.kinesis.model.PutRecordRequest;
-import com.amazonaws.services.kinesis.samples.datavis.model.record.BidWinRec;
+import com.amazonaws.services.kinesis.samples.datavis.model.record.ImpressionRec;
 import com.amazonaws.services.kinesis.samples.datavis.producer.Putter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
@@ -82,7 +82,7 @@ public class ImpressionPutter implements Putter {
      * Send a single pair to Amazon Kinesis using PutRecord.
      */
     private void sendRq() {
-        BidWinRec winRec = bidWinFactory.create();
+        ImpressionRec winRec = bidWinFactory.create();
         byte[] bytes;
         try {
             bytes = JSON.writeValueAsBytes(winRec);

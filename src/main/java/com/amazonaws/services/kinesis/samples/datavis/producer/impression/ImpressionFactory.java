@@ -1,6 +1,6 @@
 package com.amazonaws.services.kinesis.samples.datavis.producer.impression;
 
-import com.amazonaws.services.kinesis.samples.datavis.model.record.BidWinRec;
+import com.amazonaws.services.kinesis.samples.datavis.model.record.ImpressionRec;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -35,10 +35,10 @@ public class ImpressionFactory {
      *
      * @return A new pair with random resource and referrer values.
      */
-    public BidWinRec create() {
-        BidWinRec winRec = new BidWinRec(getRandomId(), type, getRandomPrice());
+    public ImpressionRec create() {
+        ImpressionRec impressionRec = new ImpressionRec(getRandomId(), type);
 
-        return winRec;
+        return impressionRec;
     }
 
     /**

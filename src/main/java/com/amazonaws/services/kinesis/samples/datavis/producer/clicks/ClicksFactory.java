@@ -1,6 +1,6 @@
 package com.amazonaws.services.kinesis.samples.datavis.producer.clicks;
 
-import com.amazonaws.services.kinesis.samples.datavis.model.record.BidWinRec;
+import com.amazonaws.services.kinesis.samples.datavis.model.record.ClicksRec;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -35,10 +35,10 @@ public class ClicksFactory {
      *
      * @return A new pair with random resource and referrer values.
      */
-    public BidWinRec create() {
-        BidWinRec winRec = new BidWinRec(getRandomId(), type, getRandomPrice());
+    public ClicksRec create() {
+        ClicksRec clicksRec = new ClicksRec(getRandomId(), type);
 
-        return winRec;
+        return clicksRec;
     }
 
     /**
