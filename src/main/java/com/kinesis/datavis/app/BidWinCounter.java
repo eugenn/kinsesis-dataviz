@@ -4,7 +4,7 @@ import com.amazonaws.regions.Region;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.kinesis.clientlibrary.interfaces.IRecordProcessorFactory;
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;
-import com.kinesis.datavis.kcl.CountingRecordProcessorFactory;
+import com.kinesis.datavis.kcl.TwinCountingProcessorFactory;
 import com.kinesis.datavis.kcl.persistence.ddb.BidWinCountPersister;
 import com.kinesis.datavis.model.dynamo.BidWinCount;
 import com.kinesis.datavis.model.record.BidWinRec;
@@ -29,7 +29,7 @@ public class BidWinCounter extends CounterApp {
      * Start the Kinesis Client application.
      *
      * @param args Expecting 4 arguments: Application name to use for the Kinesis Client Application, Stream name to
-     *        read from, DynamoDB table name to persist counts into, and the AWS region in which these resources
+     *        read from, DynamoDB table name to persistCounter counts into, and the AWS region in which these resources
      *        exist or should be created.
      */
     public static void main(String[] args) throws UnknownHostException {
@@ -52,7 +52,7 @@ public class BidWinCounter extends CounterApp {
 
 
         IRecordProcessorFactory recordProcessor =
-                new CountingRecordProcessorFactory<BidWinRec, BidWinCount>(BidWinRec.class,
+                new TwinCountingProcessorFactory<BidWinRec, BidWinCount>(BidWinRec.class,
                         persister,
                         COMPUTE_RANGE_FOR_COUNTS_IN_MILLIS,
                         COMPUTE_INTERVAL_IN_MILLIS);

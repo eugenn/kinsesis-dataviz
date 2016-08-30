@@ -24,9 +24,9 @@ public class ClicksCountPersister extends QueueRecordPersister implements CountP
     }
 
     @Override
-    public void persist(Map<ClicksRec, Long> objectCounts) {
+    public void persistCounter(Map<ClicksRec, Long> objectCounts) {
         if (objectCounts.isEmpty()) {
-            // short circuit to avoid creating a map when we have no objects to persist
+            // short circuit to avoid creating a map when we have no objects to persistCounter
             return;
         }
 
@@ -60,6 +60,10 @@ public class ClicksCountPersister extends QueueRecordPersister implements CountP
         counts.addAll(countMap.values());
     }
 
+    @Override
+    public void persistCounters(Map<ClicksRec, Long> objectCounts, Map<ClicksRec, Double> objectSums) {
+
+    }
 
 
 }

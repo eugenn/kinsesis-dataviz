@@ -1,18 +1,3 @@
-/*
- * Copyright 2014 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Amazon Software License (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- * http://aws.amazon.com/asl/
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
- */
-
 package com.kinesis.datavis.kcl;
 
 import com.amazonaws.services.kinesis.clientlibrary.exceptions.InvalidStateException;
@@ -24,7 +9,7 @@ import com.amazonaws.services.kinesis.clientlibrary.types.ShutdownReason;
 import com.amazonaws.services.kinesis.model.Record;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kinesis.datavis.kcl.counter.SlidingWindowCounter;
+import com.kinesis.datavis.kcl.counter.SlidingWindowTwinCounter;
 import com.kinesis.datavis.kcl.persistence.CountPersister;
 import com.kinesis.datavis.kcl.timing.Clock;
 import com.kinesis.datavis.kcl.timing.NanoClock;
@@ -40,12 +25,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Computes a map of (HttpReferrerPair -> count(pair)) over a fixed range of time. Counts are computed at the intervals
- * provided.
- *
- * @param <T> The type of records this processor is capable of counting.
+ * Created by eugennekhai on 30/08/16.
  */
-public class CountingRecordProcessor<T,C> implements IRecordProcessor {
+public class TwinCountingRecordProcessor<T,C> implements IRecordProcessor {
     private static final Log LOG = LogFactory.getLog(CountingRecordProcessor.class);
 
     // Lock to use for our timer
@@ -62,7 +44,7 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
     private int computeRangeInMillis;
 
     // Counter for keeping track of counts per interval.
-    private SlidingWindowCounter<T> windowCounter;
+    private SlidingWindowTwinCounter<T> windowCounter;
 
     // The shard this processor is processing
     private String kinesisShardId;
@@ -78,6 +60,8 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
     // The type of record we expect to receive as JSON
     private Class<T> recordType;
 
+    private Object monitor = new Object();
+
     /**
      * Create a new processor.
      *
@@ -87,11 +71,11 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
      * @param computeRangeInMillis Range to compute distinct counts across
      * @param computeIntervalInMillis Interval between computing total count for the overall time range.
      */
-    public CountingRecordProcessor(CountingRecordProcessorConfig config,
-            Class<T> recordType,
-            CountPersister<T, C> persister,
-            int computeRangeInMillis,
-            int computeIntervalInMillis) {
+    public TwinCountingRecordProcessor(CountingRecordProcessorConfig config,
+                                   Class<T> recordType,
+                                   CountPersister<T, C> persister,
+                                   int computeRangeInMillis,
+                                   int computeIntervalInMillis) {
 
         this.config = config;
         this.recordType = recordType;
@@ -112,25 +96,26 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
 
         persister.initialize();
 
+        int windowSize = (int) (computeRangeInMillis / computeIntervalInMillis);
         // Create a sliding window whose size is large enough to hold an entire range of individual interval counts.
-        windowCounter = new SlidingWindowCounter<>((int) (computeRangeInMillis / computeIntervalInMillis));
+        windowCounter = new SlidingWindowTwinCounter<>(windowSize);
 
         // Create a scheduled task that runs every computeIntervalInMillis to compute and
         // persistCounter the counts.
         scheduledExecutor.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                // Synchronize on the windowCounter so we stop advancing the interval while we're checkpointing
-                synchronized (windowCounter) {
-                    try {
-                        advanceOneInterval();
-                    } catch (Exception ex) {
-                        LOG.warn("Error advancing sliding window one interval (" + computeIntervalInMillis
-                                + "ms). Skipping this interval.", ex);
-                    }
-                }
-            }
-        },
+                                                  @Override
+                                                  public void run() {
+                                                      // Synchronize on the windowCounter so we stop advancing the interval while we're checkpointing
+                                                      synchronized (monitor) {
+                                                          try {
+                                                              advanceOneInterval();
+                                                          } catch (Exception ex) {
+                                                              LOG.warn("Error advancing sliding window one interval (" + computeIntervalInMillis
+                                                                      + "ms). Skipping this interval.", ex);
+                                                          }
+                                                      }
+                                                  }
+                                              },
                 TimeUnit.SECONDS.toMillis(config.getInitialWindowAdvanceDelayInSeconds()), computeIntervalInMillis,
                 TimeUnit.MILLISECONDS);
     }
@@ -141,11 +126,13 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
      */
     protected void advanceOneInterval() {
         Map<T, Long> counts = null;
-        synchronized (windowCounter) {
-            // Only persist the counts if we have a full range of data to report. We don't want partial
+        Map<T, Double> sums = null;
+        synchronized (monitor) {
+            // Only persistCounter the counts if we have a full range of data to report. We don't want partial
             // counts each time the process starts.
             if (shouldPersistCounts()) {
                 counts = windowCounter.getCounts();
+                sums = windowCounter.getSum();
 
                 windowCounter.pruneEmptyObjects();
             } else {
@@ -158,9 +145,8 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
             windowCounter.advanceWindow();
         }
         // Persist the counts if we have a full range
-        if (counts != null) {
-
-            persister.persistCounter(counts);
+        if (counts != null && sums != null) {
+            persister.persistCounters(counts, sums);
         }
     }
 
@@ -173,21 +159,22 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
                 rec = JSON.readValue(r.getData().array(), recordType);
             } catch (IOException e) {
                 LOG.warn("Skipping record. Unable to parse record into HttpReferrerPair. Partition Key: "
-                        + r.getPartitionKey() + ". Sequence Number: " + r.getSequenceNumber(),
+                                + r.getPartitionKey() + ". Sequence Number: " + r.getSequenceNumber(),
                         e);
                 continue;
             }
             // Increment the windowCounter for the new pair. This is synchronized because there is another thread reading from
             // the windowCounter to compute running totals every interval.
-            synchronized (windowCounter) {
+            synchronized (monitor) {
                 windowCounter.increment(rec);
+                windowCounter.sum(rec);
             }
         }
 
         // Checkpoint if it's time to!
         if (checkpointTimer.isTimeUp()) {
             // Obtain a lock on the windowCounter to prevent additional counts from being calculated while checkpointing.
-            synchronized (windowCounter) {
+            synchronized (monitor) {
                 checkpoint(checkpointer);
                 resetCheckpointAlarm();
             }
@@ -217,7 +204,7 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
                 // Important to checkpoint after reaching end of shard, so we can start processing data from child
                 // shards.
                 if (reason == ShutdownReason.TERMINATE) {
-                    synchronized (windowCounter) {
+                    synchronized (monitor) {
                         checkpoint(checkpointer);
                     }
                 }
@@ -262,7 +249,7 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
                     break;
                 } else {
                     LOG.info("Transient issue when checkpointing - attempt " + (i + 1) + " of "
-                            + config.getCheckpointRetries(),
+                                    + config.getCheckpointRetries(),
                             e);
                 }
             } catch (InvalidStateException e) {
@@ -284,3 +271,4 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
         System.exit(1);
     }
 }
+

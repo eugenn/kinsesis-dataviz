@@ -41,9 +41,9 @@ public class BidRqCountPersister extends QueueRecordPersister implements CountPe
     }
 
     @Override
-    public void persist(Map<BidRequestRec, Long> objectCounts) {
+    public void persistCounter(Map<BidRequestRec, Long> objectCounts) {
         if (objectCounts.isEmpty()) {
-            // short circuit to avoid creating a map when we have no objects to persist
+            // short circuit to avoid creating a map when we have no objects to persistCounter
             return;
         }
 
@@ -78,6 +78,10 @@ public class BidRqCountPersister extends QueueRecordPersister implements CountPe
 
     }
 
+    @Override
+    public void persistCounters(Map<BidRequestRec, Long> objectCounts, Map<BidRequestRec, Double> objectSums) {
+
+    }
 
 
 }

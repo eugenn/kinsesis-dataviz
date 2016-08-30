@@ -39,7 +39,7 @@ public class DynamoDBBidRqCountPersisterTest {
 //        pair.setWh("a");
 //        pair.setType("b");
 //        final long count = 1L;
-////        persister.persist(Collections.singletonMap(pair, count));
+////        persister.persistCounter(Collections.singletonMap(pair, count));
 ////
 ////        persister.sendQueueToDynamoDB(new ArrayList<HttpReferrerPairsCount>());
 //
@@ -73,7 +73,7 @@ public class DynamoDBBidRqCountPersisterTest {
 ////        counts.put(new BidRequestRec(resource, "f"), 20L);
 //
 //        // Persist the counts
-////        persister.persist(counts);
+////        persister.persistCounter(counts);
 //
 //        // Trigger the flush to DynamoDB.
 ////        persister.sendQueueToDynamoDB(new ArrayList<HttpReferrerPairsCount>());
@@ -110,7 +110,7 @@ public class DynamoDBBidRqCountPersisterTest {
 //
 //
 //        final long count = 1L;
-////        persister.persist(Collections.singletonMap(pair, count));
+////        persister.persistCounter(Collections.singletonMap(pair, count));
 //
 //        // Wait for the persister thread to pick up the new counts
 //        Thread.sleep(100);

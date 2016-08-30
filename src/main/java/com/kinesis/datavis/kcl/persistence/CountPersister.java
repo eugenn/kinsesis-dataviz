@@ -22,7 +22,7 @@ import java.util.Map;
 /**
  * A class that is capable of persisting the counts of objects as produced by {@link CountingRecordProcessor}.
  *
- * @param <T> Type of objects this persister can persist.
+ * @param <T> Type of objects this persister can persistCounter.
  */
 public interface CountPersister<T, C> {
 
@@ -36,11 +36,17 @@ public interface CountPersister<T, C> {
      *
      * @param objectCounts
      */
-    public void persist(Map<T, Long> objectCounts);
+    public void persistCounter(Map<T, Long> objectCounts);
+    /**
+     * Persist the map of objects to counts.
+     *
+     * @param objectSums
+     */
+    public void persistCounters(Map<T, Long> objectCounts, Map<T, Double> objectSums);
 
     /**
      * Indicates this persister should flush its internal state and guarantee all records received from calls to
-     * {@link #persist(Map)} are completely handled.
+     * {@link #persistCounter(Map)} are completely handled.
      *
      * @throws InterruptedException if any thread interrupted the current thread while performing a checkpoint.
      */

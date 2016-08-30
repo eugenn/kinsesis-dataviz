@@ -26,7 +26,7 @@ $(function() {
  */
 var Graph = function() {
 
-  var graph, totalDurationToGraphInSeconds = 120;
+  var graph, totalDurationToGraphInSeconds = 60;
 
   return {
     /**
@@ -143,7 +143,7 @@ var Graph = function() {
  */
 var UIHelper = function(data, graph) {
   // How frequently should we poll for new data and update the graph?
-  var updateIntervalInMillis = 400;
+  var updateIntervalInMillis = 600;
   // How often should the top N display be updated?
   var intervalsPerTopNUpdate = 5;
   // How far back should we fetch data at every interval?
@@ -479,7 +479,7 @@ var CountData = function() {
      * @param {object} Count data returned by our data provider.
      */
     addNewData : function(newCountData) {
-      var objType = "impression";
+      var types = ["impression", "totalWinPrices"]
       // Expected data format:
       // [{
       //   "resource" : "/index.html",
@@ -491,17 +491,29 @@ var CountData = function() {
         // Update the host who last calculated the counts
         setLastUpdatedBy(countRec.host);
 
-        // Reuse or create a new data series entry for this type
-        refData = data[objType] || {
-              label : countRec.type,
-              data : {}
-            };
-        // Set the count
-        refData.data[countRec.timestamp] = countRec.count;
-        // Update the type data
-        data[objType] = refData;
-        // Update our totals whenever new data is added
-        //updateTotal(refCount.type);
+        types.forEach(function(type) {
+          // Reuse or create a new data series entry for this type
+          refData = data[type] || {
+                label : type,
+                data : {}
+              };
+
+
+          switch (type) {
+            case "impression": refData.data[countRec.timestamp] = countRec.count;
+              break;
+            case "totalWinPrices": refData.data[countRec.timestamp] = countRec.totalPrice;
+              break;
+          }
+
+          data[type] = refData;
+          // Update the type data
+          //data[type] = refData;
+          // Update our totals whenever new data is added
+          updateTotal(type);
+        })
+
+
 
       });
     },

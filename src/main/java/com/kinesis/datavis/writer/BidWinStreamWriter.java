@@ -13,7 +13,6 @@ import com.kinesis.datavis.utils.StreamUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,18 +72,22 @@ public class BidWinStreamWriter {
 //        bidRequestIds.add(UUID.randomUUID().toString());
 //        bidRequestIds.add(UUID.randomUUID().toString());
         bidRequestIds.add("11111111111");
-        bidRequestIds.add("22222222222");
-        bidRequestIds.add("33333333333");
+//        bidRequestIds.add("22222222222");
+//        bidRequestIds.add("33333333333");
 
-        List<BigDecimal> prices = new ArrayList<>();
-        prices.add(BigDecimal.valueOf(5.33));
-        prices.add(BigDecimal.valueOf(1.03));
-        prices.add(BigDecimal.valueOf(0.53));
-        prices.add(BigDecimal.valueOf(5.33));
-        prices.add(BigDecimal.valueOf(10.223));
-        prices.add(BigDecimal.valueOf(2.11));
-        prices.add(BigDecimal.valueOf(3.33));
-        prices.add(BigDecimal.valueOf(1.673));
+        List<Double> prices = new ArrayList<>();
+//        prices.add(Double.valueOf(1.00));
+//        prices.add(Double.valueOf(1.00));
+//        prices.add(Double.valueOf(1.00));
+
+        prices.add(Double.valueOf(2.83));
+        prices.add(Double.valueOf(1.03));
+        prices.add(Double.valueOf(0.53));
+        prices.add(Double.valueOf(2.33));
+        prices.add(Double.valueOf(0.223));
+        prices.add(Double.valueOf(2.11));
+        prices.add(Double.valueOf(3.33));
+        prices.add(Double.valueOf(1.673));
 
         BidWinFactory bwFactory = new BidWinFactory(bidRequestIds, prices, "bidwin");
 

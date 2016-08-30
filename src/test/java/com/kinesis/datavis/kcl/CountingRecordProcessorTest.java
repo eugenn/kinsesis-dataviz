@@ -86,7 +86,7 @@ public class CountingRecordProcessorTest {
 //        assertTrue((end - start) < TimeUnit.SECONDS.toNanos(config.getInitialWindowAdvanceDelayInSeconds() + 1));
 //
 //        // Make sure the persister is not called since we don't haven't had time to collect a full window of data
-//        verify(persister, never()).persist(anyMapOf(BidRequestRec.class, Long.class));
+//        verify(persister, never()).persistCounter(anyMapOf(BidRequestRec.class, Long.class));
 //    }
 //
 //    @Test(timeout = 5000)
@@ -102,7 +102,7 @@ public class CountingRecordProcessorTest {
 //        assertTrue((end - start) >= TimeUnit.SECONDS.toNanos(config.getInitialWindowAdvanceDelayInSeconds() + 1));
 //
 //        // Make sure our persister was called at least once
-//        verify(persister, atLeast(1)).persist(anyMapOf(BidRequestRec.class, Long.class));
+//        verify(persister, atLeast(1)).persistCounter(anyMapOf(BidRequestRec.class, Long.class));
 //    }
 //
 //    private Record createRecordFrom(BidRequestRec pair) {
@@ -136,7 +136,7 @@ public class CountingRecordProcessorTest {
 //
 //        processor.advanceOneInterval();
 //
-//        verify(persister).persist(expectedCounts);
+//        verify(persister).persistCounter(expectedCounts);
 //    }
 //
 //    @Test
@@ -162,7 +162,7 @@ public class CountingRecordProcessorTest {
 //        // We should have a single count for the good record
 //        Map<BidRequestRec, Long> expectedCounts = Collections.singletonMap(pair, 1L);
 //
-//        verify(persister).persist(expectedCounts);
+//        verify(persister).persistCounter(expectedCounts);
 //    }
 //
 //    @Test
@@ -289,7 +289,7 @@ public class CountingRecordProcessorTest {
 //
 //        // When we advance to the next interval our persister should be called with a single count for our pair.
 //        processor.advanceOneInterval();
-//        verify(persister).persist(Collections.singletonMap(pair, 1L));
+//        verify(persister).persistCounter(Collections.singletonMap(pair, 1L));
 //
 //        // Advance enough times to clear the window (once before and 9 times here = 10 elapsed intervals)
 //        for (int i = 0; i < 9; i++) {
@@ -298,10 +298,10 @@ public class CountingRecordProcessorTest {
 //
 //        // Verify we have a count of 0 for our resource on the first interval immediately after it leaves the window
 //        processor.advanceOneInterval();
-//        verify(persister).persist(Collections.singletonMap(pair, 0L));
+//        verify(persister).persistCounter(Collections.singletonMap(pair, 0L));
 //
 //        // Advance once more and verify the resource is no longer returned with any counts
 //        processor.advanceOneInterval();
-//        verify(persister).persist(Collections.<BidRequestRec, Long> emptyMap());
+//        verify(persister).persistCounter(Collections.<BidRequestRec, Long> emptyMap());
 //    }
 }

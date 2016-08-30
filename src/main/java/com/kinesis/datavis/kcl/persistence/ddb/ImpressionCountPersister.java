@@ -9,7 +9,6 @@ import com.kinesis.datavis.utils.HostResolver;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -24,10 +23,16 @@ public class ImpressionCountPersister extends QueueRecordPersister implements Co
         super(dbMapper);
     }
 
+
     @Override
-    public void persist(Map<ImpressionRec, Long> objectCounts) {
+    public void persistCounter(Map<ImpressionRec, Long> objectCounts) {
+
+    }
+
+    @Override
+    public void persistCounters(Map<ImpressionRec, Long> objectCounts, Map<ImpressionRec, Double> objectSums) {
         if (objectCounts.isEmpty()) {
-            // short circuit to avoid creating a map when we have no objects to persist
+            // short circuit to avoid creating a map when we have no objects to persistCounter
             return;
         }
 
@@ -37,11 +42,16 @@ public class ImpressionCountPersister extends QueueRecordPersister implements Co
         // We map resource to pair counts so we can easily look up a resource and add referrer counts to it
         Map<Date, ImpressionCount> countMap = new HashMap<>();
 
+        Iterator<Map.Entry<ImpressionRec, Double>> iter = objectSums.entrySet().iterator();
+
+
         for (Map.Entry<ImpressionRec, Long> count : objectCounts.entrySet()) {
             Date date = Calendar.getInstance(UTC).getTime();
 
             // Check for an existing counts for this resource
             ImpressionRec rec = count.getKey();
+            Map.Entry<ImpressionRec, Double> totalPrice = iter.next();
+
             ImpressionCount bdCount = countMap.get(date);
             if (bdCount == null) {
                 // Create a new pair if this resource hasn't been seen yet in this batch
@@ -49,19 +59,20 @@ public class ImpressionCountPersister extends QueueRecordPersister implements Co
                 bdCount.setHashKey(DynamoDBUtils.getHashKey());
                 bdCount.setTimestamp(date);
                 bdCount.setBidRequestId(rec.getBidRequestId());
-                bdCount.setTotalPrice(BigDecimal.ZERO);
                 bdCount.setHost(HostResolver.resolveHostname());
 
                 countMap.put(date, bdCount);
             }
 
+
             bdCount.setCount(bdCount.getCount() + count.getValue());
-            bdCount.setTotalPrice(rec.getWinPrice());
+            bdCount.setTotalPrice(totalPrice.getValue());
+
+            System.out.println(bdCount.getCount() + "  " + bdCount.getTotalPrice());
 
         }
 
         counts.addAll(countMap.values());
     }
-
 }
 

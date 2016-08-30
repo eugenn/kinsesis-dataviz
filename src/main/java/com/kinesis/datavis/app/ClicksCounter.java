@@ -29,7 +29,7 @@ public class ClicksCounter extends CounterApp {
      * Start the Kinesis Client application.
      *
      * @param args Expecting 4 arguments: Application name to use for the Kinesis Client Application, Stream name to
-     *        read from, DynamoDB table name to persist counts into, and the AWS region in which these resources
+     *        read from, DynamoDB table name to persistCounter counts into, and the AWS region in which these resources
      *        exist or should be created.
      */
     public static void main(String[] args) throws UnknownHostException {

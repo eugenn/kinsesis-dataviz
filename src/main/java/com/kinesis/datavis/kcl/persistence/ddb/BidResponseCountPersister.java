@@ -24,9 +24,9 @@ public class BidResponseCountPersister extends QueueRecordPersister implements C
     }
 
     @Override
-    public void persist(Map<BidResponseRec, Long> objectCounts) {
+    public void persistCounter(Map<BidResponseRec, Long> objectCounts) {
         if (objectCounts.isEmpty()) {
-            // short circuit to avoid creating a map when we have no objects to persist
+            // short circuit to avoid creating a map when we have no objects to persistCounter
             return;
         }
 
@@ -57,6 +57,11 @@ public class BidResponseCountPersister extends QueueRecordPersister implements C
         }
 
         counts.addAll(countMap.values());
+
+    }
+
+    @Override
+    public void persistCounters(Map<BidResponseRec, Long> objectCounts, Map<BidResponseRec, Double> objectSums) {
 
     }
 

@@ -2,7 +2,6 @@ package com.kinesis.datavis.producer.bidwin;
 
 import com.kinesis.datavis.model.record.BidWinRec;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -10,7 +9,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * Created by eugennekhai on 25/08/16.
  */
 public class BidWinFactory {
-    private final List<BigDecimal> prices;
+    private final List<Double> prices;
     private List<String> bidRequestIds;
     private String type;
 
@@ -19,7 +18,7 @@ public class BidWinFactory {
      *
      * @param bidRequestIds List of bidRequestIds to use when generating a pair.
      */
-    public BidWinFactory(List<String> bidRequestIds, List<BigDecimal> prices, String type) {
+    public BidWinFactory(List<String> bidRequestIds, List<Double> prices, String type) {
         if (bidRequestIds == null || bidRequestIds.isEmpty()) {
             throw new IllegalArgumentException("At least 1 resource is required");
         }
@@ -55,7 +54,7 @@ public class BidWinFactory {
      *
      * @return A random referrer.
      */
-    protected BigDecimal getRandomPrice() {
+    protected Double getRandomPrice() {
         return prices.get(ThreadLocalRandom.current().nextInt(prices.size()));
     }
 }

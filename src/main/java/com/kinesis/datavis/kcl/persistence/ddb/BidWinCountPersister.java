@@ -25,9 +25,14 @@ public class BidWinCountPersister extends QueueRecordPersister implements CountP
     }
 
     @Override
-    public void persist(Map<BidWinRec, Long> objectCounts) {
+    public void persistCounter(Map<BidWinRec, Long> objectCounts) {
+
+    }
+
+    @Override
+    public void persistCounters(Map<BidWinRec, Long> objectCounts, Map<BidWinRec, Double> objectSums) {
         if (objectCounts.isEmpty()) {
-            // short circuit to avoid creating a map when we have no objects to persist
+            // short circuit to avoid creating a map when we have no objects to persistCounter
             return;
         }
 
@@ -37,10 +42,14 @@ public class BidWinCountPersister extends QueueRecordPersister implements CountP
         // We map resource to pair counts so we can easily look up a resource and add referrer counts to it
         Map<Date, BidWinCount> countMap = new HashMap<>();
 
+        Iterator<Map.Entry<BidWinRec, Double>> iter = objectSums.entrySet().iterator();
+
         for (Map.Entry<BidWinRec, Long> count : objectCounts.entrySet()) {
             Date date = Calendar.getInstance(UTC).getTime();
             // Check for an existing counts for this resource
             BidWinRec rec = count.getKey();
+            Map.Entry<BidWinRec, Double> totalPrice = iter.next();
+
             BidWinCount bdCount = countMap.get(date);
             if (bdCount == null) {
                 // Create a new pair if this resource hasn't been seen yet in this batch
@@ -53,9 +62,10 @@ public class BidWinCountPersister extends QueueRecordPersister implements CountP
                 countMap.put(date, bdCount);
             }
 
+            bdCount.setTotalPrice(totalPrice.getValue());
             bdCount.setCount(bdCount.getCount() + count.getValue());
-            bdCount.setTotalPrice(bdCount.getTotalPrice().add(rec.getWinPrice()));
 
+            System.out.println(bdCount.getCount() + "  " + bdCount.getTotalPrice());
 
         }
 

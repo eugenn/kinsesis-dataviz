@@ -6,7 +6,6 @@ import com.amazonaws.services.kinesis.clientlibrary.interfaces.IRecordProcessorF
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;
 import com.kinesis.datavis.kcl.CountingRecordProcessorFactory;
 import com.kinesis.datavis.kcl.persistence.ddb.BidResponseCountPersister;
-import com.kinesis.datavis.kcl.persistence.ddb.QueueRecordPersister;
 import com.kinesis.datavis.model.dynamo.BidResponseCount;
 import com.kinesis.datavis.model.record.BidResponseRec;
 import com.kinesis.datavis.utils.AppUtils;
@@ -30,7 +29,7 @@ public class BidResponseCounter extends CounterApp {
      * Start the Kinesis Client application.
      *
      * @param args Expecting 4 arguments: Application name to use for the Kinesis Client Application, Stream name to
-     *        read from, DynamoDB table name to persist counts into, and the AWS region in which these resources
+     *        read from, DynamoDB table name to persistCounter counts into, and the AWS region in which these resources
      *        exist or should be created.
      */
     public static void main(String[] args) throws UnknownHostException {

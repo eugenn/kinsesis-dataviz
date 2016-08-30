@@ -208,11 +208,11 @@ var UIHelper = function(data, graph) {
     // Update our local data for the active resource
     updateData(activeResource, rangeOfDataToFetchEveryIntervalInSeconds);
 
-    // Update top N every intervalsPerTopNUpdate intervals
-    //if (topNIntervalCounter++ % intervalsPerTopNUpdate == 0) {
-    //  updateTopN(data);
-    //  topNIntervalCounter = 1;
-    //}
+     //Update top N every intervalsPerTopNUpdate intervals
+    if (topNIntervalCounter++ % intervalsPerTopNUpdate == 0) {
+      updateTopN(data);
+      topNIntervalCounter = 1;
+    }
 
     // Update the graph with our new data, transformed into the data series
     // format Flot expects
@@ -271,9 +271,9 @@ var UIHelper = function(data, graph) {
       setDescription("This graph displays the last "
           + graph.getTotalDurationToGraphInSeconds()
           + " seconds of counts as calculated by the Amazon Kinesis Data Visualization");
-      //$("#topNDescription").text(
-      //    "Top " + topNToCalculate + " types by counts (Updated every "
-      //        + (intervalsPerTopNUpdate * updateIntervalInMillis) + "ms):");
+      $("#topNDescription").text(
+          "Top " + topNToCalculate + " types by counts (Updated every "
+              + (intervalsPerTopNUpdate * updateIntervalInMillis) + "ms):");
     },
 
     /**
@@ -479,6 +479,7 @@ var CountData = function() {
      * @param {object} Count data returned by our data provider.
      */
     addNewData : function(newCountData) {
+      var types = ["bidwin", "totalWinPrices"]
       var objType = "bidwin";
       // Expected data format:
       // [{
@@ -491,17 +492,29 @@ var CountData = function() {
         // Update the host who last calculated the counts
         setLastUpdatedBy(countRec.host);
 
-        // Reuse or create a new data series entry for this type
-        refData = data[objType] || {
-              label : countRec.type,
-              data : {}
-            };
-        // Set the count
-        refData.data[countRec.timestamp] = countRec.count;
-        // Update the type data
-        data[objType] = refData;
-        // Update our totals whenever new data is added
-        //updateTotal(refCount.type);
+        types.forEach(function(type) {
+          // Reuse or create a new data series entry for this type
+          refData = data[type] || {
+                label : type,
+                data : {}
+              };
+
+
+          switch (type) {
+            case "bidwin": refData.data[countRec.timestamp] = countRec.count;
+              break;
+            case "totalWinPrices": refData.data[countRec.timestamp] = countRec.totalPrice;
+              break;
+          }
+
+          data[type] = refData;
+          // Update the type data
+          //data[type] = refData;
+          // Update our totals whenever new data is added
+          updateTotal(type);
+        })
+
+
 
       });
     },

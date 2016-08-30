@@ -3,8 +3,6 @@ package com.kinesis.datavis.model.record;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.math.BigDecimal;
-
 /**
  * Created by eugennekhai on 28/08/16.
  */
@@ -13,7 +11,7 @@ import java.math.BigDecimal;
 public class ImpressionRec {
     private String bidRequestId;
     private String type;
-    private BigDecimal winPrice = BigDecimal.ZERO;
+    private Double winPrice = 0d;
 
     public ImpressionRec() {
     }

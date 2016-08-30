@@ -43,7 +43,7 @@
         <impression.aggregator.name>KCLDynamoDBTableImp</impression.aggregator.name>
         <impression.stream>KinesisStreamImp</impression.stream>
         <impression.counts-table>CountsDynamoDBTableImp</impression.counts-table>
-        <impression.servlet>GetBidImpCountsServlet</impression.servlet>
+        <impression.servlet>GetImpressionCountsServlet</impression.servlet>
         <impression.endpoint>GetImpCounts</impression.endpoint>
 
         <clicks.aggregator.name>KCLDynamoDBTableCks</clicks.aggregator.name>

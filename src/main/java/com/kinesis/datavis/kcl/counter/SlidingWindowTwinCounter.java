@@ -1,14 +1,14 @@
-package com.kinesis.datavis.kcl.adder;
+package com.kinesis.datavis.kcl.counter;
 
-import com.kinesis.datavis.kcl.counter.BucketBasedCounter;
+import com.kinesis.datavis.kcl.adder.BucketBasedAdder;
 
 import java.util.Map;
 
 /**
- * Created by eugennekhai on 29/08/16.
+ * Created by eugennekhai on 30/08/16.
  */
-public class SlidingWindowAdder<ObjectType> {
-
+public class SlidingWindowTwinCounter<ObjectType> {
+    private BucketBasedCounter<ObjectType> counter;
     private BucketBasedAdder<ObjectType> adder;
 
     private int windowSize;
@@ -17,12 +17,14 @@ public class SlidingWindowAdder<ObjectType> {
     // Keep track of the total window advances so we can answer the question: Is this window full?
     private int totalAdvances;
 
-    public SlidingWindowAdder(int windowSize) {
+    public SlidingWindowTwinCounter(int windowSize) {
         if (windowSize < 1) {
             throw new IllegalArgumentException("windowSize must be >= 1");
         }
+
         this.windowSize = windowSize;
 
+        this.counter = new BucketBasedCounter<>(windowSize);
         this.adder = new BucketBasedAdder<>(windowSize);
 
         headBucket = 0;
@@ -40,10 +42,22 @@ public class SlidingWindowAdder<ObjectType> {
         return (bucket + 1) % windowSize;
     }
 
+    /**
+     * Increment the count for an object in the current bucket by 1.
+     *
+     * @param obj Object whose count should be incremented.
+     */
+    public void increment(ObjectType obj) {
+        counter.increment(obj, headBucket);
+    }
 
-
-    public void sum(ObjectType obj, double val) {
-        adder.sum(obj, headBucket, val);
+    /**
+     * Increment the count for an object in the current bucket by 1.
+     *
+     * @param obj Object whose count should be incremented.
+     */
+    public void sum(ObjectType obj) {
+        adder.sum(obj, headBucket);
     }
 
     /**
@@ -51,8 +65,8 @@ public class SlidingWindowAdder<ObjectType> {
      *
      * @return A mapping of ObjectType -> total count across all buckets.
      */
-    public Map<ObjectType, Double> getCounts() {
-        return adder.getCounts();
+    public Map<ObjectType, Long> getCounts() {
+        return counter.getCounts();
     }
 
     /**
@@ -60,7 +74,7 @@ public class SlidingWindowAdder<ObjectType> {
      *
      * @return A mapping of ObjectType -> total count across all buckets.
      */
-    public Map<ObjectType, Double> getSums() {
+    public Map<ObjectType, Double> getSum() {
         return adder.getSum();
     }
 
@@ -68,6 +82,7 @@ public class SlidingWindowAdder<ObjectType> {
      * Advance the window "one bucket". This will remove the oldest bucket and any count stored in it.
      */
     public void advanceWindow() {
+        counter.clearBucket(tailBucket);
         adder.clearBucket(tailBucket);
 
         headBucket = tailBucket;
@@ -92,6 +107,7 @@ public class SlidingWindowAdder<ObjectType> {
      * @see BucketBasedCounter#pruneEmptyObjects()
      */
     public void pruneEmptyObjects() {
+        counter.pruneEmptyObjects();
         adder.pruneEmptyObjects();
     }
 }
