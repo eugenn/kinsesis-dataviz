@@ -34,11 +34,11 @@
         <bdwin.servlet>GetBidWinCountsServlet</bdwin.servlet>
         <bdwin.endpoint>GetWinCounts</bdwin.endpoint>
 
-        <bdwin.aggregator.name>KCLDynamoDBTableBrsp</bdwin.aggregator.name>
+        <bdresp.aggregator.name>KCLDynamoDBTableBrsp</bdresp.aggregator.name>
         <bdresp.stream>KinesisStreamBrsp</bdresp.stream>
         <bdresp.counts-table>CountsDynamoDBTableBrsp</bdresp.counts-table>
-        <bdwin.servlet>GetBidRspCountsServlet</bdwin.servlet>
-        <bdwin.endpoint>GetRspCounts</bdwin.endpoint>
+        <bdresp.servlet>GetBidRspCountsServlet</bdresp.servlet>
+        <bdresp.endpoint>GetRspCounts</bdresp.endpoint>
 
         <impression.aggregator.name>KCLDynamoDBTableImp</impression.aggregator.name>
         <impression.stream>KinesisStreamImp</impression.stream>
