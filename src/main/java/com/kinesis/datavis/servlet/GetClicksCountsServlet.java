@@ -100,7 +100,7 @@ public class GetClicksCountsServlet extends HttpServlet {
 
         List<ClicksCount> counts = mapper.query(ClicksCount.class, query);
 
-        System.out.println(counts.size());
+//        System.out.println(counts.size());
         // Return the counts as JSON
         resp.setContentType("application/json");
         resp.setStatus(HttpServletResponse.SC_OK);

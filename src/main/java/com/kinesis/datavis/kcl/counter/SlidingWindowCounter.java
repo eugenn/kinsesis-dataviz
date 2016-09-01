@@ -73,15 +73,6 @@ public class SlidingWindowCounter<ObjectType> {
     }
 
     /**
-     * Get the counts for all objects across all buckets.
-     *
-     * @return A mapping of ObjectType -> total count across all buckets.
-     */
-    public Map<ObjectType, Double> getSums() {
-        return counter.getSum();
-    }
-
-    /**
      * Advance the window "one bucket". This will remove the oldest bucket and any count stored in it.
      */
     public void advanceWindow() {

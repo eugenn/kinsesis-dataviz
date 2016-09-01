@@ -4,10 +4,10 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.kinesis.AmazonKinesis;
 import com.amazonaws.services.kinesis.model.ProvisionedThroughputExceededException;
 import com.amazonaws.services.kinesis.model.PutRecordRequest;
-import com.kinesis.datavis.model.record.BidResponseRec;
 import com.kinesis.datavis.producer.Putter;
 import com.kinesis.datavis.utils.DynamoDBUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kinesis.openrtb.BidResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -83,12 +83,12 @@ public class BidResponsePutter implements Putter {
      * Send a single pair to Amazon Kinesis using PutRecord.
      */
     private void sendRq() {
-        BidResponseRec winRec = bidResponseFactory.create();
+        BidResponse rec = bidResponseFactory.create();
         byte[] bytes;
         try {
-            bytes = JSON.writeValueAsBytes(winRec);
+            bytes = JSON.writeValueAsBytes(rec);
         } catch (IOException e) {
-            LOG.warn("Skipping pair. Unable to serialize: '" + winRec + "'", e);
+            LOG.warn("Skipping pair. Unable to serialize: '" + rec + "'", e);
             return;
         }
 

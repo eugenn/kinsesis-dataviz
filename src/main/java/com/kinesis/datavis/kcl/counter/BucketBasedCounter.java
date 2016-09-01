@@ -26,7 +26,6 @@ import java.util.Map;
  */
 public class BucketBasedCounter<ObjectType> {
     private Map<ObjectType, long[]> objectCounts;
-    private Map<ObjectType, double[]> objectSums;
     private int maxBuckets;
 
     /**
@@ -74,21 +73,6 @@ public class BucketBasedCounter<ObjectType> {
     }
 
     /**
-     * Computes the total count for all objects across all buckets.
-     *
-     * @return A mapping of object to total count across all buckets.
-     */
-    public Map<ObjectType, Double> getSum() {
-        Map<ObjectType, Double> count = new HashMap<>();
-
-        for (Map.Entry<ObjectType, double[]> entry : objectSums.entrySet()) {
-            count.put(entry.getKey(), calculateSumTotal(entry.getValue()));
-        }
-
-        return count;
-    }
-
-    /**
      * Calculates the sum total of occurrences across all bucket counts.
      * 
      * @param counts A set of count buckets from the same object.
@@ -97,14 +81,6 @@ public class BucketBasedCounter<ObjectType> {
     private long calculateTotal(long[] counts) {
         long total = 0;
         for (long count : counts) {
-            total += count;
-        }
-        return total;
-    }
-
-    private double calculateSumTotal(double[] counts) {
-        double total = 0;
-        for (double count : counts) {
             total += count;
         }
         return total;

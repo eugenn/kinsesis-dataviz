@@ -272,7 +272,7 @@ var UIHelper = function(data, graph) {
           + graph.getTotalDurationToGraphInSeconds()
           + " seconds of counts as calculated by the Amazon Kinesis Data Visualization");
       $("#topNDescription").text(
-          "Top " + topNToCalculate + " types by counts (Updated every "
+          "(Updated every "
               + (intervalsPerTopNUpdate * updateIntervalInMillis) + "ms):");
     },
 

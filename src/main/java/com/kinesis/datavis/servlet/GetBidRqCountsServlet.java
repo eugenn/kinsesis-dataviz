@@ -116,7 +116,7 @@ public class GetBidRqCountsServlet extends HttpServlet {
 
         List<BidRequestCount> counts = mapper.query(BidRequestCount.class, query);
 
-        System.out.println(counts.size());
+//        System.out.println(counts.size());
         // Return the counts as JSON
         resp.setContentType("application/json");
         resp.setStatus(HttpServletResponse.SC_OK);

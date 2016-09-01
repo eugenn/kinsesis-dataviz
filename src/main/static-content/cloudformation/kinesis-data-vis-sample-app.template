@@ -1,7 +1,7 @@
 {
   "AWSTemplateFormatVersion" : "2010-09-09",
 
-  "Description" : "The Amazon Kinesis Data Visualization Sample Application",
+  "Description" : "Statistics apps",
 
   "Parameters" : {
     "InstanceType" : {
@@ -37,7 +37,7 @@
       "Type" : "String",
       "MinLength" : "7",
       "MaxLength" : "255",
-      "Default" : "https://github.com/awslabs/amazon-kinesis-data-visualization-sample/releases/download/v1.1.2/amazon-kinesis-data-visualization-sample-1.1.2-assembly.zip"
+      "Default" : "https://github.com/eugenn/kinsesis-dataviz/raw/master/release/amazon-kinesis-data-visualization-sample-1.1.2-assembly.zip"
     }
   },
 
@@ -72,14 +72,14 @@
   },
 
   "Resources" : {
-    "KinesisStream" : {
+    "KinesisStreamBwin" : {
       "Type" : "AWS::Kinesis::Stream",
       "Properties" : {
         "ShardCount" : "2"
       }
     },
 
-    "KCLDynamoDBTable" : {
+    "KCLDynamoDBTableBwin" : {
       "Type" : "AWS::DynamoDB::Table",
       "Properties" : {
         "AttributeDefinitions" : [
@@ -101,12 +101,12 @@
       }
     },
 
-    "CountsDynamoDBTable" : {
+    "CountsDynamoDBTableBwin" : {
       "Type" : "AWS::DynamoDB::Table",
       "Properties" : {
         "AttributeDefinitions" : [
           {
-            "AttributeName" : "resource",
+            "AttributeName" : "hashKey",
             "AttributeType" : "S"
           },
           {
@@ -116,7 +116,7 @@
         ],
         "KeySchema" : [
           {
-            "AttributeName" : "resource",
+            "AttributeName" : "hashKey",
             "KeyType" : "HASH"
           },
           {
@@ -174,15 +174,15 @@
              "Statement" : [ {
                 "Effect" : "Allow",
                 "Action" : "kinesis:*",
-                "Resource" : { "Fn::Join" : [ "", [ "arn:aws:kinesis:", { "Ref" : "AWS::Region" }, ":", { "Ref" : "AWS::AccountId" }, ":stream/", { "Ref" : "KinesisStream" } ]]}
+                "Resource" : { "Fn::Join" : [ "", [ "arn:aws:kinesis:", { "Ref" : "AWS::Region" }, ":", { "Ref" : "AWS::AccountId" }, ":stream/", { "Ref" : "KinesisStreamBwin" } ]]}
              }, {
                 "Effect" : "Allow",
                 "Action" : "dynamodb:*",
-                "Resource" : { "Fn::Join" : [ "", [ "arn:aws:dynamodb:", { "Ref" : "AWS::Region" }, ":", { "Ref" : "AWS::AccountId" }, ":table/", { "Ref" : "KCLDynamoDBTable" } ]]}
+                "Resource" : { "Fn::Join" : [ "", [ "arn:aws:dynamodb:", { "Ref" : "AWS::Region" }, ":", { "Ref" : "AWS::AccountId" }, ":table/", { "Ref" : "KCLDynamoDBTableBwin" } ]]}
              }, {
                 "Effect" : "Allow",
                 "Action" : "dynamodb:*",
-                "Resource" : { "Fn::Join" : [ "", [ "arn:aws:dynamodb:", { "Ref" : "AWS::Region" }, ":", { "Ref" : "AWS::AccountId" }, ":table/", { "Ref" : "CountsDynamoDBTable" } ]]}
+                "Resource" : { "Fn::Join" : [ "", [ "arn:aws:dynamodb:", { "Ref" : "AWS::Region" }, ":", { "Ref" : "AWS::AccountId" }, ":table/", { "Ref" : "CountsDynamoDBTableBwin" } ]]}
              }, {
                 "Effect" : "Allow",
                 "Action" : "cloudwatch:*",
@@ -212,21 +212,21 @@
               }
             },
             "files" : {
-              "/var/kinesis-data-vis-sample-app/watchdog.sh" : {
+              "/var/kinsesis-dataviz/watchdog.sh" : {
                 "content" : {"Fn::Join" : ["", [
                   "#!/bin/bash\n",
-                  "if ! ps aux | grep HttpReferrerCounterApplication | grep -v grep ; then\n",
+                  "if ! ps aux | grep BidWinCounter | grep -v grep ; then\n",
                   "    # Launch the Kinesis application for counting HTTP referrer pairs\n",
-                  "    java -cp /var/kinesis-data-vis-sample-app/lib/\\* com.amazonaws.services.kinesis.samples.datavis.HttpReferrerCounterApplication ", { "Ref" : "KCLDynamoDBTable" }, " ", { "Ref" : "KinesisStream" }, " ", { "Ref" : "CountsDynamoDBTable" }, " ", { "Ref" : "AWS::Region" }, " &>> /home/ec2-user/kinesis-data-vis-sample-app-kcl.log &\n",
+                  "    java -cp /var/kinsesis-dataviz/lib/\\* com.kinesis.datavis.app.BidWinCounter ", { "Ref" : "KCLDynamoDBTableBwin" }, " ", { "Ref" : "KinesisStreamBwin" }, " ", { "Ref" : "CountsDynamoDBTableBwin" }, " ", { "Ref" : "AWS::Region" }, " &>> /home/ec2-user/kinesis-data-vis-sample-app-kcl.log &\n",
                   "fi\n",
-                  "if ! ps aux | grep HttpReferrerStreamWriter | grep -v grep ; then\n",
+                  "if ! ps aux | grep BidWinStreamWriter | grep -v grep ; then\n",
                   "    # Launch our Kinesis stream writer to fill our stream with generated HTTP (resource, referrer) pairs.\n",
                   "    # This will create a writer with 5 threads to send records indefinitely.\n",
-                  "    java -cp /var/kinesis-data-vis-sample-app/lib/\\* com.amazonaws.services.kinesis.samples.datavis.HttpReferrerStreamWriter 5 ",  { "Ref" : "KinesisStream" }, " ", { "Ref" : "AWS::Region" }, " &>> /home/ec2-user/kinesis-data-vis-sample-app-publisher.log &\n",
+                  "    java -cp /var/kinsesis-dataviz/lib/\\* com.kinesis.datavis.writer.BidWinStreamWriter 5 ",  { "Ref" : "KinesisStreamBwin" }, " ", { "Ref" : "AWS::Region" }, " &>> /home/ec2-user/kinesis-data-vis-sample-app-publisher.log &\n",
                   "fi\n",
                   "if ! ps aux | grep WebServer | grep -v grep ; then\n",
                   "    # Launch the webserver\n",
-                  "    java -cp /var/kinesis-data-vis-sample-app/lib/\\* com.amazonaws.services.kinesis.samples.datavis.WebServer 80 /var/kinesis-data-vis-sample-app/wwwroot ", { "Ref" : "CountsDynamoDBTable" }, " ", { "Ref" : "AWS::Region" }, " &>> /home/ec2-user/kinesis-data-vis-sample-app-www.log &\n",
+                  "    java -cp /var/kinsesis-dataviz/lib/\\* com.kinesis.datavis.server.WebServer 80 /var/kinesis-data-vis-sample-app/wwwroot ", { "Ref" : "CountsDynamoDBTableBwin" }, " GetBidWinCountsServlet GetWinCounts", { "Ref" : "AWS::Region" }, " &>> /home/ec2-user/kinesis-data-vis-sample-app-www.log &\n",
                   "fi\n"
                 ]]},
                 "mode" : "000755",
@@ -302,16 +302,16 @@
       "Value" : { "Fn::GetAtt" : [ "Ec2Instance", "AvailabilityZone" ] }
     },
     "StreamName" : {
-      "Description" : "The name of the Kinesis Stream. This was autogenerated by the Kinesis Resource named 'KinesisStream'",
-      "Value" : { "Ref" : "KinesisStream" }
+      "Description" : "The name of the Kinesis Stream. This was autogenerated by the Kinesis Resource named 'KinesisStreamBwin'",
+      "Value" : { "Ref" : "KinesisStreamBwin" }
     },
     "ApplicationName" : {
       "Description" : "The name of the Kinesis Client Application. This was autogenerated by the DynamoDB Resource named 'KCLDynamoDBTable'",
-      "Value" : { "Ref" : "KCLDynamoDBTable" }
+      "Value" : { "Ref" : "KCLDynamoDBTableBwin" }
     },
     "CountsTable" : {
       "Description" : "The name of the DynamoDB table where counts are persisted. This was autogenerated by the DynamoDB Resource named 'CountsDynamoDBTable'",
-      "Value" : { "Ref" : "CountsDynamoDBTable" }
+      "Value" : { "Ref" : "CountsDynamoDBTableBwin" }
     }
   }
 }

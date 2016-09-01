@@ -18,9 +18,9 @@ package com.kinesis.datavis.kcl.persistence.ddb;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.kinesis.datavis.kcl.persistence.CountPersister;
 import com.kinesis.datavis.model.dynamo.BidRequestCount;
-import com.kinesis.datavis.model.record.BidRequestRec;
 import com.kinesis.datavis.utils.DynamoDBUtils;
 import com.kinesis.datavis.utils.HostResolver;
+import com.kinesis.openrtb.BidRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -30,7 +30,7 @@ import java.util.*;
  * Persists counts to DynamoDB. This uses a separate thread to send counts to DynamoDB to decouple any network latency
  * from affecting the thread we use to update counts.
  */
-public class BidRqCountPersister extends QueueRecordPersister implements CountPersister<BidRequestRec, BidRequestCount> {
+public class BidRqCountPersister extends QueueRecordPersister implements CountPersister<BidRequest, BidRequestCount> {
     private static final Log LOG = LogFactory.getLog(BidRqCountPersister.class);
     // Generate UTC timestamps
     protected static final TimeZone UTC = TimeZone.getTimeZone("UTC");
@@ -41,7 +41,7 @@ public class BidRqCountPersister extends QueueRecordPersister implements CountPe
     }
 
     @Override
-    public void persistCounter(Map<BidRequestRec, Long> objectCounts) {
+    public void persistCounter(Map<BidRequest, Long> objectCounts) {
         if (objectCounts.isEmpty()) {
             // short circuit to avoid creating a map when we have no objects to persistCounter
             return;
@@ -53,18 +53,18 @@ public class BidRqCountPersister extends QueueRecordPersister implements CountPe
         // We map resource to pair counts so we can easily look up a resource and add referrer counts to it
         Map<Date, BidRequestCount> countMap = new HashMap<>();
 
-        for (Map.Entry<BidRequestRec, Long> count : objectCounts.entrySet()) {
+        for (Map.Entry<BidRequest, Long> count : objectCounts.entrySet()) {
             Date date = Calendar.getInstance(UTC).getTime();
 
             // Check for an existing counts for this resource
-            BidRequestRec rec = count.getKey();
+            BidRequest rec = count.getKey();
             BidRequestCount bdCount = countMap.get(date);
             if (bdCount == null) {
                 // Create a new pair if this resource hasn't been seen yet in this batch
                 bdCount = new BidRequestCount();
                 bdCount.setHashKey(DynamoDBUtils.getHashKey());
-                bdCount.setWh(rec.getWh());
-                bdCount.setBidRequestId(rec.getBidRequestId());
+                bdCount.setWh(rec.getDevice().getWidth() + "x" + rec.getDevice().getHeight());
+                bdCount.setBidRequestId(rec.getRequestId());
                 bdCount.setTimestamp(date);
                 bdCount.setHost(HostResolver.resolveHostname());
 
@@ -79,7 +79,7 @@ public class BidRqCountPersister extends QueueRecordPersister implements CountPe
     }
 
     @Override
-    public void persistCounters(Map<BidRequestRec, Long> objectCounts, Map<BidRequestRec, Double> objectSums) {
+    public void persistCounters(Map<BidRequest, Long> objectCounts, Map<BidRequest, Double> objectSums) {
 
     }
 

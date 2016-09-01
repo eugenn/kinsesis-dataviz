@@ -1,6 +1,7 @@
 package com.kinesis.datavis.producer.bidrq;
 
-import com.kinesis.datavis.model.record.BidRequestRec;
+import com.kinesis.openrtb.BidRequest;
+import com.kinesis.openrtb.Device;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -11,20 +12,18 @@ import java.util.concurrent.ThreadLocalRandom;
 public class BidRequestFactory {
     private List<String> whs;
     private List<String> bidRequestIds;
-    private String type;
 
     /**
      * Create a new generator which will use the resources and referrers provided.
      *
      * @param bidRequestIds List of resources to use when generating a pair.
      */
-    public BidRequestFactory(List<String> bidRequestIds, List<String> whs,  String type) {
+    public BidRequestFactory(List<String> bidRequestIds, List<String> whs) {
         if (bidRequestIds == null || bidRequestIds.isEmpty()) {
             throw new IllegalArgumentException("At least 1 resource is required");
         }
         this.bidRequestIds = bidRequestIds;
         this.whs = whs;
-        this.type = type;
     }
 
     /**
@@ -33,8 +32,11 @@ public class BidRequestFactory {
      *
      * @return A new pair with random resource and referrer values.
      */
-    public BidRequestRec create() {
-        return new BidRequestRec(getRandomId(), type, getRandomWH());
+    public BidRequest create() {
+        Device device = Device.builder().width(300).height(200).build();
+        BidRequest bidRequest = BidRequest.builder().requestId(getRandomId()).device(device).build();
+
+        return bidRequest;
     }
 
     /**

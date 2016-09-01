@@ -85,7 +85,7 @@ public class BidRequestStreamWriter  {
 //        bannerIds.add("33333333333");
         bidRequestIds.add("44444444444");
 
-        BidRequestFactory bdFactory = new BidRequestFactory(bidRequestIds, resources, "bidrequest");
+        BidRequestFactory bdFactory = new BidRequestFactory(bidRequestIds, resources);
 
         // Creates a stream to write to with 2 shards if it doesn't exist
         StreamUtils streamUtils = new StreamUtils(kinesis);

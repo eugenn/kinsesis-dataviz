@@ -56,20 +56,27 @@ public class BidResponseStreamWriter {
         AmazonKinesis kinesis = new AmazonKinesisClient(credentialsProvider, clientConfig);
         kinesis.setRegion(region);
 
-        // The more resources we declare the higher write IOPS we need on our DynamoDB table.
-        // We write a record for each resource every interval.
-        // If interval = 500ms, resource count = 7 we need: (1000/500 * 7) = 14 write IOPS minimum.
+
+        List<String> bidRqs = new ArrayList<>();
+        bidRqs.add("11111111111");
+//        bidRqs.add("22222222222");
+//        bidRqs.add("33333333333");
+//        bidRqs.add("44444444444");
+
         List<String> bannerIds = new ArrayList<>();
-//        bidRequestIds.add(UUID.randomUUID().toString());
-//        bidRequestIds.add(UUID.randomUUID().toString());
-//        bidRequestIds.add(UUID.randomUUID().toString());
         bannerIds.add("11111111111");
-//        bannerIds.add("22222222222");
+        bannerIds.add("22222222222");
+//        bannerIds.add("33333333333");
+//        bannerIds.add("44444444444");
+
+        List<String> audienceIds = new ArrayList<>();
+        audienceIds.add("ffffff");
+        audienceIds.add("mmmmmm");
 //        bannerIds.add("33333333333");
 //        bannerIds.add("44444444444");
 
 
-        BidResponseFactory responseFactory = new BidResponseFactory(bannerIds, "bidresponse");
+        BidResponseFactory responseFactory = new BidResponseFactory(bidRqs, bannerIds, audienceIds);
 
         // Creates a stream to write to with 2 shards if it doesn't exist
         StreamUtils streamUtils = new StreamUtils(kinesis);

@@ -6,9 +6,8 @@ import com.amazonaws.services.kinesis.clientlibrary.interfaces.IRecordProcessorF
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;
 import com.kinesis.datavis.kcl.CountingRecordProcessorFactory;
 import com.kinesis.datavis.kcl.persistence.ddb.BidResponseCountPersister;
-import com.kinesis.datavis.model.dynamo.BidResponseCount;
-import com.kinesis.datavis.model.record.BidResponseRec;
 import com.kinesis.datavis.utils.AppUtils;
+import com.kinesis.openrtb.BidResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -46,11 +45,13 @@ public class BidResponseCounter extends CounterApp {
 
         DynamoDBMapper mapper = createMapper(applicationName, streamName, countsTableName, region);
 
+//        DynamoDBMapper mapper2 = createMapper2(region);
+
         // Persist counts to DynamoDB
-        BidResponseCountPersister persister = new BidResponseCountPersister(mapper);
+        BidResponseCountPersister persister = new BidResponseCountPersister(mapper, null);
 
         IRecordProcessorFactory recordProcessor =
-                new CountingRecordProcessorFactory<BidResponseRec, BidResponseCount>(BidResponseRec.class,
+                new CountingRecordProcessorFactory<>(BidResponse.class,
                         persister,
                         COMPUTE_RANGE_FOR_COUNTS_IN_MILLIS,
                         COMPUTE_INTERVAL_IN_MILLIS);
