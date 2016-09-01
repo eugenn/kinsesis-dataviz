@@ -107,12 +107,12 @@ public class GetBidRqCountsServlet extends HttpServlet {
         Condition recentUpdates =
                 new Condition().withComparisonOperator(ComparisonOperator.GT)
                         .withAttributeValueList(new AttributeValue().withS(DATE_FORMATTER.get().format(startTime)));
-        Condition attrFilter =
-                new Condition().
-                        withComparisonOperator(ComparisonOperator.EQ).withAttributeValueList(new AttributeValue().withS(resource));
+//        Condition attrFilter =
+//                new Condition().
+//                        withComparisonOperator(ComparisonOperator.EQ).withAttributeValueList(new AttributeValue().withS(resource));
 
         query.setRangeKeyConditions(Collections.singletonMap("timestamp", recentUpdates));
-        query.setQueryFilter(Collections.singletonMap("wh", attrFilter));
+//        query.setQueryFilter(Collections.singletonMap("wh", attrFilter));
 
         List<BidRequestCount> counts = mapper.query(BidRequestCount.class, query);
 

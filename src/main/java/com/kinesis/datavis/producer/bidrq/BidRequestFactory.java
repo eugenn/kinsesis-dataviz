@@ -4,6 +4,7 @@ import com.kinesis.openrtb.BidRequest;
 import com.kinesis.openrtb.Device;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -34,7 +35,7 @@ public class BidRequestFactory {
      */
     public BidRequest create() {
         Device device = Device.builder().width(300).height(200).build();
-        BidRequest bidRequest = BidRequest.builder().requestId(getRandomId()).device(device).build();
+        BidRequest bidRequest = BidRequest.builder().requestId(UUID.randomUUID().toString()).device(device).build();
 
         return bidRequest;
     }
