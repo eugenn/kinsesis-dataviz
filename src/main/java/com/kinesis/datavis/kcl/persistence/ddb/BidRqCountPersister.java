@@ -63,8 +63,8 @@ public class BidRqCountPersister extends QueueRecordPersister implements CountPe
                 // Create a new pair if this resource hasn't been seen yet in this batch
                 bdCount = new BidRequestCount();
                 bdCount.setHashKey(DynamoDBUtils.getHashKey());
-                bdCount.setWh(rec.getDevice().getWidth() + "x" + rec.getDevice().getHeight());
-                bdCount.setBidRequestId(rec.getRequestId());
+//                bdCount.setWh(rec.getDevice().getWidth() + "x" + rec.getDevice().getHeight());
+//                bdCount.setBidRequestId(rec.getRequestId());
                 bdCount.setTimestamp(date);
                 bdCount.setHost(HostResolver.resolveHostname());
 
