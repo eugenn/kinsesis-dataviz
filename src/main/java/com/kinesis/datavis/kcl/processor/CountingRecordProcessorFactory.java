@@ -13,10 +13,11 @@
  * permissions and limitations under the License.
  */
 
-package com.kinesis.datavis.kcl;
+package com.kinesis.datavis.kcl.processor;
 
 import com.amazonaws.services.kinesis.clientlibrary.interfaces.IRecordProcessor;
 import com.amazonaws.services.kinesis.clientlibrary.interfaces.IRecordProcessorFactory;
+import com.jdbc.dao.MappingDAO;
 import com.kinesis.datavis.kcl.persistence.CountPersister;
 
 /**
@@ -28,6 +29,7 @@ public class CountingRecordProcessorFactory<T, C> implements IRecordProcessorFac
 
     private Class<T> recordType;
     private CountPersister<T, C> persister;
+    private MappingDAO mappingDAO;
     private int computeRangeInMillis;
     private int computeIntervalInMillis;
     private CountingRecordProcessorConfig config;
@@ -36,13 +38,14 @@ public class CountingRecordProcessorFactory<T, C> implements IRecordProcessorFac
      * Creates a new factory that uses the default configuration values for each
      * processor it creates.
      *
-     * @see #CountingRecordProcessorFactory(Class, CountPersister, int, int)
+     * @see #CountingRecordProcessorFactory(Class, CountPersister, MappingDAO, int, int)
      */
     public CountingRecordProcessorFactory(Class<T> recordType,
                                           CountPersister<T,C> persister,
+                                          MappingDAO mappingDAO,
                                           int computeRangeInMillis,
                                           int computeIntervalInMillis) {
-        this(recordType, persister, computeRangeInMillis, computeIntervalInMillis, new CountingRecordProcessorConfig());
+        this(recordType, persister, mappingDAO, computeRangeInMillis, computeIntervalInMillis, new CountingRecordProcessorConfig());
     }
 
     /**
@@ -60,11 +63,13 @@ public class CountingRecordProcessorFactory<T, C> implements IRecordProcessorFac
      */
     public CountingRecordProcessorFactory(Class<T> recordType,
                                           CountPersister<T,C> persister,
+                                          MappingDAO mappingDAO,
                                           int computeRangeInMillis,
                                           int computeIntervalInMillis,
                                           CountingRecordProcessorConfig config) {
         this.recordType = recordType;
         this.persister = persister;
+        this.mappingDAO = mappingDAO;
         this.computeRangeInMillis = computeRangeInMillis;
         this.computeIntervalInMillis = computeIntervalInMillis;
         this.config = config;
@@ -79,6 +84,7 @@ public class CountingRecordProcessorFactory<T, C> implements IRecordProcessorFac
         return new CountingRecordProcessor<>(config,
                 recordType,
                 persister,
+                mappingDAO,
                 computeRangeInMillis,
                 computeIntervalInMillis);
     }

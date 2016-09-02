@@ -11,21 +11,18 @@ import java.util.concurrent.ThreadLocalRandom;
 public class BidWinFactory {
     private final List<Double> prices;
     private List<String> bidRequestIds;
-    private String type;
 
     /**
      * Create a new generator which will use the bidRequestIds and referrers provided.
      *
      * @param bidRequestIds List of bidRequestIds to use when generating a pair.
      */
-    public BidWinFactory(List<String> bidRequestIds, List<Double> prices, String type) {
+    public BidWinFactory(List<String> bidRequestIds, List<Double> prices) {
         if (bidRequestIds == null || bidRequestIds.isEmpty()) {
             throw new IllegalArgumentException("At least 1 resource is required");
         }
         this.bidRequestIds = bidRequestIds;
         this.prices = prices;
-
-        this.type = type;
     }
 
     /**
@@ -35,7 +32,7 @@ public class BidWinFactory {
      * @return A new pair with random resource and referrer values.
      */
     public BidWinRec create() {
-        BidWinRec winRec = new BidWinRec(getRandomId(), type, getRandomPrice());
+        BidWinRec winRec = new BidWinRec(getRandomId(), "undefined", "undefined", getRandomPrice());
 
         return winRec;
     }
@@ -57,4 +54,6 @@ public class BidWinFactory {
     protected Double getRandomPrice() {
         return prices.get(ThreadLocalRandom.current().nextInt(prices.size()));
     }
+
+
 }

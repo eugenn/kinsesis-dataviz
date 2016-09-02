@@ -49,6 +49,8 @@ public class GetBidWinCountsServlet extends HttpServlet {
     private transient DynamoDBMapper mapper;
 
     private static final String PARAMETER_RESOURCE = "resource";
+    private static final String PARAMETER_AUDIENCE = "audienceId";
+
     private static final String PARAMETER_RANGE_IN_SECONDS = "range_in_seconds";
 
     public GetBidWinCountsServlet(DynamoDBMapper mapper) {
@@ -71,6 +73,8 @@ public class GetBidWinCountsServlet extends HttpServlet {
 
         // Parse query string as a single integer - the number of seconds since "now" to query for new counts
         String resource = params.getString(PARAMETER_RESOURCE);
+        String audienceId = params.getString(PARAMETER_AUDIENCE);
+
         int rangeInSeconds = Integer.parseInt(params.getString(PARAMETER_RANGE_IN_SECONDS));
 
         Calendar c = Calendar.getInstance();
@@ -82,7 +86,7 @@ public class GetBidWinCountsServlet extends HttpServlet {
 
         DynamoDBQueryExpression<BidWinCount> query = new DynamoDBQueryExpression<>();
 
-        resource = "11111111111";
+//        resource = "11111111111";
 
         BidWinCount hashKey = new BidWinCount();
         hashKey.setHashKey(DynamoDBUtils.getHashKey());
@@ -92,13 +96,24 @@ public class GetBidWinCountsServlet extends HttpServlet {
         Condition recentUpdates =
                 new Condition().withComparisonOperator(ComparisonOperator.GT)
                         .withAttributeValueList(new AttributeValue().withS(DATE_FORMATTER.get().format(startTime)));
-        Condition attrFilter =
+
+        Condition bannerIdFilter =
                 new Condition().
                         withComparisonOperator(ComparisonOperator.EQ).withAttributeValueList(new AttributeValue().
                         withS(resource));
 
+        Condition audienceIdFilter =
+                new Condition().
+                        withComparisonOperator(ComparisonOperator.EQ).withAttributeValueList(new AttributeValue().
+                        withS(audienceId));
+
+        final Map<String, Condition> paramsAttr = new HashMap<>();
+        paramsAttr.put("bannerId", bannerIdFilter);
+        paramsAttr.put("audienceId", audienceIdFilter);
+
         query.setRangeKeyConditions(Collections.singletonMap("timestamp", recentUpdates));
-        query.setQueryFilter(Collections.singletonMap("bidRequestId", attrFilter));
+        query.setQueryFilter(paramsAttr);
+
 
         List<BidWinCount> counts = mapper.query(BidWinCount.class, query);
 

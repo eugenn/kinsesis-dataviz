@@ -71,15 +71,19 @@ public class DynamoDBUtils {
      * @param tableName The name of the table to create.
      */
     public void createCountTableIfNotExists(String tableName) {
+        createCountTableIfNotExists(tableName, ATTRIBUTE_NAME_HASH_KEY, ATTRIBUTE_NAME_RANGE_KEY);
+    }
+
+    public void createCountTableIfNotExists(String tableName, String attrHash, String attrRange) {
         List<KeySchemaElement> ks = new ArrayList<>();
-        ks.add(new KeySchemaElement().withKeyType(KeyType.HASH).withAttributeName(ATTRIBUTE_NAME_HASH_KEY));
-        ks.add(new KeySchemaElement().withKeyType(KeyType.RANGE).withAttributeName(ATTRIBUTE_NAME_RANGE_KEY));
+        ks.add(new KeySchemaElement().withKeyType(KeyType.HASH).withAttributeName(attrHash));
+        ks.add(new KeySchemaElement().withKeyType(KeyType.RANGE).withAttributeName(attrRange));
 
         ArrayList<AttributeDefinition> attributeDefinitions = new ArrayList<>();
-        attributeDefinitions.add(new AttributeDefinition().withAttributeName(ATTRIBUTE_NAME_HASH_KEY)
+        attributeDefinitions.add(new AttributeDefinition().withAttributeName(attrHash)
                 .withAttributeType(ScalarAttributeType.S));
         // Range key must be a String. DynamoDBMapper translates Dates to ISO8601 strings.
-        attributeDefinitions.add(new AttributeDefinition().withAttributeName(ATTRIBUTE_NAME_RANGE_KEY)
+        attributeDefinitions.add(new AttributeDefinition().withAttributeName(attrRange)
                 .withAttributeType(ScalarAttributeType.S));
         // Create the table with enough write IOPS to handle 5 distinct resources updated every 1 second:
         // 1 update/second * 5 resources = 5 write IOPS.
@@ -105,7 +109,6 @@ public class DynamoDBUtils {
             // Assume table exists and is ready to use
         }
     }
-
     /**
      * Delete a DynamoDB table.
      *

@@ -18,6 +18,7 @@ package com.kinesis.datavis.kcl;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import com.kinesis.datavis.kcl.processor.CountingRecordProcessorConfig;
 import org.junit.Test;
 
 public class CountingRecordProcessorConfigTest {

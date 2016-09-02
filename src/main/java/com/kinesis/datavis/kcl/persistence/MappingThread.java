@@ -1,11 +1,11 @@
 package com.kinesis.datavis.kcl.persistence;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.jdbc.dao.MappingDAO;
+import com.jdbc.vo.Mapping;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -13,14 +13,14 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by eugennekhai on 31/08/16.
  */
-public class MapperThread<T> extends Thread {
+public class MappingThread<T> extends Thread {
     private static final Log LOG = LogFactory.getLog(PersisterThread.class);
     private static final int MAX_COUNTS_IN_MEMORY = 60000;
-    private DynamoDBMapper mapper;
     private final BlockingQueue<T> counts;
+    private MappingDAO mappingDAO;
 
-    public MapperThread(DynamoDBMapper mapper, BlockingQueue<T> counts) {
-        this.mapper = mapper;
+    public MappingThread(MappingDAO mappingDAO, BlockingQueue<T> counts) {
+        this.mappingDAO = mappingDAO;
         this.counts = counts;
     }
 
@@ -69,15 +69,14 @@ public class MapperThread<T> extends Thread {
             long start = System.nanoTime();
             // Write the contents of the buffer as items to our table
 
-            List<DynamoDBMapper.FailedBatch> failures = mapper.batchWrite(buffer, Collections.emptyList());
+            mappingDAO.batchInsert((List<Mapping>) buffer);
+
             long end = System.nanoTime();
             LOG.info(String.format("%d new counts sent to DynamoDB in %dms",
                     buffer.size(),
                     TimeUnit.NANOSECONDS.toMillis(end - start)));
 
-            for (DynamoDBMapper.FailedBatch failure : failures) {
-                LOG.warn("Error sending count batch to DynamoDB. This will not be retried!", failure.getException());
-            }
+
         } catch (Exception ex) {
             LOG.error("Error sending new counts to DynamoDB. The some counts may not be persisted.", ex);
         }

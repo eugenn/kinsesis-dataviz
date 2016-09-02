@@ -4,7 +4,9 @@ import com.amazonaws.regions.Region;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.kinesis.clientlibrary.interfaces.IRecordProcessorFactory;
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;
-import com.kinesis.datavis.kcl.TwinCountingProcessorFactory;
+import com.jdbc.dao.JDBCMappingDAO;
+import com.jdbc.dao.MappingDAO;
+import com.kinesis.datavis.kcl.processor.TwinCountingProcessorFactory;
 import com.kinesis.datavis.kcl.persistence.ddb.ImpressionCountPersister;
 import com.kinesis.datavis.model.dynamo.ImpressionCount;
 import com.kinesis.datavis.model.record.ImpressionRec;
@@ -50,10 +52,14 @@ public class ImpressionCounter extends CounterApp {
         ImpressionCountPersister persister =
                 new ImpressionCountPersister(mapper);
 
+        DynamoDBMapper mapper2 = createMapperForMappingTable(region);
+
+        MappingDAO mappingDAO = new JDBCMappingDAO();
 
         IRecordProcessorFactory recordProcessor =
                 new TwinCountingProcessorFactory<ImpressionRec, ImpressionCount>(ImpressionRec.class,
                         persister,
+                        mappingDAO,
                         COMPUTE_RANGE_FOR_COUNTS_IN_MILLIS,
                         COMPUTE_INTERVAL_IN_MILLIS);
 

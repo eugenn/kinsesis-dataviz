@@ -4,6 +4,7 @@ import com.kinesis.datavis.model.record.ClicksRec;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -12,7 +13,6 @@ import java.util.concurrent.ThreadLocalRandom;
 public class ClicksFactory {
     private final List<BigDecimal> prices;
     private List<String> bidRequestIds;
-    private String type;
 
     /**
      * Create a new generator which will use the bidRequestIds and referrers provided.
@@ -26,7 +26,6 @@ public class ClicksFactory {
         this.bidRequestIds = bidRequestIds;
         this.prices = prices;
 
-        this.type = type;
     }
 
     /**
@@ -36,7 +35,7 @@ public class ClicksFactory {
      * @return A new pair with random resource and referrer values.
      */
     public ClicksRec create() {
-        ClicksRec clicksRec = new ClicksRec(getRandomId(), type);
+        ClicksRec clicksRec = new ClicksRec(UUID.randomUUID().toString(), "undefined", "undefined");
 
         return clicksRec;
     }

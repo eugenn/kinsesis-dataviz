@@ -10,7 +10,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public class ImpressionRec {
     private String bidRequestId;
-    private String type;
+    private String bannerId;
+    private String audienceId;
     private Double winPrice = 0d;
 
     public ImpressionRec() {
@@ -23,8 +24,8 @@ public class ImpressionRec {
 
         ImpressionRec that = (ImpressionRec) o;
 
-        if (type != null ? !type.equals(that.type) : that.type != null) return false;
         if (bidRequestId != null ? !bidRequestId.equals(that.bidRequestId) : that.bidRequestId != null) return false;
+        if (bannerId != null ? !bannerId.equals(that.bannerId) : that.bannerId != null) return false;
 
         return true;
     }
@@ -32,7 +33,7 @@ public class ImpressionRec {
     @Override
     public int hashCode() {
         int result = bidRequestId != null ? bidRequestId.hashCode() : 0;
-        result = 31 * result + (type != null ? type.hashCode() : 0);
+        result = 31 * result + (bannerId != null ? bannerId.hashCode() : 0);
         return result;
     }
 
@@ -40,7 +41,7 @@ public class ImpressionRec {
     public String toString() {
         return "ImpressionRec{" +
                 "bidRequestId='" + bidRequestId + '\'' +
-                ", type='" + type + '\'' +
+                ", bannerId='" + bannerId + '\'' +
                 '}';
     }
 

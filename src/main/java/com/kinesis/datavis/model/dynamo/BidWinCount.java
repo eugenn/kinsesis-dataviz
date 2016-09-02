@@ -35,6 +35,9 @@ public class BidWinCount {
     private String host;
 
     @DynamoDBAttribute
-    private String bidRequestId;
+    private String bannerId;
+
+    @DynamoDBAttribute
+    private String audienceId;
 
 }

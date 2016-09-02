@@ -10,19 +10,12 @@ import lombok.Getter;
 @AllArgsConstructor
 public class ClicksRec {
     private String bidRequestId;
-    private String type;
+    private String bannerId;
+    private String audienceId;
 
     public ClicksRec() {
     }
 
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -31,8 +24,8 @@ public class ClicksRec {
 
         ClicksRec that = (ClicksRec) o;
 
-        if (type != null ? !type.equals(that.type) : that.type != null) return false;
         if (bidRequestId != null ? !bidRequestId.equals(that.bidRequestId) : that.bidRequestId != null) return false;
+        if (bannerId != null ? !bannerId.equals(that.bannerId) : that.bannerId != null) return false;
 
         return true;
     }
@@ -40,7 +33,7 @@ public class ClicksRec {
     @Override
     public int hashCode() {
         int result = bidRequestId != null ? bidRequestId.hashCode() : 0;
-        result = 31 * result + (type != null ? type.hashCode() : 0);
+        result = 31 * result + (bannerId != null ? bannerId.hashCode() : 0);
         return result;
     }
 
@@ -48,7 +41,7 @@ public class ClicksRec {
     public String toString() {
         return "ClicksRec{" +
                 "bidRequestId='" + bidRequestId + '\'' +
-                ", type='" + type + '\'' +
+                ", bannerId='" + bannerId + '\'' +
                 '}';
     }
 

@@ -19,12 +19,13 @@ package com.kinesis.openrtb;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 import java.util.List;
 
 @EqualsAndHashCode
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
+@lombok.Data
 public class BidRequest {
     private final String requestId;
     private final List<Imp> impressions;
@@ -42,6 +43,8 @@ public class BidRequest {
     private final List<String> badv;
     private final Regs regs;
     private final Ext ext;
+    private String bannerId;
+    private String audienceId;
 
     public BidRequest(
             @JsonProperty("id") String requestId,

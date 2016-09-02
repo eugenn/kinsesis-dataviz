@@ -13,7 +13,7 @@
  * permissions and limitations under the License.
  */
 
-package com.kinesis.datavis.kcl;
+package com.kinesis.datavis.kcl.processor;
 
 /**
  * The configuration settings for a {@link CountingRecordProcessor}.

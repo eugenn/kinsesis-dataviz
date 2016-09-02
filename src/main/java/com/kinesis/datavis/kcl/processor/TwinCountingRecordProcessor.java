@@ -1,4 +1,4 @@
-package com.kinesis.datavis.kcl;
+package com.kinesis.datavis.kcl.processor;
 
 import com.amazonaws.services.kinesis.clientlibrary.exceptions.InvalidStateException;
 import com.amazonaws.services.kinesis.clientlibrary.exceptions.ShutdownException;
@@ -9,11 +9,14 @@ import com.amazonaws.services.kinesis.clientlibrary.types.ShutdownReason;
 import com.amazonaws.services.kinesis.model.Record;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jdbc.dao.MappingDAO;
+import com.jdbc.vo.Mapping;
 import com.kinesis.datavis.kcl.counter.SlidingWindowTwinCounter;
 import com.kinesis.datavis.kcl.persistence.CountPersister;
 import com.kinesis.datavis.kcl.timing.Clock;
 import com.kinesis.datavis.kcl.timing.NanoClock;
 import com.kinesis.datavis.kcl.timing.Timer;
+import com.kinesis.datavis.utils.ReflectionUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -27,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by eugennekhai on 30/08/16.
  */
-public class TwinCountingRecordProcessor<T,C> implements IRecordProcessor {
+public class TwinCountingRecordProcessor<T, C> implements IRecordProcessor {
     private static final Log LOG = LogFactory.getLog(CountingRecordProcessor.class);
 
     // Lock to use for our timer
@@ -53,7 +56,9 @@ public class TwinCountingRecordProcessor<T,C> implements IRecordProcessor {
     private ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(1);
 
     // This is responsible for persisting our counts every interval
-    private CountPersister<T,C> persister;
+    private CountPersister<T, C> persister;
+
+    MappingDAO mappingDAO;
 
     private CountingRecordProcessorConfig config;
 
@@ -65,21 +70,23 @@ public class TwinCountingRecordProcessor<T,C> implements IRecordProcessor {
     /**
      * Create a new processor.
      *
-     * @param config Configuration for this record processor.
-     * @param recordType The type of record we expect to receive as a UTF-8 JSON string.
-     * @param persister Counts will be persisted with this persister.
-     * @param computeRangeInMillis Range to compute distinct counts across
+     * @param config                  Configuration for this record processor.
+     * @param recordType              The type of record we expect to receive as a UTF-8 JSON string.
+     * @param persister               Counts will be persisted with this persister.
+     * @param computeRangeInMillis    Range to compute distinct counts across
      * @param computeIntervalInMillis Interval between computing total count for the overall time range.
      */
     public TwinCountingRecordProcessor(CountingRecordProcessorConfig config,
-                                   Class<T> recordType,
-                                   CountPersister<T, C> persister,
-                                   int computeRangeInMillis,
-                                   int computeIntervalInMillis) {
+                                       Class<T> recordType,
+                                       CountPersister<T, C> persister,
+                                       MappingDAO mappingDAO,
+                                       int computeRangeInMillis,
+                                       int computeIntervalInMillis) {
 
         this.config = config;
         this.recordType = recordType;
         this.persister = persister;
+        this.mappingDAO = mappingDAO;
         this.computeRangeInMillis = computeRangeInMillis;
         this.computeIntervalInMillis = computeIntervalInMillis;
 
@@ -157,10 +164,14 @@ public class TwinCountingRecordProcessor<T,C> implements IRecordProcessor {
             T rec;
             try {
                 rec = JSON.readValue(r.getData().array(), recordType);
+
+                Mapping mapping = mappingDAO.load(ReflectionUtil.getValue(rec, "getBidRequestId"));
+
+                ReflectionUtil.setValue(rec, "bannerId", mapping.getBannerId());
+                ReflectionUtil.setValue(rec, "audienceId", mapping.getAudienceId());
             } catch (IOException e) {
                 LOG.warn("Skipping record. Unable to parse record into HttpReferrerPair. Partition Key: "
-                                + r.getPartitionKey() + ". Sequence Number: " + r.getSequenceNumber(),
-                        e);
+                        + r.getPartitionKey() + ". Sequence Number: " + r.getSequenceNumber(), e);
                 continue;
             }
             // Increment the windowCounter for the new pair. This is synchronized because there is another thread reading from
@@ -180,6 +191,7 @@ public class TwinCountingRecordProcessor<T,C> implements IRecordProcessor {
             }
         }
     }
+
 
     /**
      * We must have collected a full range window worth of samples before we should persistCounter any counts.

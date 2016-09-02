@@ -58,7 +58,7 @@ public class BidResponseStreamWriter {
 
 
         List<String> bidRqs = new ArrayList<>();
-        bidRqs.add("11111111111");
+//        bidRqs.add("11111111111");
 //        bidRqs.add("22222222222");
 //        bidRqs.add("33333333333");
 //        bidRqs.add("44444444444");
@@ -70,13 +70,13 @@ public class BidResponseStreamWriter {
 //        bannerIds.add("44444444444");
 
         List<String> audienceIds = new ArrayList<>();
-        audienceIds.add("ffffff");
-        audienceIds.add("mmmmmm");
+        audienceIds.add("female");
+        audienceIds.add("male");
 //        bannerIds.add("33333333333");
 //        bannerIds.add("44444444444");
 
 
-        BidResponseFactory responseFactory = new BidResponseFactory(bidRqs, bannerIds, audienceIds);
+        BidResponseFactory responseFactory = new BidResponseFactory(bidRqs, bannerIds, audienceIds, null);
 
         // Creates a stream to write to with 2 shards if it doesn't exist
         StreamUtils streamUtils = new StreamUtils(kinesis);

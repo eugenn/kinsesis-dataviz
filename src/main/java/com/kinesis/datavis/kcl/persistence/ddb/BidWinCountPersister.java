@@ -55,7 +55,10 @@ public class BidWinCountPersister extends QueueRecordPersister implements CountP
                 // Create a new pair if this resource hasn't been seen yet in this batch
                 bdCount = new BidWinCount();
                 bdCount.setHashKey(DynamoDBUtils.getHashKey());
-                bdCount.setBidRequestId(rec.getBidRequestId());
+
+                bdCount.setBannerId(rec.getBannerId());
+                bdCount.setAudienceId(rec.getAudienceId());
+
                 bdCount.setTimestamp(date);
                 bdCount.setHost(HostResolver.resolveHostname());
 
@@ -64,8 +67,6 @@ public class BidWinCountPersister extends QueueRecordPersister implements CountP
 
             bdCount.setTotalPrice(totalPrice.getValue());
             bdCount.setCount(bdCount.getCount() + count.getValue());
-
-            System.out.println(bdCount.getCount() + "  " + bdCount.getTotalPrice());
 
         }
 

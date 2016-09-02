@@ -164,7 +164,7 @@ public class BidResponse {
 
         BidResponse that = (BidResponse) o;
 
-        if (getId() != null ? !getId().equals(that.getId()) : that.getId() != null) return false;
+//        if (getId() != null ? !getId().equals(that.getId()) : that.getId() != null) return false;
         if (getBannerId() != null ? !getBannerId().equals(that.getBannerId()) : that.getBannerId() != null) return false;
         if (getAudienceId() != null ? !getAudienceId().equals(that.getAudienceId()) : that.getAudienceId() != null) return false;
 

@@ -15,7 +15,7 @@
 
 package com.kinesis.datavis.kcl.persistence;
 
-import com.kinesis.datavis.kcl.CountingRecordProcessor;
+import com.kinesis.datavis.kcl.processor.CountingRecordProcessor;
 
 import java.util.Map;
 

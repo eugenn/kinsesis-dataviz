@@ -71,7 +71,7 @@ public class BidWinStreamWriter {
 //        bidRequestIds.add(UUID.randomUUID().toString());
 //        bidRequestIds.add(UUID.randomUUID().toString());
 //        bidRequestIds.add(UUID.randomUUID().toString());
-        bidRequestIds.add("11111111111");
+        bidRequestIds.add("0f633e51-879b-4f9c-9488-228e98bc7bb1");
 //        bidRequestIds.add("22222222222");
 //        bidRequestIds.add("33333333333");
 
@@ -89,7 +89,7 @@ public class BidWinStreamWriter {
         prices.add(Double.valueOf(3.33));
         prices.add(Double.valueOf(1.673));
 
-        BidWinFactory bwFactory = new BidWinFactory(bidRequestIds, prices, "bidwin");
+        BidWinFactory bwFactory = new BidWinFactory(bidRequestIds, prices);
 
         // Creates a stream to write to with 2 shards if it doesn't exist
         StreamUtils streamUtils = new StreamUtils(kinesis);

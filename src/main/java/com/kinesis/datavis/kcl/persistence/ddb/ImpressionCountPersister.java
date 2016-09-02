@@ -59,6 +59,8 @@ public class ImpressionCountPersister extends QueueRecordPersister implements Co
                 bdCount.setHashKey(DynamoDBUtils.getHashKey());
                 bdCount.setTimestamp(date);
                 bdCount.setBidRequestId(rec.getBidRequestId());
+                bdCount.setBannerId(rec.getBannerId());
+                bdCount.setAudienceId(rec.getAudienceId());
                 bdCount.setHost(HostResolver.resolveHostname());
 
                 countMap.put(date, bdCount);

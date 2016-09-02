@@ -3,6 +3,7 @@ package com.kinesis.datavis.producer.impression;
 import com.kinesis.datavis.model.record.ImpressionRec;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -35,7 +36,7 @@ public class ImpressionFactory {
      * @return A new pair with random resource and referrer values.
      */
     public ImpressionRec create() {
-        ImpressionRec impressionRec = new ImpressionRec(getRandomId(), type, getRandomPrice());
+        ImpressionRec impressionRec = new ImpressionRec(UUID.randomUUID().toString(), "undefined", "undefined", getRandomPrice());
 
         return impressionRec;
     }

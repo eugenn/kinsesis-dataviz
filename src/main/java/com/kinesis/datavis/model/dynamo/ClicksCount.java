@@ -34,4 +34,10 @@ public class ClicksCount {
     @DynamoDBAttribute
     private String bidRequestId;
 
+    @DynamoDBAttribute
+    private String bannerId;
+
+    @DynamoDBAttribute
+    private String audienceId;
+
 }

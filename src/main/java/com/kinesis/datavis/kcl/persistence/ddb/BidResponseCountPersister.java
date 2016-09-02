@@ -1,10 +1,11 @@
 package com.kinesis.datavis.kcl.persistence.ddb;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.jdbc.dao.MappingDAO;
+import com.jdbc.vo.Mapping;
 import com.kinesis.datavis.kcl.persistence.CountPersister;
-import com.kinesis.datavis.kcl.persistence.MapperThread;
+import com.kinesis.datavis.kcl.persistence.MappingThread;
 import com.kinesis.datavis.kcl.persistence.PersisterThread;
-import com.kinesis.datavis.model.dynamo.BannerRequestMapper;
 import com.kinesis.datavis.model.dynamo.BidResponseCount;
 import com.kinesis.datavis.utils.DynamoDBUtils;
 import com.kinesis.datavis.utils.HostResolver;
@@ -13,6 +14,7 @@ import lombok.Getter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -25,14 +27,12 @@ public class BidResponseCountPersister extends QueueRecordPersister implements C
     // Generate UTC timestamps
     protected static final TimeZone UTC = TimeZone.getTimeZone("UTC");
     @Getter
-    public BlockingQueue<BannerRequestMapper> counts2 = new LinkedBlockingQueue<>(60000);
+    public BlockingQueue<Mapping> counts2 = new LinkedBlockingQueue<>(60000);
+    private MappingDAO mappingDAO;
 
-    MapperThread<BannerRequestMapper> mapperThread;
-    DynamoDBMapper dbMapper2;
-
-    public BidResponseCountPersister(DynamoDBMapper dbMapper, DynamoDBMapper dbMapper2) {
+    public BidResponseCountPersister(DynamoDBMapper dbMapper, MappingDAO mappingDAO) {
         super(dbMapper);
-        this.dbMapper2 = dbMapper2;
+        this.mappingDAO = mappingDAO;
     }
 
     public void initialize() {
@@ -41,9 +41,9 @@ public class BidResponseCountPersister extends QueueRecordPersister implements C
         dynamoDBSender.setDaemon(true);
         dynamoDBSender.start();
 
-//        mapperThread = new MapperThread<>(dbMapper2, counts2);
-//        mapperThread.setDaemon(true);
-//        mapperThread.start();
+        MappingThread<Mapping> mappingThread = new MappingThread<>(mappingDAO, counts2);
+        mappingThread.setDaemon(true);
+        mappingThread.start();
     }
 
     public void checkpoint() throws InterruptedException {
@@ -53,16 +53,9 @@ public class BidResponseCountPersister extends QueueRecordPersister implements C
             synchronized(counts) {
                 while (!counts.isEmpty()) {
                     counts.wait();
-//                    counts2.wait();
                 }
                 // All the counts we currently know about have been persisted. It is now safe to return from this blocking call.
             }
-//            synchronized(counts2) {
-//                while (!counts2.isEmpty()) {
-//                    counts2.wait();
-//                }
-//                // All the counts we currently know about have been persisted. It is now safe to return from this blocking call.
-//            }
         } else {
             throw new IllegalStateException("DynamoDB persister thread is not running. Counts are not persisted and we should not checkpoint!");
         }
@@ -75,7 +68,7 @@ public class BidResponseCountPersister extends QueueRecordPersister implements C
             return;
         }
 
-        List<BannerRequestMapper> bnrqs = new ArrayList<>();
+        List<Mapping> bnrqs = new ArrayList<>();
 
         Map<Date, BidResponseCount> countMap = new HashMap<>();
 
@@ -87,13 +80,14 @@ public class BidResponseCountPersister extends QueueRecordPersister implements C
             BidResponseCount bdCount = countMap.get(date);
             String hashKey = DynamoDBUtils.getHashKey();
 
-            bnrqs.add(new BannerRequestMapper(hashKey, date, rec.getBannerId(), rec.getId(), rec.getAudienceId()));
+            bnrqs.add(new Mapping(rec.getId(), rec.getBannerId(), rec.getAudienceId(), new Timestamp(System.currentTimeMillis())));
 
             if (bdCount == null) {
                 // Create a new pair if this resource hasn't been seen yet in this batch
                 bdCount = new BidResponseCount();
                 bdCount.setHashKey(hashKey);
-                bdCount.setBannerId(rec.getId());
+                bdCount.setBannerId(rec.getBannerId());
+                bdCount.setAudienceId(rec.getAudienceId());
                 bdCount.setTimestamp(date);
                 bdCount.setHost(HostResolver.resolveHostname());
 
@@ -103,13 +97,8 @@ public class BidResponseCountPersister extends QueueRecordPersister implements C
             bdCount.setCount(bdCount.getCount() + count.getValue());
         }
 
-
-
         counts.addAll(countMap.values());
-//        counts2.addAll(bnrqs);
-
-
-
+        counts2.addAll(bnrqs);
     }
 
     @Override

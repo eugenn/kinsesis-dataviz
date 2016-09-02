@@ -6,7 +6,6 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 import lombok.Data;
 
-import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -24,13 +23,13 @@ public class BidResponseCount {
     @DynamoDBAttribute
     private Long count = 0L;
 
-    @DynamoDBAttribute
-    private BigDecimal totalPrice = BigDecimal.ZERO;
-
     // Store the hostname of the worker that updated the count
     @DynamoDBAttribute
     private String host;
 
     @DynamoDBAttribute
     private String bannerId;
+
+    @DynamoDBAttribute
+    private String audienceId;
 }

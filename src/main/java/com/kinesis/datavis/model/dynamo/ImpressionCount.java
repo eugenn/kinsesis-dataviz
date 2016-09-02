@@ -33,4 +33,10 @@ public class ImpressionCount {
     @DynamoDBAttribute
     private String bidRequestId;
 
+    @DynamoDBAttribute
+    private String bannerId;
+
+    @DynamoDBAttribute
+    private String audienceId;
+
 }

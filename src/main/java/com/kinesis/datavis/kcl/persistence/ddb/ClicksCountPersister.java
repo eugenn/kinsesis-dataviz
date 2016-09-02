@@ -48,6 +48,8 @@ public class ClicksCountPersister extends QueueRecordPersister implements CountP
                 bdCount.setHashKey(DynamoDBUtils.getHashKey());
                 bdCount.setTimestamp(date);
                 bdCount.setBidRequestId(rec.getBidRequestId());
+                bdCount.setBannerId(rec.getBannerId());
+                bdCount.setAudienceId(rec.getAudienceId());
                 bdCount.setHost(HostResolver.resolveHostname());
 
                 countMap.put(date, bdCount);

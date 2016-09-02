@@ -19,7 +19,9 @@ import com.amazonaws.regions.Region;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.kinesis.clientlibrary.interfaces.IRecordProcessorFactory;
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;
-import com.kinesis.datavis.kcl.CountingRecordProcessorFactory;
+import com.jdbc.dao.JDBCMappingDAO;
+import com.jdbc.dao.MappingDAO;
+import com.kinesis.datavis.kcl.processor.CountingRecordProcessorFactory;
 import com.kinesis.datavis.kcl.persistence.CountPersister;
 import com.kinesis.datavis.kcl.persistence.ddb.BidRqCountPersister;
 import com.kinesis.datavis.utils.AppUtils;
@@ -65,9 +67,12 @@ public class BidRequestCounter extends CounterApp {
         // Persist counts to DynamoDB
         BidRqCountPersister persister = new BidRqCountPersister(mapper);
 
+        MappingDAO mappingDAO = new JDBCMappingDAO();
+
         IRecordProcessorFactory recordProcessor =
                 new CountingRecordProcessorFactory<>(BidRequest.class,
                         persister,
+                        mappingDAO,
                         COMPUTE_RANGE_FOR_COUNTS_IN_MILLIS,
                         COMPUTE_INTERVAL_IN_MILLIS);
 

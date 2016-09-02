@@ -1,16 +1,17 @@
 package com.kinesis.datavis.model.record;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 
 /**
  * Created by eugennekhai on 25/08/16.
  */
-@Getter
+@Data
 @AllArgsConstructor
 public class BidWinRec {
     private String bidRequestId;
-    private String type;
+    private String bannerId;
+    private String audienceId;
     private Double winPrice = Double.valueOf(0);
 
     public BidWinRec() {}
@@ -22,8 +23,8 @@ public class BidWinRec {
 
         BidWinRec that = (BidWinRec) o;
 
-        if (type != null ? !type.equals(that.type) : that.type != null) return false;
         if (bidRequestId != null ? !bidRequestId.equals(that.bidRequestId) : that.bidRequestId != null) return false;
+        if (bannerId != null ? !bannerId.equals(that.bannerId) : that.bannerId != null) return false;
 
         return true;
     }
@@ -31,7 +32,7 @@ public class BidWinRec {
     @Override
     public int hashCode() {
         int result = bidRequestId != null ? bidRequestId.hashCode() : 0;
-        result = 31 * result + (type != null ? type.hashCode() : 0);
+        result = 31 * result + (bannerId != null ? bannerId.hashCode() : 0);
         return result;
     }
 
@@ -39,7 +40,6 @@ public class BidWinRec {
     public String toString() {
         return "BidWinRec{" +
                 "bidRequestId='" + bidRequestId + '\'' +
-                ", type='" + type + '\'' +
                 '}';
     }
 

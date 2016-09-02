@@ -13,7 +13,7 @@
  * permissions and limitations under the License.
  */
 
-package com.kinesis.datavis.kcl;
+package com.kinesis.datavis.kcl.processor;
 
 import com.amazonaws.services.kinesis.clientlibrary.exceptions.InvalidStateException;
 import com.amazonaws.services.kinesis.clientlibrary.exceptions.ShutdownException;
@@ -24,11 +24,14 @@ import com.amazonaws.services.kinesis.clientlibrary.types.ShutdownReason;
 import com.amazonaws.services.kinesis.model.Record;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jdbc.dao.MappingDAO;
+import com.jdbc.vo.Mapping;
 import com.kinesis.datavis.kcl.counter.SlidingWindowCounter;
 import com.kinesis.datavis.kcl.persistence.CountPersister;
 import com.kinesis.datavis.kcl.timing.Clock;
 import com.kinesis.datavis.kcl.timing.NanoClock;
 import com.kinesis.datavis.kcl.timing.Timer;
+import com.kinesis.datavis.utils.ReflectionUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -73,6 +76,8 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
     // This is responsible for persisting our counts every interval
     private CountPersister<T,C> persister;
 
+    private MappingDAO mappingDAO;
+
     private CountingRecordProcessorConfig config;
 
     // The type of record we expect to receive as JSON
@@ -90,12 +95,14 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
     public CountingRecordProcessor(CountingRecordProcessorConfig config,
             Class<T> recordType,
             CountPersister<T, C> persister,
+                                   MappingDAO mappingDAO,
             int computeRangeInMillis,
             int computeIntervalInMillis) {
 
         this.config = config;
         this.recordType = recordType;
         this.persister = persister;
+        this.mappingDAO = mappingDAO;
         this.computeRangeInMillis = computeRangeInMillis;
         this.computeIntervalInMillis = computeIntervalInMillis;
 
@@ -171,6 +178,13 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
             T rec;
             try {
                 rec = JSON.readValue(r.getData().array(), recordType);
+
+
+                Mapping mapping = mappingDAO.load(ReflectionUtil.getValue(rec, "getBidRequestId"));
+
+                ReflectionUtil.setValue(rec, "bannerId", mapping.getBannerId());
+                ReflectionUtil.setValue(rec, "audienceId", mapping.getAudienceId());
+
             } catch (IOException e) {
                 LOG.warn("Skipping record. Unable to parse record into HttpReferrerPair. Partition Key: "
                         + r.getPartitionKey() + ". Sequence Number: " + r.getSequenceNumber(),

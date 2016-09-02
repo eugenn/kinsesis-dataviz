@@ -1,7 +1,6 @@
 package com.kinesis.datavis.kcl.adder;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import com.kinesis.datavis.utils.ReflectionUtil;
 
 /**
  * Created by eugennekhai on 29/08/16.
@@ -30,19 +29,8 @@ public class BucketBasedAdder<ObjectType> extends DefaultBasketAdder<ObjectType>
             counts = new double[maxBuckets];
             objectSums.put(obj, counts);
         }
-        counts[bucket] += getValue(obj, "getWinPrice");
+        counts[bucket] += ReflectionUtil.getDValue(obj, "getWinPrice");
         return counts[bucket];
-    }
-
-    protected double getValue(ObjectType obj, String name) {
-        try {
-            Method method = obj.getClass().getMethod(name);
-            return (Double) method.invoke(obj);
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
-
-        return 0d;
     }
 
 
