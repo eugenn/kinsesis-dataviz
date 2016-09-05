@@ -28,6 +28,7 @@ import java.util.List;
 @lombok.Data
 public class BidRequest {
     private final String requestId;
+    private final String bidRequestId;
     private final List<Imp> impressions;
     private final Site site;
     private final App app;
@@ -65,6 +66,7 @@ public class BidRequest {
             @JsonProperty("ext") Ext ext
     ) {
         this.requestId = requestId;
+        this.bidRequestId = requestId;
         this.impressions = impressions;
         this.site = site;
         this.app = app;

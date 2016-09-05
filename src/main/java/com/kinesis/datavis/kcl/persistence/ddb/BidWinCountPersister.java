@@ -4,8 +4,8 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.kinesis.datavis.kcl.persistence.CountPersister;
 import com.kinesis.datavis.model.dynamo.BidWinCount;
 import com.kinesis.datavis.model.record.BidWinRec;
-import com.kinesis.datavis.utils.DynamoDBUtils;
 import com.kinesis.datavis.utils.HostResolver;
+import com.kinesis.datavis.utils.Ticker;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -54,7 +54,7 @@ public class BidWinCountPersister extends QueueRecordPersister implements CountP
             if (bdCount == null) {
                 // Create a new pair if this resource hasn't been seen yet in this batch
                 bdCount = new BidWinCount();
-                bdCount.setHashKey(DynamoDBUtils.getHashKey());
+                bdCount.setHashKey(Ticker.getInstance().hashKey());
 
                 bdCount.setBannerId(rec.getBannerId());
                 bdCount.setAudienceId(rec.getAudienceId());

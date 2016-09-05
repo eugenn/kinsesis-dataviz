@@ -71,7 +71,7 @@ public class BidWinStreamWriter {
 //        bidRequestIds.add(UUID.randomUUID().toString());
 //        bidRequestIds.add(UUID.randomUUID().toString());
 //        bidRequestIds.add(UUID.randomUUID().toString());
-        bidRequestIds.add("0f633e51-879b-4f9c-9488-228e98bc7bb1");
+        bidRequestIds.add("5b2e73b1-df9e-433b-b3fc-bbc390faf161");
 //        bidRequestIds.add("22222222222");
 //        bidRequestIds.add("33333333333");
 

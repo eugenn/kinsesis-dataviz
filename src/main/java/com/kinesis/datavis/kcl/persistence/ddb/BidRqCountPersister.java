@@ -18,8 +18,8 @@ package com.kinesis.datavis.kcl.persistence.ddb;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.kinesis.datavis.kcl.persistence.CountPersister;
 import com.kinesis.datavis.model.dynamo.BidRequestCount;
-import com.kinesis.datavis.utils.DynamoDBUtils;
 import com.kinesis.datavis.utils.HostResolver;
+import com.kinesis.datavis.utils.Ticker;
 import com.kinesis.openrtb.BidRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -62,7 +62,7 @@ public class BidRqCountPersister extends QueueRecordPersister implements CountPe
             if (bdCount == null) {
                 // Create a new pair if this resource hasn't been seen yet in this batch
                 bdCount = new BidRequestCount();
-                bdCount.setHashKey(DynamoDBUtils.getHashKey());
+                bdCount.setHashKey(Ticker.getInstance().hashKey());
 //                bdCount.setWh(rec.getDevice().getWidth() + "x" + rec.getDevice().getHeight());
 //                bdCount.setBidRequestId(rec.getRequestId());
                 bdCount.setTimestamp(date);

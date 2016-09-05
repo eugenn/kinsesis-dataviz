@@ -6,6 +6,7 @@ import com.amazonaws.services.kinesis.clientlibrary.interfaces.IRecordProcessorF
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;
 import com.jdbc.dao.JDBCMappingDAO;
 import com.jdbc.dao.MappingDAO;
+import com.kinesis.connectors.s3.emitter.S3Emitter;
 import com.kinesis.datavis.kcl.processor.CountingRecordProcessorFactory;
 import com.kinesis.datavis.kcl.persistence.ddb.ClicksCountPersister;
 import com.kinesis.datavis.model.dynamo.ClicksCount;
@@ -58,6 +59,7 @@ public class ClicksCounter extends CounterApp {
                 new CountingRecordProcessorFactory<ClicksRec, ClicksCount>(ClicksRec.class,
                         persister,
                         mappingDAO,
+                        new S3Emitter("clicks"),
                         COMPUTE_RANGE_FOR_COUNTS_IN_MILLIS,
                         COMPUTE_INTERVAL_IN_MILLIS);
 

@@ -1,6 +1,7 @@
 package com.kinesis.datavis.kcl.processor;
 
 import com.amazonaws.services.kinesis.clientlibrary.exceptions.InvalidStateException;
+import com.amazonaws.services.kinesis.clientlibrary.exceptions.KinesisClientLibDependencyException;
 import com.amazonaws.services.kinesis.clientlibrary.exceptions.ShutdownException;
 import com.amazonaws.services.kinesis.clientlibrary.exceptions.ThrottlingException;
 import com.amazonaws.services.kinesis.clientlibrary.interfaces.IRecordProcessor;
@@ -11,6 +12,9 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jdbc.dao.MappingDAO;
 import com.jdbc.vo.Mapping;
+import com.kinesis.connectors.s3.buffer.FlushBuffer;
+import com.kinesis.connectors.s3.buffer.UnmodifiableBuffer;
+import com.kinesis.connectors.s3.emitter.IEmitter;
 import com.kinesis.datavis.kcl.counter.SlidingWindowTwinCounter;
 import com.kinesis.datavis.kcl.persistence.CountPersister;
 import com.kinesis.datavis.kcl.timing.Clock;
@@ -21,6 +25,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -58,7 +64,7 @@ public class TwinCountingRecordProcessor<T, C> implements IRecordProcessor {
     // This is responsible for persisting our counts every interval
     private CountPersister<T, C> persister;
 
-    MappingDAO mappingDAO;
+    private MappingDAO mappingDAO;
 
     private CountingRecordProcessorConfig config;
 
@@ -66,6 +72,11 @@ public class TwinCountingRecordProcessor<T, C> implements IRecordProcessor {
     private Class<T> recordType;
 
     private Object monitor = new Object();
+
+    private IEmitter<byte[]> emitter;
+    private FlushBuffer<byte[]> buffer;
+    private long backoffInterval = 1000L * 10;
+
 
     /**
      * Create a new processor.
@@ -80,6 +91,7 @@ public class TwinCountingRecordProcessor<T, C> implements IRecordProcessor {
                                        Class<T> recordType,
                                        CountPersister<T, C> persister,
                                        MappingDAO mappingDAO,
+                                       IEmitter emitter,
                                        int computeRangeInMillis,
                                        int computeIntervalInMillis) {
 
@@ -89,6 +101,9 @@ public class TwinCountingRecordProcessor<T, C> implements IRecordProcessor {
         this.mappingDAO = mappingDAO;
         this.computeRangeInMillis = computeRangeInMillis;
         this.computeIntervalInMillis = computeIntervalInMillis;
+
+        this.emitter = emitter;
+        this.buffer = new FlushBuffer<>();
 
         // Create an object mapper to deserialize records that ignores unknown properties
         JSON = new ObjectMapper();
@@ -167,8 +182,20 @@ public class TwinCountingRecordProcessor<T, C> implements IRecordProcessor {
 
                 Mapping mapping = mappingDAO.load(ReflectionUtil.getValue(rec, "getBidRequestId"));
 
-                ReflectionUtil.setValue(rec, "bannerId", mapping.getBannerId());
-                ReflectionUtil.setValue(rec, "audienceId", mapping.getAudienceId());
+
+                if (mapping != null) {
+                    String bannerId = mapping.getBannerId();
+                    String audienceId = mapping.getAudienceId();
+
+                    ReflectionUtil.setValue(rec, "bannerId", bannerId);
+                    ReflectionUtil.setValue(rec, "audienceId", audienceId);
+
+                    String jsonPatched = toJSON(bannerId, audienceId, r.getData().array());
+
+                    buffer.consumeRecord(jsonPatched.getBytes(Charset.forName("UTF-8")), r.getData().array().length, r.getSequenceNumber());
+
+                }
+
             } catch (IOException e) {
                 LOG.warn("Skipping record. Unable to parse record into HttpReferrerPair. Partition Key: "
                         + r.getPartitionKey() + ". Sequence Number: " + r.getSequenceNumber(), e);
@@ -182,6 +209,10 @@ public class TwinCountingRecordProcessor<T, C> implements IRecordProcessor {
             }
         }
 
+        if (buffer.shouldFlush()) {
+            emit(buffer.getRecords());
+        }
+
         // Checkpoint if it's time to!
         if (checkpointTimer.isTimeUp()) {
             // Obtain a lock on the windowCounter to prevent additional counts from being calculated while checkpointing.
@@ -192,6 +223,33 @@ public class TwinCountingRecordProcessor<T, C> implements IRecordProcessor {
         }
     }
 
+    private String toJSON(String bannerId, String audienceId, byte[] data) {
+        StringBuilder builder = new StringBuilder("{\"bannerId\":\"");
+        builder.append(bannerId)
+                .append("\",\"audienceId\":\"")
+                .append(audienceId)
+                .append("\",\"data\":")
+                .append(new String(data))
+                .append("}");
+        return builder.toString();
+    }
+
+    private void emit(List<byte[]> emitItems) {
+        List<byte[]> unprocessed = new ArrayList<>(emitItems);
+        try {
+            for (int numTries = 0; numTries < 3; numTries++) {
+                unprocessed = emitter.emit(new UnmodifiableBuffer<byte[]>(buffer));
+
+            }
+            if (!unprocessed.isEmpty()) {
+                emitter.fail(unprocessed);
+            }
+
+        } catch (IOException | KinesisClientLibDependencyException e) {
+            LOG.error(e);
+            e.printStackTrace();
+        }
+    }
 
     /**
      * We must have collected a full range window worth of samples before we should persistCounter any counts.
@@ -207,6 +265,7 @@ public class TwinCountingRecordProcessor<T, C> implements IRecordProcessor {
         LOG.info("Shutting down record processor for shard: " + kinesisShardId);
 
         scheduledExecutor.shutdown();
+        emitter.shutdown();
         try {
             // Wait for at most 30 seconds for the executor service's tasks to complete
             if (!scheduledExecutor.awaitTermination(30, TimeUnit.SECONDS)) {

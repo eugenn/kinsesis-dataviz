@@ -7,8 +7,8 @@ import com.kinesis.datavis.kcl.persistence.CountPersister;
 import com.kinesis.datavis.kcl.persistence.MappingThread;
 import com.kinesis.datavis.kcl.persistence.PersisterThread;
 import com.kinesis.datavis.model.dynamo.BidResponseCount;
-import com.kinesis.datavis.utils.DynamoDBUtils;
 import com.kinesis.datavis.utils.HostResolver;
+import com.kinesis.datavis.utils.Ticker;
 import com.kinesis.openrtb.BidResponse;
 import lombok.Getter;
 import org.apache.commons.logging.Log;
@@ -43,7 +43,7 @@ public class BidResponseCountPersister extends QueueRecordPersister implements C
 
         MappingThread<Mapping> mappingThread = new MappingThread<>(mappingDAO, counts2);
         mappingThread.setDaemon(true);
-        mappingThread.start();
+//        mappingThread.start();
     }
 
     public void checkpoint() throws InterruptedException {
@@ -78,7 +78,7 @@ public class BidResponseCountPersister extends QueueRecordPersister implements C
             // Check for an existing counts for this resource
             BidResponse rec = count.getKey();
             BidResponseCount bdCount = countMap.get(date);
-            String hashKey = DynamoDBUtils.getHashKey();
+            String hashKey = Ticker.getInstance().hashKey();
 
             bnrqs.add(new Mapping(rec.getId(), rec.getBannerId(), rec.getAudienceId(), new Timestamp(System.currentTimeMillis())));
 

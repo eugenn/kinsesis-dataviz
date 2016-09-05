@@ -16,6 +16,7 @@
 package com.kinesis.datavis.kcl.processor;
 
 import com.amazonaws.services.kinesis.clientlibrary.exceptions.InvalidStateException;
+import com.amazonaws.services.kinesis.clientlibrary.exceptions.KinesisClientLibDependencyException;
 import com.amazonaws.services.kinesis.clientlibrary.exceptions.ShutdownException;
 import com.amazonaws.services.kinesis.clientlibrary.exceptions.ThrottlingException;
 import com.amazonaws.services.kinesis.clientlibrary.interfaces.IRecordProcessor;
@@ -26,6 +27,9 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jdbc.dao.MappingDAO;
 import com.jdbc.vo.Mapping;
+import com.kinesis.connectors.s3.buffer.FlushBuffer;
+import com.kinesis.connectors.s3.buffer.UnmodifiableBuffer;
+import com.kinesis.connectors.s3.emitter.IEmitter;
 import com.kinesis.datavis.kcl.counter.SlidingWindowCounter;
 import com.kinesis.datavis.kcl.persistence.CountPersister;
 import com.kinesis.datavis.kcl.timing.Clock;
@@ -36,6 +40,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -48,7 +54,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @param <T> The type of records this processor is capable of counting.
  */
-public class CountingRecordProcessor<T,C> implements IRecordProcessor {
+public class CountingRecordProcessor<T, C> implements IRecordProcessor {
     private static final Log LOG = LogFactory.getLog(CountingRecordProcessor.class);
 
     // Lock to use for our timer
@@ -74,7 +80,7 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
     private ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(1);
 
     // This is responsible for persisting our counts every interval
-    private CountPersister<T,C> persister;
+    private CountPersister<T, C> persister;
 
     private MappingDAO mappingDAO;
 
@@ -83,21 +89,26 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
     // The type of record we expect to receive as JSON
     private Class<T> recordType;
 
+    private IEmitter<byte[]> emitter;
+    private FlushBuffer<byte[]> buffer;
+    private long backoffInterval = 1000L * 10;
+
     /**
      * Create a new processor.
      *
-     * @param config Configuration for this record processor.
-     * @param recordType The type of record we expect to receive as a UTF-8 JSON string.
-     * @param persister Counts will be persisted with this persister.
-     * @param computeRangeInMillis Range to compute distinct counts across
+     * @param config                  Configuration for this record processor.
+     * @param recordType              The type of record we expect to receive as a UTF-8 JSON string.
+     * @param persister               Counts will be persisted with this persister.
+     * @param computeRangeInMillis    Range to compute distinct counts across
      * @param computeIntervalInMillis Interval between computing total count for the overall time range.
      */
     public CountingRecordProcessor(CountingRecordProcessorConfig config,
-            Class<T> recordType,
-            CountPersister<T, C> persister,
+                                   Class<T> recordType,
+                                   CountPersister<T, C> persister,
                                    MappingDAO mappingDAO,
-            int computeRangeInMillis,
-            int computeIntervalInMillis) {
+                                   IEmitter emitter,
+                                   int computeRangeInMillis,
+                                   int computeIntervalInMillis) {
 
         this.config = config;
         this.recordType = recordType;
@@ -105,6 +116,9 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
         this.mappingDAO = mappingDAO;
         this.computeRangeInMillis = computeRangeInMillis;
         this.computeIntervalInMillis = computeIntervalInMillis;
+
+        this.emitter = emitter;
+        this.buffer = new FlushBuffer<>();
 
         // Create an object mapper to deserialize records that ignores unknown properties
         JSON = new ObjectMapper();
@@ -125,19 +139,19 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
         // Create a scheduled task that runs every computeIntervalInMillis to compute and
         // persistCounter the counts.
         scheduledExecutor.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                // Synchronize on the windowCounter so we stop advancing the interval while we're checkpointing
-                synchronized (windowCounter) {
-                    try {
-                        advanceOneInterval();
-                    } catch (Exception ex) {
-                        LOG.warn("Error advancing sliding window one interval (" + computeIntervalInMillis
-                                + "ms). Skipping this interval.", ex);
-                    }
-                }
-            }
-        },
+                                                  @Override
+                                                  public void run() {
+                                                      // Synchronize on the windowCounter so we stop advancing the interval while we're checkpointing
+                                                      synchronized (windowCounter) {
+                                                          try {
+                                                              advanceOneInterval();
+                                                          } catch (Exception ex) {
+                                                              LOG.warn("Error advancing sliding window one interval (" + computeIntervalInMillis
+                                                                      + "ms). Skipping this interval.", ex);
+                                                          }
+                                                      }
+                                                  }
+                                              },
                 TimeUnit.SECONDS.toMillis(config.getInitialWindowAdvanceDelayInSeconds()), computeIntervalInMillis,
                 TimeUnit.MILLISECONDS);
     }
@@ -179,15 +193,24 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
             try {
                 rec = JSON.readValue(r.getData().array(), recordType);
 
-
                 Mapping mapping = mappingDAO.load(ReflectionUtil.getValue(rec, "getBidRequestId"));
 
-                ReflectionUtil.setValue(rec, "bannerId", mapping.getBannerId());
-                ReflectionUtil.setValue(rec, "audienceId", mapping.getAudienceId());
+                if (mapping != null) {
+                    String bannerId = mapping.getBannerId();
+                    String audienceId = mapping.getAudienceId();
+
+                    ReflectionUtil.setValue(rec, "bannerId", bannerId);
+                    ReflectionUtil.setValue(rec, "audienceId", audienceId);
+
+                    String jsonPatched = toJSON(bannerId, audienceId, r.getData().array());
+
+                    buffer.consumeRecord(jsonPatched.getBytes(Charset.forName("UTF-8")), r.getData().array().length, r.getSequenceNumber());
+
+                }
 
             } catch (IOException e) {
                 LOG.warn("Skipping record. Unable to parse record into HttpReferrerPair. Partition Key: "
-                        + r.getPartitionKey() + ". Sequence Number: " + r.getSequenceNumber(),
+                                + r.getPartitionKey() + ". Sequence Number: " + r.getSequenceNumber(),
                         e);
                 continue;
             }
@@ -198,6 +221,10 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
             }
         }
 
+        if (buffer.shouldFlush()) {
+            emit(buffer.getRecords());
+        }
+
         // Checkpoint if it's time to!
         if (checkpointTimer.isTimeUp()) {
             // Obtain a lock on the windowCounter to prevent additional counts from being calculated while checkpointing.
@@ -205,6 +232,33 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
                 checkpoint(checkpointer);
                 resetCheckpointAlarm();
             }
+        }
+    }
+
+    private String toJSON(String bannerId, String audienceId, byte[] data) {
+        StringBuilder builder = new StringBuilder("{\"bannerId\":\"");
+        builder.append(bannerId)
+                .append("\",\"audienceId\":\"")
+                .append(audienceId)
+                .append("\",\"data\":")
+                .append(new String(data))
+                .append("}");
+        return builder.toString();
+    }
+
+    private void emit(List<byte[]> emitItems) {
+        List<byte[]> unprocessed = new ArrayList<>(emitItems);
+        try {
+            for (int numTries = 0; numTries < 3; numTries++) {
+                unprocessed = emitter.emit(new UnmodifiableBuffer<byte[]>(buffer));
+            }
+            if (!unprocessed.isEmpty()) {
+                emitter.fail(unprocessed);
+            }
+            buffer.clear();
+        } catch (IOException | KinesisClientLibDependencyException e) {
+            LOG.error(e);
+            e.printStackTrace();
         }
     }
 
@@ -222,6 +276,7 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
         LOG.info("Shutting down record processor for shard: " + kinesisShardId);
 
         scheduledExecutor.shutdown();
+        emitter.shutdown();
         try {
             // Wait for at most 30 seconds for the executor service's tasks to complete
             if (!scheduledExecutor.awaitTermination(30, TimeUnit.SECONDS)) {
@@ -276,7 +331,7 @@ public class CountingRecordProcessor<T,C> implements IRecordProcessor {
                     break;
                 } else {
                     LOG.info("Transient issue when checkpointing - attempt " + (i + 1) + " of "
-                            + config.getCheckpointRetries(),
+                                    + config.getCheckpointRetries(),
                             e);
                 }
             } catch (InvalidStateException e) {

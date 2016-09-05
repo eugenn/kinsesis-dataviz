@@ -5,9 +5,9 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.ComparisonOperator;
 import com.amazonaws.services.dynamodbv2.model.Condition;
-import com.kinesis.datavis.model.dynamo.ImpressionCount;
-import com.kinesis.datavis.utils.DynamoDBUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kinesis.datavis.model.dynamo.ImpressionCount;
+import com.kinesis.datavis.utils.Ticker;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.jetty.util.MultiMap;
@@ -85,7 +85,7 @@ public class GetImpressionCountsServlet extends HttpServlet {
 
 
         ImpressionCount hashKey = new ImpressionCount();
-        hashKey.setHashKey(DynamoDBUtils.getHashKey());
+        hashKey.setHashKey(Ticker.getInstance().hashKey());
 
         query.setHashKeyValues(hashKey);
 

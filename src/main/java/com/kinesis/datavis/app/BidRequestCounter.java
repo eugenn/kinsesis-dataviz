@@ -21,9 +21,10 @@ import com.amazonaws.services.kinesis.clientlibrary.interfaces.IRecordProcessorF
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;
 import com.jdbc.dao.JDBCMappingDAO;
 import com.jdbc.dao.MappingDAO;
-import com.kinesis.datavis.kcl.processor.CountingRecordProcessorFactory;
+import com.kinesis.connectors.s3.emitter.S3Emitter;
 import com.kinesis.datavis.kcl.persistence.CountPersister;
 import com.kinesis.datavis.kcl.persistence.ddb.BidRqCountPersister;
+import com.kinesis.datavis.kcl.processor.CountingRecordProcessorFactory;
 import com.kinesis.datavis.utils.AppUtils;
 import com.kinesis.openrtb.BidRequest;
 import org.apache.commons.logging.Log;
@@ -73,6 +74,7 @@ public class BidRequestCounter extends CounterApp {
                 new CountingRecordProcessorFactory<>(BidRequest.class,
                         persister,
                         mappingDAO,
+                        new S3Emitter("bdrequest"),
                         COMPUTE_RANGE_FOR_COUNTS_IN_MILLIS,
                         COMPUTE_INTERVAL_IN_MILLIS);
 

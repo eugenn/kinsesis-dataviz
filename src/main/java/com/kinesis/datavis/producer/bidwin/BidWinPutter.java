@@ -4,10 +4,10 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.kinesis.AmazonKinesis;
 import com.amazonaws.services.kinesis.model.ProvisionedThroughputExceededException;
 import com.amazonaws.services.kinesis.model.PutRecordRequest;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kinesis.datavis.model.record.BidWinRec;
 import com.kinesis.datavis.producer.Putter;
-import com.kinesis.datavis.utils.DynamoDBUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kinesis.datavis.utils.Ticker;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -95,7 +95,7 @@ public class BidWinPutter implements Putter {
         PutRecordRequest putRecord = new PutRecordRequest();
         putRecord.setStreamName(streamName);
         // We use the resource as the partition key so we can accurately calculate totals for a given resource
-        putRecord.setPartitionKey(DynamoDBUtils.getHashKey());
+        putRecord.setPartitionKey(Ticker.getInstance().hashKey());
         putRecord.setData(ByteBuffer.wrap(bytes));
         // Order is not important for this application so we do not send a SequenceNumberForOrdering
         putRecord.setSequenceNumberForOrdering(null);

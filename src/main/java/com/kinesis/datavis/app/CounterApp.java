@@ -55,22 +55,6 @@ public class CounterApp {
         return dynamoDBUtils.createMapperForTable(countsTableName);
     }
 
-    public static DynamoDBMapper createMapperForMappingTable(Region region) {
-        AWSCredentialsProvider credentialsProvider = new DefaultAWSCredentialsProviderChain();
-
-        ClientConfiguration clientConfig = AppUtils.configureUserAgentForSample(new ClientConfiguration());
-
-        AmazonDynamoDB dynamoDB = new AmazonDynamoDBClient(credentialsProvider, clientConfig);
-        dynamoDB.setRegion(region);
-
-
-        DynamoDBUtils dynamoDBUtils = new DynamoDBUtils(dynamoDB);
-        dynamoDBUtils.createCountTableIfNotExists("RequestBannerAudience", "bidRequestId", "timestamp");
-
-
-        return dynamoDBUtils.createMapperForTable("RequestBannerAudience");
-    }
-
     public static KinesisClientLibConfiguration buildConfig(String applicationName, String streamName, Region region) {
         String workerId = String.valueOf(UUID.randomUUID());
         LOG.info(String.format("Using working id: %s", workerId));

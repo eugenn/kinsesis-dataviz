@@ -63,6 +63,9 @@ public class BidResponseStreamWriter {
 //        bidRqs.add("33333333333");
 //        bidRqs.add("44444444444");
 
+        bidRqs.add("5b2e73b1-df9e-433b-b3fc-bbc390faf161");
+
+
         List<String> bannerIds = new ArrayList<>();
         bannerIds.add("11111111111");
         bannerIds.add("22222222222");
@@ -76,7 +79,7 @@ public class BidResponseStreamWriter {
 //        bannerIds.add("44444444444");
 
 
-        BidResponseFactory responseFactory = new BidResponseFactory(bidRqs, bannerIds, audienceIds, null);
+        BidResponseFactory responseFactory = new BidResponseFactory(bidRqs, bannerIds, audienceIds);
 
         // Creates a stream to write to with 2 shards if it doesn't exist
         StreamUtils streamUtils = new StreamUtils(kinesis);

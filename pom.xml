@@ -22,11 +22,11 @@
     </licenses>
 
     <properties>
-        <bidrg.aggregator.name>KCLDynamoDBTableBrq</bidrg.aggregator.name>
-        <bidrq.stream>KinesisStreamBrq</bidrq.stream>
-        <bidrq.counts-table>CountsDynamoDBTableBrq</bidrq.counts-table>
-        <bidrq.servlet>GetBidRqCountsServlet</bidrq.servlet>
-        <bidrq.endpoint>GetRqCounts</bidrq.endpoint>
+        <bidrg.aggregator.name>KCLDynamoDBTableBwin</bidrg.aggregator.name>
+        <bidrq.stream>KCLDynamoDBTableBwin</bidrq.stream>
+        <bidrq.counts-table>CountsDynamoDBTableBwin</bidrq.counts-table>
+        <bidrq.servlet>GetBidWinCountsServlet</bidrq.servlet>
+        <bidrq.endpoint>GetWinCounts</bidrq.endpoint>
 
         <bdwin.aggregator.name>KCLDynamoDBTableBwin</bdwin.aggregator.name>
         <bdwin.stream>KinesisStreamBwin</bdwin.stream>
@@ -54,7 +54,6 @@
 
         <aws.region>eu-west-1</aws.region>
         <amazon-kinesis-client.version>1.7.0</amazon-kinesis-client.version>
-
         <jetty.version>8.1.9.v20130131</jetty.version>
     </properties>
 
@@ -165,7 +164,7 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <mainClass>com.kinesis.datavis.app.BidRequestCounter</mainClass>
+                            <mainClass>com.kinesis.datavis.app.BidWinCounter</mainClass>
                             <arguments>
                                 <argument>${bidrg.aggregator.name}</argument>
                                 <argument>${bidrq.stream}</argument>
@@ -187,7 +186,7 @@
                         <artifactId>exec-maven-plugin</artifactId>
                         <version>1.5.0</version>
                         <configuration>
-                            <mainClass>com.kinesis.datavis.writer.BidRequestStreamWriter</mainClass>
+                            <mainClass>com.kinesis.datavis.writer.BidWinStreamWriter</mainClass>
                             <arguments>
                                 <!-- Start a single thread to put records in to Amazon Kinesis -->
                                 <argument>1</argument>
