@@ -1,6 +1,7 @@
 package com.jdbc.dao;
 
 import com.jdbc.vo.Mapping;
+import org.apache.tomcat.dbcp.dbcp.BasicDataSource;
 
 import java.sql.*;
 import java.util.LinkedList;
@@ -8,20 +9,17 @@ import java.util.List;
 
 public class JDBCMappingDAO implements MappingDAO {
 
-    Connection connection = null;
+    private static final BasicDataSource dataSource = new BasicDataSource();
 
-    public Connection getConnection() {
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            if (connection == null)
-                connection = DriverManager.getConnection("jdbc:mysql://localhost/kinesis?user=root&password=root");
+    static {
+        dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+        dataSource.setUrl("jdbc:mysql://localhost/kinesis");
+        dataSource.setUsername("root");
+        dataSource.setPassword("root");
+    }
 
-        } catch (ClassNotFoundException | SQLException e) {
-
-            e.printStackTrace();
-
-        }
-        return connection;
+    public static Connection getConnection() throws SQLException {
+        return dataSource.getConnection();
     }
 
     @Override
@@ -59,7 +57,8 @@ public class JDBCMappingDAO implements MappingDAO {
 
     @Override
     public void batchInsert(List<Mapping> mappings) {
-        try (PreparedStatement preparedStatement = getConnection().prepareStatement("INSERT INTO kinesis.mapping (bidrequestId ,banneridId, audience, timestamp) VALUES (? , ?, ?, ?)")) {
+        try (Connection conn = getConnection();
+             PreparedStatement preparedStatement = conn.prepareStatement("INSERT INTO kinesis.mapping (bidrequestId ,banneridId, audience, timestamp) VALUES (? , ?, ?, ?)")) {
             int i = 0;
 
             for (Mapping mapping : mappings) {
@@ -86,7 +85,8 @@ public class JDBCMappingDAO implements MappingDAO {
     public void deleteAll() {
         String deleteSQL = "DELETE FROM mapping WHERE mapping.timestamp < ADDDATE(NOW(), INTERVAL -1 MINUTE)";
 
-        try (Statement statement = getConnection().createStatement()) {
+        try (Connection conn = getConnection();
+             Statement statement = conn.createStatement()) {
             statement.execute(deleteSQL);
 
 
@@ -118,9 +118,9 @@ public class JDBCMappingDAO implements MappingDAO {
     }
 
     public long count() {
-        try {
-            Statement statement = connection.createStatement();
-            ResultSet set = statement.executeQuery("SELECT COUNT(1) FROM mapping");
+        try (Connection conn = getConnection();
+             Statement statement = conn.createStatement();
+             ResultSet set = statement.executeQuery("SELECT COUNT(1) FROM mapping")) {
             if (set.next()) {
                 return set.getLong(1);
             }

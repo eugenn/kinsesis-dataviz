@@ -5,6 +5,7 @@ import com.kinesis.openrtb.Ext;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -18,7 +19,7 @@ public class BidResponseFactory {
 
     public BidResponse create() {
         Ext ext = Ext.builder().put("uniq_id", getRandomBannerId()).put("audience_id", getRandomAudienceIds()).build();
-        BidResponse winRec = BidResponse.builder().id(getRandomId()).ext(ext).build();
+        BidResponse winRec = BidResponse.builder().id(UUID.randomUUID().toString()).ext(ext).build();
         return winRec;
     }
 
