@@ -86,10 +86,8 @@ public class GetBidWinCountsServlet extends HttpServlet {
 
         DynamoDBQueryExpression<BidWinCount> query = new DynamoDBQueryExpression<>();
 
-//        resource = "11111111111";
-
         BidWinCount hashKey = new BidWinCount();
-        hashKey.setHashKey(Ticker.getInstance().hashKey());
+        hashKey.setHashKey(Ticker.getInstance().hashKey(audienceId));
 
         query.setHashKeyValues(hashKey);
 

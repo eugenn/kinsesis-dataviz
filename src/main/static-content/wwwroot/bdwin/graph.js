@@ -156,7 +156,7 @@ var UIHelper = function(data, graph) {
   var running = true;
   // Set the active resource to query for counts when updating data.
   var activeResource = "11111111111";
-  var activeAudience = "female";
+  var activeAudience = "male";
 
 
   /**
@@ -192,7 +192,7 @@ var UIHelper = function(data, graph) {
 
     var table = $("<table/>").addClass("topN");
     $.each(topN, function(_, v) {
-      console.log(v)
+      //console.log(v)
       debugger;
       var row = $("<tr/>");
       row.append($("<td/>").addClass('typeColumn').text(v.type));
@@ -491,6 +491,7 @@ var CountData = function() {
       //   "host" : "worker01-ec2",
       //   "typeCounts" : [{"type":"bidrequest","count":1002}]
       // }]
+      console.log(newCountData);
       newCountData.forEach(function(countRec) {
         // Update the host who last calculated the counts
         setLastUpdatedBy(countRec.host);

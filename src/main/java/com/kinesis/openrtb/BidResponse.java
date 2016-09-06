@@ -164,7 +164,6 @@ public class BidResponse {
 
         BidResponse that = (BidResponse) o;
 
-//        if (getId() != null ? !getId().equals(that.getId()) : that.getId() != null) return false;
         if (getBannerId() != null ? !getBannerId().equals(that.getBannerId()) : that.getBannerId() != null) return false;
         if (getAudienceId() != null ? !getAudienceId().equals(that.getAudienceId()) : that.getAudienceId() != null) return false;
 
@@ -173,8 +172,9 @@ public class BidResponse {
 
     @Override
     public int hashCode() {
-        int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + (getBannerId() != null ? getBannerId().hashCode() : 0);
+        int result = getBannerId() != null ? getBannerId().hashCode() : 0;
+        result = 31 * result + (getAudienceId() != null ? getAudienceId().hashCode() : 0);
+
         return result;
     }
 

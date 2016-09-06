@@ -75,7 +75,7 @@ public class TwinCountingRecordProcessor<T, C> implements IRecordProcessor {
 
     private IEmitter<byte[]> emitter;
     private FlushBuffer<byte[]> buffer;
-    private long backoffInterval = 1000L * 10;
+//    private long backoffInterval = 1000L * 10;
 
 
     /**

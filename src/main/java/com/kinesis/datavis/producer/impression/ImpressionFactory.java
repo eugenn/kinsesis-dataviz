@@ -3,7 +3,6 @@ package com.kinesis.datavis.producer.impression;
 import com.kinesis.datavis.model.record.ImpressionRec;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -12,21 +11,19 @@ import java.util.concurrent.ThreadLocalRandom;
 public class ImpressionFactory {
     private final List<Double> prices;
     private List<String> bidRequestIds;
-    private String type;
 
     /**
      * Create a new generator which will use the bidRequestIds and referrers provided.
      *
      * @param bidRequestIds List of bidRequestIds to use when generating a pair.
      */
-    public ImpressionFactory(List<String> bidRequestIds, List<Double> prices, String type) {
+    public ImpressionFactory(List<String> bidRequestIds, List<Double> prices) {
         if (bidRequestIds == null || bidRequestIds.isEmpty()) {
             throw new IllegalArgumentException("At least 1 resource is required");
         }
         this.bidRequestIds = bidRequestIds;
         this.prices = prices;
 
-        this.type = type;
     }
 
     /**
@@ -36,7 +33,7 @@ public class ImpressionFactory {
      * @return A new pair with random resource and referrer values.
      */
     public ImpressionRec create() {
-        ImpressionRec impressionRec = new ImpressionRec(UUID.randomUUID().toString(), "undefined", "undefined", getRandomPrice());
+        ImpressionRec impressionRec = new ImpressionRec(getRandomId(), "undefined", "undefined", getRandomPrice());
 
         return impressionRec;
     }

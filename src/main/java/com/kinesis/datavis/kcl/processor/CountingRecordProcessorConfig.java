@@ -25,7 +25,7 @@ public class CountingRecordProcessorConfig {
     private long checkpointBackoffTimeInSeconds = 3L;
     private long checkpointRetries = 10;
     // The initial amount of time to wait after initialize() is called before advancing the interval window.
-    private long initialWindowAdvanceDelayInSeconds = 10L;
+    private long initialWindowAdvanceDelayInSeconds = 5L;
 
     public long getCheckpointIntervalInSeconds() {
         return checkpointIntervalInSeconds;

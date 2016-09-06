@@ -24,6 +24,7 @@ public class BidWinPutter implements Putter {
     private BidWinFactory bidWinFactory;
     private AmazonKinesis kinesis;
     private String streamName;
+    private int i = 0;
 
     private final ObjectMapper JSON = new ObjectMapper();
 
@@ -114,5 +115,7 @@ public class BidWinPutter implements Putter {
         } catch (AmazonClientException ex) {
             LOG.warn("Error sending record to Amazon Kinesis.", ex);
         }
+
+        System.out.println(i++ + "   " + winRec.getAudienceId());
     }
 }

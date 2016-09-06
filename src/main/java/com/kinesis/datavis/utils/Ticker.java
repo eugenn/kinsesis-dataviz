@@ -33,6 +33,10 @@ public class Ticker {
         return hashKey;
     }
 
+    public String hashKey(String audienceId) {
+        return hashKey + audienceId;
+    }
+
     public String s3Path() {
         return s3Path;
     }

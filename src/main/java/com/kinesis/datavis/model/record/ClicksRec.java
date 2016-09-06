@@ -1,12 +1,12 @@
 package com.kinesis.datavis.model.record;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 
 /**
  * Created by eugennekhai on 28/08/16.
  */
-@Getter
+@Data
 @AllArgsConstructor
 public class ClicksRec {
     private String bidRequestId;
@@ -24,16 +24,17 @@ public class ClicksRec {
 
         ClicksRec that = (ClicksRec) o;
 
-        if (bidRequestId != null ? !bidRequestId.equals(that.bidRequestId) : that.bidRequestId != null) return false;
         if (bannerId != null ? !bannerId.equals(that.bannerId) : that.bannerId != null) return false;
+        if (audienceId != null ? !audienceId.equals(that.audienceId) : that.audienceId != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = bidRequestId != null ? bidRequestId.hashCode() : 0;
-        result = 31 * result + (bannerId != null ? bannerId.hashCode() : 0);
+        int result = bannerId != null ? bannerId.hashCode() : 0;
+        result = 31 * result + (audienceId != null ? audienceId.hashCode() : 0);
+
         return result;
     }
 

@@ -9,15 +9,15 @@ import com.kinesis.datavis.utils.Ticker;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.*;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by eugennekhai on 29/08/16.
  */
 public class ClicksCountPersister extends QueueRecordPersister implements CountPersister<ClicksRec, ClicksCount> {
     private static final Log LOG = LogFactory.getLog(BidRqCountPersister.class);
-    // Generate UTC timestamps
-    protected static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
     public ClicksCountPersister(DynamoDBMapper dbMapper) {
         super(dbMapper);
@@ -26,35 +26,29 @@ public class ClicksCountPersister extends QueueRecordPersister implements CountP
     @Override
     public void persistCounter(Map<ClicksRec, Long> objectCounts) {
         if (objectCounts.isEmpty()) {
-            // short circuit to avoid creating a map when we have no objects to persistCounter
             return;
         }
 
-        // Use a local collection to batch writing the new counts into the queue. This will allow the queue drainer
-        // to remain simple as it doesn't have to account for less than full batches.
-
-        // We map resource to pair counts so we can easily look up a resource and add referrer counts to it
-        Map<Date, ClicksCount> countMap = new HashMap<>();
+        Map<ClicksRec, ClicksCount> countMap = new HashMap<>();
+        Calendar cal = Calendar.getInstance(UTC);
 
         for (Map.Entry<ClicksRec, Long> count : objectCounts.entrySet()) {
-            Date date = Calendar.getInstance(UTC).getTime();
-
-            // Check for an existing counts for this resource
             ClicksRec rec = count.getKey();
-            ClicksCount bdCount = countMap.get(date);
+            ClicksCount bdCount = countMap.get(rec);
+
             if (bdCount == null) {
-                // Create a new pair if this resource hasn't been seen yet in this batch
                 bdCount = new ClicksCount();
-                bdCount.setHashKey(Ticker.getInstance().hashKey());
-                bdCount.setTimestamp(date);
-                bdCount.setBidRequestId(rec.getBidRequestId());
+                bdCount.setHashKey(Ticker.getInstance().hashKey(rec.getAudienceId()));
+
                 bdCount.setBannerId(rec.getBannerId());
                 bdCount.setAudienceId(rec.getAudienceId());
+                bdCount.setBidRequestId(rec.getBidRequestId());
                 bdCount.setHost(HostResolver.resolveHostname());
 
-                countMap.put(date, bdCount);
+                countMap.put(rec, bdCount);
             }
 
+            bdCount.setTimestamp(cal.getTime());
             bdCount.setCount(bdCount.getCount() + count.getValue());
 
         }

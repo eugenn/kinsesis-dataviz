@@ -64,32 +64,31 @@ public class ImpressionStreamWriter {
         AmazonKinesis kinesis = new AmazonKinesisClient(credentialsProvider, clientConfig);
         kinesis.setRegion(region);
 
-        // The more resources we declare the higher write IOPS we need on our DynamoDB table.
-        // We write a record for each resource every interval.
-        // If interval = 500ms, resource count = 7 we need: (1000/500 * 7) = 14 write IOPS minimum.
         List<String> bidRequestIds = new ArrayList<>();
 //        bidRequestIds.add(UUID.randomUUID().toString());
 //        bidRequestIds.add(UUID.randomUUID().toString());
-//        bidRequestIds.add(UUID.randomUUID().toString());
-        bidRequestIds.add("11111111111");
-//        bidRequestIds.add("22222222222");
-//        bidRequestIds.add("33333333333");
+        bidRequestIds.add("b05361fe-4413-4a0e-92ae-cc2d9314ba16"); //f
+//        bidRequestIds.add("3523784b-38f7-4afc-985a-62736dbdcbf1"); //f
+//        bidRequestIds.add("e268b3fa-d53b-4f73-bb2f-31f429831e4a"); //m
+        bidRequestIds.add("fcc5f84b-c004-43c8-b25b-a2548614dff9"); //m
+        bidRequestIds.add("9c9af2a7-15f7-4cd2-b810-444d54599881"); //m
+        bidRequestIds.add("1673d571-9298-4d52-b586-099dd46488e3"); //m
 
         List<Double> prices = new ArrayList<>();
-//        prices.add(Double.valueOf(1.00));
-//        prices.add(Double.valueOf(1.00));
+        prices.add(Double.valueOf(1.00));
+        prices.add(Double.valueOf(1.00));
 //        prices.add(Double.valueOf(1.00));
 
-        prices.add(Double.valueOf(2.83));
-        prices.add(Double.valueOf(1.03));
-        prices.add(Double.valueOf(0.53));
-        prices.add(Double.valueOf(2.33));
-        prices.add(Double.valueOf(0.223));
-        prices.add(Double.valueOf(2.11));
-        prices.add(Double.valueOf(3.33));
-        prices.add(Double.valueOf(1.673));
+//        prices.add(Double.valueOf(2.83));
+//        prices.add(Double.valueOf(1.03));
+//        prices.add(Double.valueOf(0.53));
+//        prices.add(Double.valueOf(2.33));
+//        prices.add(Double.valueOf(0.223));
+//        prices.add(Double.valueOf(2.11));
+//        prices.add(Double.valueOf(3.33));
+//        prices.add(Double.valueOf(1.673));
 
-        ImpressionFactory impFactory = new ImpressionFactory(bidRequestIds, prices, "impression");
+        ImpressionFactory impFactory = new ImpressionFactory(bidRequestIds, prices);
 
         // Creates a stream to write to with 2 shards if it doesn't exist
         StreamUtils streamUtils = new StreamUtils(kinesis);

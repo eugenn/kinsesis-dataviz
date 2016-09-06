@@ -75,7 +75,7 @@ var Graph = function() {
               timezone : "browser",
               timeformat : "%M:%S",
               min : (new Date()).getTime()
-                  - (totalDurationToGraphInSeconds * 1000),
+              - (totalDurationToGraphInSeconds * 1000),
               max : (new Date()).getTime()
             },
             // Show the legend of unique types in the upper-right corner of
@@ -147,7 +147,7 @@ var UIHelper = function(data, graph) {
   // How often should the top N display be updated?
   var intervalsPerTopNUpdate = 5;
   // How far back should we fetch data at every interval?
-  var rangeOfDataToFetchEveryIntervalInSeconds = 2;
+  var rangeOfDataToFetchEveryIntervalInSeconds = 1;
   // What should N be for our Top N display?
   var topNToCalculate = 3;
   // Keep track of when we last updated the top N display.
@@ -155,7 +155,9 @@ var UIHelper = function(data, graph) {
   // Controls the update loop.
   var running = true;
   // Set the active resource to query for counts when updating data.
-  var activeResource = "300x200";
+  var activeResource = "11111111111";
+  var activeAudience = "male";
+
 
   /**
    * Fetch counts from the last secondsAgo seconds.
@@ -167,9 +169,9 @@ var UIHelper = function(data, graph) {
    * @param {function}
    *          callback The callback to invoke when data has been updated.
    */
-  var updateData = function(resource, secondsAgo, callback) {
+  var updateData = function(resource, audienceId, secondsAgo, callback) {
     // Fetch data from our data provider
-    provider.getData(resource, secondsAgo, function(newData) {
+    provider.getData(resource, audienceId, secondsAgo, function(newData) {
       // Store the data locally
       data.addNewData(newData);
       // Remove data that's outside the window of data we are displaying. This
@@ -190,7 +192,7 @@ var UIHelper = function(data, graph) {
 
     var table = $("<table/>").addClass("topN");
     $.each(topN, function(_, v) {
-      console.log(v)
+      //console.log(v)
       debugger;
       var row = $("<tr/>");
       row.append($("<td/>").addClass('typeColumn').text(v.type));
@@ -206,13 +208,13 @@ var UIHelper = function(data, graph) {
    */
   var update = function() {
     // Update our local data for the active resource
-    updateData(activeResource, rangeOfDataToFetchEveryIntervalInSeconds);
+    updateData(activeResource, activeAudience, rangeOfDataToFetchEveryIntervalInSeconds);
 
-    // Update top N every intervalsPerTopNUpdate intervals
-    //if (topNIntervalCounter++ % intervalsPerTopNUpdate == 0) {
-    //  updateTopN(data);
-    //  topNIntervalCounter = 1;
-    //}
+    //Update top N every intervalsPerTopNUpdate intervals
+    if (topNIntervalCounter++ % intervalsPerTopNUpdate == 0) {
+      updateTopN(data);
+      topNIntervalCounter = 1;
+    }
 
     // Update the graph with our new data, transformed into the data series
     // format Flot expects
@@ -271,9 +273,9 @@ var UIHelper = function(data, graph) {
       setDescription("This graph displays the last "
           + graph.getTotalDurationToGraphInSeconds()
           + " seconds of counts as calculated by the Amazon Kinesis Data Visualization");
-      //$("#topNDescription").text(
-      //    "Top " + topNToCalculate + " types by counts (Updated every "
-      //        + (intervalsPerTopNUpdate * updateIntervalInMillis) + "ms):");
+      $("#topNDescription").text(
+          "(Updated every "
+          + (intervalsPerTopNUpdate * updateIntervalInMillis) + "ms):");
     },
 
     /**
@@ -283,7 +285,7 @@ var UIHelper = function(data, graph) {
       setDescription("Loading data...");
       var _this = this;
       // Load an initial range of data, decorate the page, and start the update polling process.
-      updateData(activeResource, rangeOfDataToFetchEveryIntervalInSeconds,
+      updateData(activeResource, activeAudience, rangeOfDataToFetchEveryIntervalInSeconds,
           function() {
             // Decorate again now that we're done with the initial load
             _this.decorate();
@@ -320,8 +322,9 @@ var CountDataProvider = function() {
    *
    * @returns The URL to send a request for new data to.
    */
-  buildUrl = function(resource, range_in_seconds) {
-    return _endpoint + "?resource=" + resource + "&range_in_seconds="
+  buildUrl = function(resource, audienceId, range_in_seconds) {
+    return _endpoint + "?resource=" + resource +  "&audienceId="
+        + audienceId +  "&range_in_seconds="
         + range_in_seconds;
   };
 
@@ -359,9 +362,9 @@ var CountDataProvider = function() {
      *          callback The function to call when data has been returned from
      *          the endpoint.
      */
-    getData : function(resource, range_in_seconds, callback) {
+    getData : function(resource, audienceId, range_in_seconds, callback) {
       $.ajax({
-        url : buildUrl(resource, range_in_seconds)
+        url : buildUrl(resource, audienceId, range_in_seconds)
       }).done(callback);
     }
   }
@@ -479,7 +482,7 @@ var CountData = function() {
      * @param {object} Count data returned by our data provider.
      */
     addNewData : function(newCountData) {
-      var objType = "clicks";
+      var types = ["clicks"]
       // Expected data format:
       // [{
       //   "resource" : "/index.html",
@@ -487,25 +490,36 @@ var CountData = function() {
       //   "host" : "worker01-ec2",
       //   "typeCounts" : [{"type":"bidrequest","count":1002}]
       // }]
+      console.log(newCountData);
       newCountData.forEach(function(countRec) {
         // Update the host who last calculated the counts
         setLastUpdatedBy(countRec.host);
 
-        // Reuse or create a new data series entry for this type
-        refData = data[objType] || {
-              label : countRec.type,
-              data : {}
-            };
-        // Set the count
-        refData.data[countRec.timestamp] = countRec.count;
-        // Update the type data
-        data[objType] = refData;
-        // Update our totals whenever new data is added
-        //updateTotal(refCount.type);
+        types.forEach(function(type) {
+          // Reuse or create a new data series entry for this type
+          refData = data[type] || {
+                label : type,
+                data : {}
+              };
+
+
+          switch (type) {
+            case "clicks": refData.data[countRec.timestamp] = countRec.count;
+              break;
+
+          }
+
+          data[type] = refData;
+          // Update the type data
+          //data[type] = refData;
+          // Update our totals whenever new data is added
+          updateTotal(type);
+        })
+
+
 
       });
     },
-
 
     /**
      * Removes data older than a specific time. This will also prune types

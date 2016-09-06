@@ -7,8 +7,8 @@ import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibC
 import com.jdbc.dao.JDBCMappingDAO;
 import com.jdbc.dao.MappingDAO;
 import com.kinesis.connectors.s3.emitter.S3Emitter;
-import com.kinesis.datavis.kcl.processor.CountingRecordProcessorFactory;
 import com.kinesis.datavis.kcl.persistence.ddb.ClicksCountPersister;
+import com.kinesis.datavis.kcl.processor.CountingRecordProcessorFactory;
 import com.kinesis.datavis.model.dynamo.ClicksCount;
 import com.kinesis.datavis.model.record.ClicksRec;
 import com.kinesis.datavis.utils.AppUtils;
@@ -49,9 +49,7 @@ public class ClicksCounter extends CounterApp {
 
         DynamoDBMapper mapper = createMapper(applicationName, streamName, countsTableName, region);
 
-        // Persist counts to DynamoDB
-        ClicksCountPersister persister =
-                new ClicksCountPersister(mapper);
+        ClicksCountPersister persister = new ClicksCountPersister(mapper);
 
         MappingDAO mappingDAO = new JDBCMappingDAO();
 

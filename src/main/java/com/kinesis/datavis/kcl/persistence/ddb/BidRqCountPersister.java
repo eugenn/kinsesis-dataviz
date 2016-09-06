@@ -32,9 +32,6 @@ import java.util.*;
  */
 public class BidRqCountPersister extends QueueRecordPersister implements CountPersister<BidRequest, BidRequestCount> {
     private static final Log LOG = LogFactory.getLog(BidRqCountPersister.class);
-    // Generate UTC timestamps
-    protected static final TimeZone UTC = TimeZone.getTimeZone("UTC");
-
 
     public BidRqCountPersister(DynamoDBMapper dbMapper) {
         super(dbMapper);
@@ -43,24 +40,17 @@ public class BidRqCountPersister extends QueueRecordPersister implements CountPe
     @Override
     public void persistCounter(Map<BidRequest, Long> objectCounts) {
         if (objectCounts.isEmpty()) {
-            // short circuit to avoid creating a map when we have no objects to persistCounter
             return;
         }
 
-        // Use a local collection to batch writing the new counts into the queue. This will allow the queue drainer
-        // to remain simple as it doesn't have to account for less than full batches.
-
-        // We map resource to pair counts so we can easily look up a resource and add referrer counts to it
         Map<Date, BidRequestCount> countMap = new HashMap<>();
 
         for (Map.Entry<BidRequest, Long> count : objectCounts.entrySet()) {
             Date date = Calendar.getInstance(UTC).getTime();
 
-            // Check for an existing counts for this resource
             BidRequest rec = count.getKey();
             BidRequestCount bdCount = countMap.get(date);
             if (bdCount == null) {
-                // Create a new pair if this resource hasn't been seen yet in this batch
                 bdCount = new BidRequestCount();
                 bdCount.setHashKey(Ticker.getInstance().hashKey());
 //                bdCount.setWh(rec.getDevice().getWidth() + "x" + rec.getDevice().getHeight());

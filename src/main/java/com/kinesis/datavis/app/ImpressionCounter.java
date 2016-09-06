@@ -49,9 +49,7 @@ public class ImpressionCounter extends CounterApp {
 
         DynamoDBMapper mapper = createMapper(applicationName, streamName, countsTableName, region);
 
-        // Persist counts to DynamoDB
-        ImpressionCountPersister persister =
-                new ImpressionCountPersister(mapper);
+        ImpressionCountPersister persister = new ImpressionCountPersister(mapper);
 
         MappingDAO mappingDAO = new JDBCMappingDAO();
 

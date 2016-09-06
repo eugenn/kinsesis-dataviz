@@ -32,40 +32,33 @@ public class BidWinCountPersister extends QueueRecordPersister implements CountP
     @Override
     public void persistCounters(Map<BidWinRec, Long> objectCounts, Map<BidWinRec, Double> objectSums) {
         if (objectCounts.isEmpty()) {
-            // short circuit to avoid creating a map when we have no objects to persistCounter
             return;
         }
 
-        // Use a local collection to batch writing the new counts into the queue. This will allow the queue drainer
-        // to remain simple as it doesn't have to account for less than full batches.
-
-        // We map resource to pair counts so we can easily look up a resource and add referrer counts to it
-        Map<Date, BidWinCount> countMap = new HashMap<>();
+        Map<BidWinRec, BidWinCount> countMap = new HashMap<>();
 
         Iterator<Map.Entry<BidWinRec, Double>> iter = objectSums.entrySet().iterator();
+        Calendar cal = Calendar.getInstance(UTC);
 
         for (Map.Entry<BidWinRec, Long> count : objectCounts.entrySet()) {
-            Date date = Calendar.getInstance(UTC).getTime();
-            // Check for an existing counts for this resource
             BidWinRec rec = count.getKey();
             Map.Entry<BidWinRec, Double> totalPrice = iter.next();
 
-            BidWinCount bdCount = countMap.get(date);
+            BidWinCount bdCount = countMap.get(rec);
             if (bdCount == null) {
-                // Create a new pair if this resource hasn't been seen yet in this batch
                 bdCount = new BidWinCount();
-                bdCount.setHashKey(Ticker.getInstance().hashKey());
+
+                bdCount.setHashKey(Ticker.getInstance().hashKey(rec.getAudienceId()));
 
                 bdCount.setBannerId(rec.getBannerId());
                 bdCount.setAudienceId(rec.getAudienceId());
 
-                bdCount.setTimestamp(date);
                 bdCount.setHost(HostResolver.resolveHostname());
-
-                countMap.put(date, bdCount);
+                countMap.put(rec, bdCount);
             }
 
-            bdCount.setTotalPrice(totalPrice.getValue());
+            bdCount.setTimestamp(cal.getTime());
+            bdCount.setTotalPrice(bdCount.getTotalPrice() + totalPrice.getValue());
             bdCount.setCount(bdCount.getCount() + count.getValue());
 
         }

@@ -23,16 +23,16 @@ public class BidWinRec {
 
         BidWinRec that = (BidWinRec) o;
 
-        if (bidRequestId != null ? !bidRequestId.equals(that.bidRequestId) : that.bidRequestId != null) return false;
         if (bannerId != null ? !bannerId.equals(that.bannerId) : that.bannerId != null) return false;
+        if (audienceId != null ? !audienceId.equals(that.audienceId) : that.audienceId != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = bidRequestId != null ? bidRequestId.hashCode() : 0;
-        result = 31 * result + (bannerId != null ? bannerId.hashCode() : 0);
+        int result = bannerId != null ? bannerId.hashCode() : 0;
+        result = 31 * result + (audienceId != null ? audienceId.hashCode() : 0);
         return result;
     }
 

@@ -24,8 +24,6 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class BidResponseCountPersister extends QueueRecordPersister implements CountPersister<BidResponse, BidResponseCount> {
     private static final Log LOG = LogFactory.getLog(BidRqCountPersister.class);
-    // Generate UTC timestamps
-    protected static final TimeZone UTC = TimeZone.getTimeZone("UTC");
     @Getter
     public BlockingQueue<Mapping> counts2 = new LinkedBlockingQueue<>(60000);
     private MappingDAO mappingDAO;

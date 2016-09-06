@@ -2,16 +2,13 @@ package com.kinesis.datavis.producer.clicks;
 
 import com.kinesis.datavis.model.record.ClicksRec;
 
-import java.math.BigDecimal;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Created by eugennekhai on 25/08/16.
  */
 public class ClicksFactory {
-    private final List<BigDecimal> prices;
     private List<String> bidRequestIds;
 
     /**
@@ -19,12 +16,11 @@ public class ClicksFactory {
      *
      * @param bidRequestIds List of bidRequestIds to use when generating a pair.
      */
-    public ClicksFactory(List<String> bidRequestIds, List<BigDecimal> prices, String type) {
+    public ClicksFactory(List<String> bidRequestIds) {
         if (bidRequestIds == null || bidRequestIds.isEmpty()) {
             throw new IllegalArgumentException("At least 1 resource is required");
         }
         this.bidRequestIds = bidRequestIds;
-        this.prices = prices;
 
     }
 
@@ -35,7 +31,7 @@ public class ClicksFactory {
      * @return A new pair with random resource and referrer values.
      */
     public ClicksRec create() {
-        ClicksRec clicksRec = new ClicksRec(UUID.randomUUID().toString(), "undefined", "undefined");
+        ClicksRec clicksRec = new ClicksRec(getRandomId(), "undefined", "undefined");
 
         return clicksRec;
     }
@@ -49,12 +45,4 @@ public class ClicksFactory {
         return bidRequestIds.get(ThreadLocalRandom.current().nextInt(bidRequestIds.size()));
     }
 
-    /**
-     * Gets a random referrer from the collection of referrers.
-     *
-     * @return A random referrer.
-     */
-    protected BigDecimal getRandomPrice() {
-        return prices.get(ThreadLocalRandom.current().nextInt(prices.size()));
-    }
 }

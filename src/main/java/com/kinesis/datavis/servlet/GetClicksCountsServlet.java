@@ -49,6 +49,7 @@ public class GetClicksCountsServlet extends HttpServlet {
     private transient DynamoDBMapper mapper;
 
     private static final String PARAMETER_RESOURCE = "resource";
+    private static final String PARAMETER_AUDIENCE = "audienceId";
     private static final String PARAMETER_RANGE_IN_SECONDS = "range_in_seconds";
 
     public GetClicksCountsServlet(DynamoDBMapper mapper) {
@@ -71,10 +72,13 @@ public class GetClicksCountsServlet extends HttpServlet {
 
         // Parse query string as a single integer - the number of seconds since "now" to query for new counts
         String resource = params.getString(PARAMETER_RESOURCE);
+        String audienceId = params.getString(PARAMETER_AUDIENCE);
+
         int rangeInSeconds = Integer.parseInt(params.getString(PARAMETER_RANGE_IN_SECONDS));
-        resource = "11111111111";
+
         Calendar c = Calendar.getInstance();
         c.add(Calendar.SECOND, -1 * rangeInSeconds);
+
         Date startTime = c.getTime();
         if (LOG.isDebugEnabled()) {
             LOG.debug(String.format("Querying for counts of resource %s since %s", resource, DATE_FORMATTER.get().format(startTime)));
@@ -84,19 +88,30 @@ public class GetClicksCountsServlet extends HttpServlet {
 
 
         ClicksCount hashKey = new ClicksCount();
-        hashKey.setHashKey(Ticker.getInstance().hashKey());
+        hashKey.setHashKey(Ticker.getInstance().hashKey(audienceId));
 
         query.setHashKeyValues(hashKey);
 
         Condition recentUpdates =
                 new Condition().withComparisonOperator(ComparisonOperator.GT)
                         .withAttributeValueList(new AttributeValue().withS(DATE_FORMATTER.get().format(startTime)));
-        Condition attrFilter =
+
+        Condition bannerIdFilter =
                 new Condition().
-                        withComparisonOperator(ComparisonOperator.EQ).withAttributeValueList(new AttributeValue().withS(resource));
+                        withComparisonOperator(ComparisonOperator.EQ).withAttributeValueList(new AttributeValue().
+                        withS(resource));
+
+        Condition audienceIdFilter =
+                new Condition().
+                        withComparisonOperator(ComparisonOperator.EQ).withAttributeValueList(new AttributeValue().
+                        withS(audienceId));
+
+        final Map<String, Condition> paramsAttr = new HashMap<>();
+        paramsAttr.put("bannerId", bannerIdFilter);
+        paramsAttr.put("audienceId", audienceIdFilter);
 
         query.setRangeKeyConditions(Collections.singletonMap("timestamp", recentUpdates));
-        query.setQueryFilter(Collections.singletonMap("bidRequestId", attrFilter));
+        query.setQueryFilter(paramsAttr);
 
         List<ClicksCount> counts = mapper.query(ClicksCount.class, query);
 
