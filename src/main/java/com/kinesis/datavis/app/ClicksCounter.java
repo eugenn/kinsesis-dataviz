@@ -12,6 +12,7 @@ import com.kinesis.datavis.kcl.processor.CountingRecordProcessorFactory;
 import com.kinesis.datavis.kcl.processor.type.CommonTypeProcessor;
 import com.kinesis.datavis.kcl.processor.type.TypeProcessor;
 import com.kinesis.datavis.model.record.ClicksRec;
+import com.kinesis.datavis.utils.AppProperties;
 import com.kinesis.datavis.utils.AppUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,22 +38,21 @@ public class ClicksCounter extends CounterApp {
      *        exist or should be created.
      */
     public static void main(String[] args) throws UnknownHostException {
-        if (args.length != 4) {
-            System.err.println("Usage: " + BidRequestCounter.class.getSimpleName()
-                    + " <application name> <stream name> <DynamoDB table name> <region>");
-            System.exit(1);
-        }
+        String path = args[0];
 
-        String applicationName = args[0];
-        String streamName = args[1];
-        String countsTableName = args[2];
-        Region region = AppUtils.parseRegion(args[3]);
+        AppProperties appProps = new AppProperties("clicks", path);
+
+        String applicationName = appProps.appName();
+        String streamName = appProps.streamName();
+        String countsTableName = appProps.countTable();
+        Region region = AppUtils.parseRegion(appProps.getRegion());
 
         DynamoDBMapper mapper = createMapper(applicationName, streamName, countsTableName, region);
 
         ClicksCountPersister persister = new ClicksCountPersister(mapper);
 
-        TypeProcessor<ClicksRec> typeProcessor = new CommonTypeProcessor<>(new JDBCMappingDAO(), new FlushBuffer<>());
+        TypeProcessor<ClicksRec> typeProcessor =
+                new CommonTypeProcessor<>(new JDBCMappingDAO(appProps.dbUrl(), appProps.dbUser(), appProps.dbPassword()), new FlushBuffer<>());
 
         IRecordProcessorFactory recordProcessor =
                 new CountingRecordProcessorFactory<>(ClicksRec.class,

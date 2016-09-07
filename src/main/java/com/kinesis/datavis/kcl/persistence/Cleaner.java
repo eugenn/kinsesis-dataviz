@@ -4,7 +4,6 @@ import com.jdbc.dao.MappingDAO;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by eugennekhai on 01/09/16.
@@ -17,12 +16,12 @@ public class Cleaner  {
 
         ScheduledExecutorService ses = Executors.newSingleThreadScheduledExecutor();
 
-        ses.scheduleAtFixedRate((Runnable) this::doClean, 0, 1, TimeUnit.HOURS);
+//        ses.scheduleAtFixedRate((Runnable) this::doClean, 0, 1, TimeUnit.HOURS);
     }
 
     private void doClean() {
         System.out.println("======Cleaning=========");
-        System.out.println(mappingDAO.count());
+//        System.out.println(mappingDAO.count());
 
         mappingDAO.deleteAll();
     }

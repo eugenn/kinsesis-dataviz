@@ -14,6 +14,7 @@ import com.kinesis.datavis.kcl.persistence.ddb.BidResponseCountPersister;
 import com.kinesis.datavis.kcl.processor.CountingRecordProcessorFactory;
 import com.kinesis.datavis.kcl.processor.type.BidResponseProcessor;
 import com.kinesis.datavis.kcl.processor.type.TypeProcessor;
+import com.kinesis.datavis.utils.AppProperties;
 import com.kinesis.datavis.utils.AppUtils;
 import com.kinesis.openrtb.BidResponse;
 import org.apache.commons.logging.Log;
@@ -42,20 +43,18 @@ public class BidResponseCounter extends CounterApp {
      *        exist or should be created.
      */
     public static void main(String[] args) throws UnknownHostException {
-        if (args.length != 4) {
-            System.err.println("Usage: " + BidRequestCounter.class.getSimpleName()
-                    + " <application name> <stream name> <DynamoDB table name> <region>");
-            System.exit(1);
-        }
+        String path = args[0];
 
-        String applicationName = args[0];
-        String streamName = args[1];
-        String countsTableName = args[2];
-        Region region = AppUtils.parseRegion(args[3]);
+        AppProperties appProps = new AppProperties("bidrsp", path);
+
+        String applicationName = appProps.appName();
+        String streamName = appProps.streamName();
+        String countsTableName = appProps.countTable();
+        Region region = AppUtils.parseRegion(appProps.getRegion());
 
         DynamoDBMapper mapper = createMapper(applicationName, streamName, countsTableName, region);
 
-        MappingDAO mappingDAO = new JDBCMappingDAO();
+        MappingDAO mappingDAO = new JDBCMappingDAO(appProps.dbUrl(), appProps.dbUser(), appProps.dbPassword());
 
         Cleaner cleaner = new Cleaner(mappingDAO);
 

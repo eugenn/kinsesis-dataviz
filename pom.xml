@@ -22,11 +22,11 @@
     </licenses>
 
     <properties>
-        <bidrg.aggregator.name>KCLDynamoDBTableBrq</bidrg.aggregator.name>
-        <bidrq.stream>KinesisStreamBrq</bidrq.stream>
-        <bidrq.counts-table>CountsDynamoDBTableBrq</bidrq.counts-table>
-        <bidrq.servlet>GetBidRqCountsServlet</bidrq.servlet>
-        <bidrq.endpoint>GetRqCounts</bidrq.endpoint>
+        <bidrg.aggregator.name>KCLDynamoDBTableImp</bidrg.aggregator.name>
+        <bidrq.stream>KinesisStreamImp</bidrq.stream>
+        <bidrq.counts-table>CountsDynamoDBTableImp</bidrq.counts-table>
+        <bidrq.servlet>GetImpressionCountsServlet</bidrq.servlet>
+        <bidrq.endpoint>GetImpCounts</bidrq.endpoint>
 
         <bdwin.aggregator.name>KCLDynamoDBTableBwin</bdwin.aggregator.name>
         <bdwin.stream>KinesisStreamBwin</bdwin.stream>
@@ -172,7 +172,7 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <mainClass>com.kinesis.datavis.app.BidRequestCounter</mainClass>
+                            <mainClass>com.kinesis.datavis.app.ImpressionCounter</mainClass>
                             <arguments>
                                 <argument>${bidrg.aggregator.name}</argument>
                                 <argument>${bidrq.stream}</argument>
@@ -194,7 +194,7 @@
                         <artifactId>exec-maven-plugin</artifactId>
                         <version>1.5.0</version>
                         <configuration>
-                            <mainClass>com.kinesis.datavis.writer.BidRequestStreamWriter</mainClass>
+                            <mainClass>com.kinesis.datavis.writer.ImpressionStreamWriter</mainClass>
                             <arguments>
                                 <!-- Start a single thread to put records in to Amazon Kinesis -->
                                 <argument>1</argument>

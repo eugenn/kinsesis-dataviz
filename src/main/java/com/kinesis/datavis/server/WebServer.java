@@ -6,6 +6,7 @@ import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.regions.Region;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
+import com.kinesis.datavis.utils.AppProperties;
 import com.kinesis.datavis.utils.AppUtils;
 import com.kinesis.datavis.utils.DynamoDBUtils;
 import org.eclipse.jetty.server.Server;
@@ -28,17 +29,15 @@ public class WebServer {
      * @throws Exception Error starting the web server.
      */
     public static void main(String[] args) throws Exception {
-        if (args.length != 6) {
-            System.err.println("Usage: " + WebServer.class
-                    + " <port number> <directory for static content> <DynamoDB table name> <region>");
-            System.exit(1);
-        }
         Server server = new Server(Integer.parseInt(args[0]));
-        String wwwroot = args[1];
-        String countsTableName = args[2];
-        String servlet = args[3];
-        String endpoint = args[4];
-        Region region = AppUtils.parseRegion(args[5]);
+
+        AppProperties appProps = new AppProperties("webserver", args[1]);
+
+        String wwwroot = appProps.webRoot();
+        String countsTableName = appProps.countTable();
+        String servlet = appProps.servletName();
+        String endpoint = appProps.endpoint();
+        Region region = AppUtils.parseRegion(appProps.getRegion());
 
         // Servlet context
         ServletContextHandler context =

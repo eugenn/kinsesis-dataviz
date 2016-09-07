@@ -13,12 +13,15 @@ import com.amazonaws.services.kinesis.clientlibrary.interfaces.IRecordProcessorF
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.InitialPositionInStream;
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.Worker;
-import com.kinesis.datavis.utils.DynamoDBUtils;
 import com.kinesis.datavis.utils.AppUtils;
+import com.kinesis.datavis.utils.DynamoDBUtils;
 import com.kinesis.datavis.utils.StreamUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
 import java.util.UUID;
 
 /**
@@ -78,5 +81,7 @@ public class CounterApp {
 
         return exitCode;
     }
+
+
 }
 

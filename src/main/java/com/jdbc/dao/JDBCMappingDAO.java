@@ -1,32 +1,31 @@
 package com.jdbc.dao;
 
 import com.jdbc.vo.Mapping;
+import org.apache.tomcat.dbcp.dbcp.BasicDataSource;
 
 import java.sql.*;
 import java.util.LinkedList;
 import java.util.List;
 
 public class JDBCMappingDAO implements MappingDAO {
-
-    private Connection connection = null;
-//    private static final BasicDataSource dataSource = new BasicDataSource();
+    private static final BasicDataSource dataSource = new BasicDataSource();
     private static final String INSERT = "INSERT INTO kinesis.mapping (bidrequestId, bannerId, audienceId, timestamp) VALUES (? , ?, ?, ?)";
     private static final String DELETE = "DELETE FROM mapping WHERE mapping.timestamp < ADDDATE(NOW(), INTERVAL -1 HOUR)";
     private static final String SELECT = "SELECT bidrequestId, bannerId, audienceId, timestamp FROM kinesis.mapping";
     private static final String COUNT = "SELECT COUNT(1) FROM mapping";
 
-    public Connection getConnection() {
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            if (connection == null)
-                connection = DriverManager.getConnection("jdbc:mysql://localhost/kinesis?user=root&password=root&autoReconnect=true&useSSL=false");
+    public JDBCMappingDAO(String url, String user, String password) {
+        dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+        dataSource.setUrl(url);
+        dataSource.setUsername(user);
+        dataSource.setPassword(password);
+        dataSource.setDefaultAutoCommit(true);
+        dataSource.setMaxActive(10);
+        dataSource.setMaxIdle(50);
+    }
 
-        } catch (ClassNotFoundException | SQLException e) {
-
-            e.printStackTrace();
-
-        }
-        return connection;
+    public static Connection getConnection() throws SQLException {
+        return dataSource.getConnection();
     }
 
     @Override
@@ -51,7 +50,8 @@ public class JDBCMappingDAO implements MappingDAO {
     @Override
     public Mapping load(String bidrequestId) {
         try (
-                Statement statement = getConnection().createStatement();
+                Connection conn = getConnection();
+                Statement statement = conn.createStatement();
                 ResultSet resultSet = statement.executeQuery("select * from mapping where bidrequestId=\"" + bidrequestId + "\"")) {
 
             if (resultSet.next()) {
@@ -66,8 +66,8 @@ public class JDBCMappingDAO implements MappingDAO {
 
     @Override
     public void batchInsert(List<Mapping> mappings) {
-        try (
-                PreparedStatement preparedStatement = getConnection().prepareStatement(INSERT)) {
+        try (Connection conn = getConnection();
+                PreparedStatement preparedStatement = conn.prepareStatement(INSERT)) {
             int i = 0;
 
             for (Mapping mapping : mappings) {

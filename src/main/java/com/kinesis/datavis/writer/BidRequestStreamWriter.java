@@ -23,6 +23,7 @@ import com.amazonaws.services.kinesis.AmazonKinesis;
 import com.amazonaws.services.kinesis.AmazonKinesisClient;
 import com.kinesis.datavis.producer.bidrq.BidRequestFactory;
 import com.kinesis.datavis.producer.bidrq.BidRequestPutter;
+import com.kinesis.datavis.utils.AppProperties;
 import com.kinesis.datavis.utils.AppUtils;
 import com.kinesis.datavis.utils.StreamUtils;
 import org.apache.commons.logging.Log;
@@ -48,17 +49,13 @@ public class BidRequestStreamWriter  {
      * @throws InterruptedException If this application is interrupted while sending records to Kinesis.
      */
     public static void main(String[] args) throws InterruptedException {
-        if (args.length != 3) {
-            System.err.println("Usage: " + BidRequestStreamWriter.class.getSimpleName()
-                    + " <number of threads> <stream name> <region>");
-            System.exit(1);
-        }
-
         int numberOfThreads = Integer.parseInt(args[0]);
 
-        String streamName = args[1];
+        AppProperties appProps = new AppProperties("bidrq", args[1]);
 
-        Region region = AppUtils.parseRegion(args[2]);
+        String streamName = appProps.streamName();
+
+        Region region = AppUtils.parseRegion(appProps.getRegion());
 
         AWSCredentialsProvider credentialsProvider = new DefaultAWSCredentialsProviderChain();
 
