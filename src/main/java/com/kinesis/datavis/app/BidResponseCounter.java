@@ -6,16 +6,22 @@ import com.amazonaws.services.kinesis.clientlibrary.interfaces.IRecordProcessorF
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;
 import com.jdbc.dao.JDBCMappingDAO;
 import com.jdbc.dao.MappingDAO;
+import com.jdbc.vo.Mapping;
+import com.kinesis.connectors.s3.buffer.FlushBuffer;
 import com.kinesis.connectors.s3.emitter.S3Emitter;
 import com.kinesis.datavis.kcl.persistence.Cleaner;
 import com.kinesis.datavis.kcl.persistence.ddb.BidResponseCountPersister;
-import com.kinesis.datavis.kcl.processor.CountingRecordProcessorFactory2;
+import com.kinesis.datavis.kcl.processor.CountingRecordProcessorFactory;
+import com.kinesis.datavis.kcl.processor.type.BidResponseProcessor;
+import com.kinesis.datavis.kcl.processor.type.TypeProcessor;
 import com.kinesis.datavis.utils.AppUtils;
 import com.kinesis.openrtb.BidResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.net.UnknownHostException;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Created by eugennekhai on 26/08/16.
@@ -53,13 +59,14 @@ public class BidResponseCounter extends CounterApp {
 
         Cleaner cleaner = new Cleaner(mappingDAO);
 
-        // Persist counts to DynamoDB
-        BidResponseCountPersister persister = new BidResponseCountPersister(mapper, mappingDAO);
+        BlockingQueue<Mapping> mappingsBuff = new LinkedBlockingQueue<>(60000);
+
+        TypeProcessor<BidResponse> typeProcessor = new BidResponseProcessor(mappingDAO, new FlushBuffer<>(), mappingsBuff);
 
         IRecordProcessorFactory recordProcessor =
-                new CountingRecordProcessorFactory2<>(BidResponse.class,
-                        persister,
-                        mappingDAO,
+                new CountingRecordProcessorFactory<>(BidResponse.class,
+                        new BidResponseCountPersister(mapper),
+                        typeProcessor,
                         new S3Emitter("bdresponse"),
                         COMPUTE_RANGE_FOR_COUNTS_IN_MILLIS,
                         COMPUTE_INTERVAL_IN_MILLIS);

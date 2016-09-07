@@ -9,17 +9,21 @@ import java.util.List;
 
 public class JDBCMappingDAO implements MappingDAO {
 
+    Connection connection = null;
     private static final BasicDataSource dataSource = new BasicDataSource();
 
-    static {
-        dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-        dataSource.setUrl("jdbc:mysql://localhost/kinesis");
-        dataSource.setUsername("root");
-        dataSource.setPassword("root");
-    }
+    public Connection getConnection() {
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            if (connection == null)
+                connection = DriverManager.getConnection("jdbc:mysql://localhost/kinesis?user=root&password=root&autoReconnect=true&useSSL=false");
 
-    public static Connection getConnection() throws SQLException {
-        return dataSource.getConnection();
+        } catch (ClassNotFoundException | SQLException e) {
+
+            e.printStackTrace();
+
+        }
+        return connection;
     }
 
     @Override
@@ -58,7 +62,7 @@ public class JDBCMappingDAO implements MappingDAO {
     @Override
     public void batchInsert(List<Mapping> mappings) {
         try (Connection conn = getConnection();
-             PreparedStatement preparedStatement = conn.prepareStatement("INSERT INTO kinesis.mapping (bidrequestId ,banneridId, audience, timestamp) VALUES (? , ?, ?, ?)")) {
+             PreparedStatement preparedStatement = conn.prepareStatement("INSERT INTO kinesis.mapping (bidrequestId, bannerId, audienceId, timestamp) VALUES (? , ?, ?, ?)")) {
             int i = 0;
 
             for (Mapping mapping : mappings) {
@@ -83,7 +87,7 @@ public class JDBCMappingDAO implements MappingDAO {
 
     @Override
     public void deleteAll() {
-        String deleteSQL = "DELETE FROM mapping WHERE mapping.timestamp < ADDDATE(NOW(), INTERVAL -1 MINUTE)";
+        String deleteSQL = "DELETE FROM mapping WHERE mapping.timestamp < ADDDATE(NOW(), INTERVAL -1 HOUR)";
 
         try (Connection conn = getConnection();
              Statement statement = conn.createStatement()) {

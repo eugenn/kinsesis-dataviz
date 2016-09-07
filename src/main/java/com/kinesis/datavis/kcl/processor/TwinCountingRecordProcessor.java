@@ -10,13 +10,14 @@ import com.amazonaws.services.kinesis.clientlibrary.types.ShutdownReason;
 import com.amazonaws.services.kinesis.model.Record;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jdbc.dao.MappingDAO;
 import com.jdbc.vo.Mapping;
-import com.kinesis.connectors.s3.buffer.FlushBuffer;
+import com.kinesis.connectors.s3.buffer.IBuffer;
 import com.kinesis.connectors.s3.buffer.UnmodifiableBuffer;
 import com.kinesis.connectors.s3.emitter.IEmitter;
 import com.kinesis.datavis.kcl.counter.SlidingWindowTwinCounter;
 import com.kinesis.datavis.kcl.persistence.CountPersister;
+import com.kinesis.datavis.kcl.processor.type.CommonTypeProcessor;
+import com.kinesis.datavis.kcl.processor.type.TypeProcessor;
 import com.kinesis.datavis.kcl.timing.Clock;
 import com.kinesis.datavis.kcl.timing.NanoClock;
 import com.kinesis.datavis.kcl.timing.Timer;
@@ -64,8 +65,6 @@ public class TwinCountingRecordProcessor<T, C> implements IRecordProcessor {
     // This is responsible for persisting our counts every interval
     private CountPersister<T, C> persister;
 
-    private MappingDAO mappingDAO;
-
     private CountingRecordProcessorConfig config;
 
     // The type of record we expect to receive as JSON
@@ -74,8 +73,8 @@ public class TwinCountingRecordProcessor<T, C> implements IRecordProcessor {
     private Object monitor = new Object();
 
     private IEmitter<byte[]> emitter;
-    private FlushBuffer<byte[]> buffer;
-//    private long backoffInterval = 1000L * 10;
+    private IBuffer<byte[]> buffer;
+    private CommonTypeProcessor<T> typeProcessor;
 
 
     /**
@@ -90,7 +89,7 @@ public class TwinCountingRecordProcessor<T, C> implements IRecordProcessor {
     public TwinCountingRecordProcessor(CountingRecordProcessorConfig config,
                                        Class<T> recordType,
                                        CountPersister<T, C> persister,
-                                       MappingDAO mappingDAO,
+                                       TypeProcessor<T> typeProcessor,
                                        IEmitter emitter,
                                        int computeRangeInMillis,
                                        int computeIntervalInMillis) {
@@ -98,12 +97,11 @@ public class TwinCountingRecordProcessor<T, C> implements IRecordProcessor {
         this.config = config;
         this.recordType = recordType;
         this.persister = persister;
-        this.mappingDAO = mappingDAO;
         this.computeRangeInMillis = computeRangeInMillis;
         this.computeIntervalInMillis = computeIntervalInMillis;
-
+        this.typeProcessor = (CommonTypeProcessor<T>) typeProcessor;
         this.emitter = emitter;
-        this.buffer = new FlushBuffer<>();
+        this.buffer = typeProcessor.getBuffer();
 
         // Create an object mapper to deserialize records that ignores unknown properties
         JSON = new ObjectMapper();
@@ -180,8 +178,7 @@ public class TwinCountingRecordProcessor<T, C> implements IRecordProcessor {
             try {
                 rec = JSON.readValue(r.getData().array(), recordType);
 
-                Mapping mapping = mappingDAO.load(ReflectionUtil.getValue(rec, "getBidRequestId"));
-
+                Mapping mapping = typeProcessor.getMappingDAO().load(ReflectionUtil.getValue(rec, "getBidRequestId"));
 
                 if (mapping != null) {
                     String bannerId = mapping.getBannerId();
@@ -190,7 +187,7 @@ public class TwinCountingRecordProcessor<T, C> implements IRecordProcessor {
                     ReflectionUtil.setValue(rec, "bannerId", bannerId);
                     ReflectionUtil.setValue(rec, "audienceId", audienceId);
 
-                    String jsonPatched = toJSON(bannerId, audienceId, r.getData().array());
+                    String jsonPatched = typeProcessor.toJSON(bannerId, audienceId, r.getData().array());
 
                     buffer.consumeRecord(jsonPatched.getBytes(Charset.forName("UTF-8")), r.getData().array().length, r.getSequenceNumber());
 
@@ -223,16 +220,6 @@ public class TwinCountingRecordProcessor<T, C> implements IRecordProcessor {
         }
     }
 
-    private String toJSON(String bannerId, String audienceId, byte[] data) {
-        StringBuilder builder = new StringBuilder("{\"bannerId\":\"");
-        builder.append(bannerId)
-                .append("\",\"audienceId\":\"")
-                .append(audienceId)
-                .append("\",\"data\":")
-                .append(new String(data))
-                .append("}");
-        return builder.toString();
-    }
 
     private void emit(List<byte[]> emitItems) {
         List<byte[]> unprocessed = new ArrayList<>(emitItems);

@@ -27,11 +27,11 @@ public class BidWinFactory {
         this.bidRequestIds = bidRequestIds;
         this.prices = prices;
 
-        mapping.put("b05361fe-4413-4a0e-92ae-cc2d9314ba16", "female");
-        mapping.put("e268b3fa-d53b-4f73-bb2f-31f429831e4a", "male");
-        mapping.put("fcc5f84b-c004-43c8-b25b-a2548614dff9", "male");
-        mapping.put("9c9af2a7-15f7-4cd2-b810-444d54599881", "male");
-        mapping.put("1673d571-9298-4d52-b586-099dd46488e3", "male");
+//        mapping.put("b05361fe-4413-4a0e-92ae-cc2d9314ba16", "female");
+//        mapping.put("e268b3fa-d53b-4f73-bb2f-31f429831e4a", "male");
+//        mapping.put("fcc5f84b-c004-43c8-b25b-a2548614dff9", "male");
+//        mapping.put("9c9af2a7-15f7-4cd2-b810-444d54599881", "male");
+//        mapping.put("1673d571-9298-4d52-b586-099dd46488e3", "male");
     }
 
     /**

@@ -67,12 +67,12 @@ public class ImpressionStreamWriter {
         List<String> bidRequestIds = new ArrayList<>();
 //        bidRequestIds.add(UUID.randomUUID().toString());
 //        bidRequestIds.add(UUID.randomUUID().toString());
-        bidRequestIds.add("b05361fe-4413-4a0e-92ae-cc2d9314ba16"); //f
+//        bidRequestIds.add("b05361fe-4413-4a0e-92ae-cc2d9314ba16"); //f
 //        bidRequestIds.add("3523784b-38f7-4afc-985a-62736dbdcbf1"); //f
 //        bidRequestIds.add("e268b3fa-d53b-4f73-bb2f-31f429831e4a"); //m
-        bidRequestIds.add("fcc5f84b-c004-43c8-b25b-a2548614dff9"); //m
-        bidRequestIds.add("9c9af2a7-15f7-4cd2-b810-444d54599881"); //m
-        bidRequestIds.add("1673d571-9298-4d52-b586-099dd46488e3"); //m
+//        bidRequestIds.add("fcc5f84b-c004-43c8-b25b-a2548614dff9"); //m
+        bidRequestIds.add("929f132d-b3cc-4608-a893-64aeb9c8cfe9"); //m
+        bidRequestIds.add("0b502371-3fd6-44d7-ae35-5716dde6f3a8"); //m
 
         List<Double> prices = new ArrayList<>();
         prices.add(Double.valueOf(1.00));

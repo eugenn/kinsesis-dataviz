@@ -1,7 +1,6 @@
 package com.kinesis.datavis.kcl.persistence.ddb;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import com.jdbc.dao.MappingDAO;
 import com.kinesis.datavis.kcl.persistence.CountPersister;
 import com.kinesis.datavis.kcl.persistence.PersisterThread;
 import com.kinesis.datavis.model.dynamo.BidResponseCount;
@@ -21,11 +20,9 @@ import java.util.Map;
  */
 public class BidResponseCountPersister extends QueueRecordPersister implements CountPersister<BidResponse, BidResponseCount> {
     private static final Log LOG = LogFactory.getLog(BidRqCountPersister.class);
-    private MappingDAO mappingDAO;
 
-    public BidResponseCountPersister(DynamoDBMapper dbMapper, MappingDAO mappingDAO) {
+    public BidResponseCountPersister(DynamoDBMapper dbMapper) {
         super(dbMapper);
-        this.mappingDAO = mappingDAO;
     }
 
     public void initialize() {
@@ -33,8 +30,6 @@ public class BidResponseCountPersister extends QueueRecordPersister implements C
         dynamoDBSender = new PersisterThread<>(mapper, counts);
         dynamoDBSender.setDaemon(true);
         dynamoDBSender.start();
-
-
     }
 
     public void checkpoint() throws InterruptedException {

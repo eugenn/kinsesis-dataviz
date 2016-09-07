@@ -20,11 +20,13 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.kinesis.clientlibrary.interfaces.IRecordProcessorFactory;
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;
 import com.jdbc.dao.JDBCMappingDAO;
-import com.jdbc.dao.MappingDAO;
+import com.kinesis.connectors.s3.buffer.FlushBuffer;
 import com.kinesis.connectors.s3.emitter.S3Emitter;
 import com.kinesis.datavis.kcl.persistence.CountPersister;
 import com.kinesis.datavis.kcl.persistence.ddb.BidRqCountPersister;
 import com.kinesis.datavis.kcl.processor.CountingRecordProcessorFactory;
+import com.kinesis.datavis.kcl.processor.type.CommonTypeProcessor;
+import com.kinesis.datavis.kcl.processor.type.TypeProcessor;
 import com.kinesis.datavis.utils.AppUtils;
 import com.kinesis.openrtb.BidRequest;
 import org.apache.commons.logging.Log;
@@ -65,15 +67,12 @@ public class BidRequestCounter extends CounterApp {
 
         DynamoDBMapper mapper = createMapper(applicationName, streamName, countsTableName, region);
 
-        // Persist counts to DynamoDB
-        BidRqCountPersister persister = new BidRqCountPersister(mapper);
-
-        MappingDAO mappingDAO = new JDBCMappingDAO();
+        TypeProcessor<BidRequest> typeProcessor = new CommonTypeProcessor<>(new JDBCMappingDAO(), new FlushBuffer<>());
 
         IRecordProcessorFactory recordProcessor =
                 new CountingRecordProcessorFactory<>(BidRequest.class,
-                        persister,
-                        mappingDAO,
+                        new BidRqCountPersister(mapper),
+                        typeProcessor,
                         new S3Emitter("bdrequest"),
                         COMPUTE_RANGE_FOR_COUNTS_IN_MILLIS,
                         COMPUTE_INTERVAL_IN_MILLIS);

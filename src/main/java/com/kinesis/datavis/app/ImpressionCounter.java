@@ -5,11 +5,12 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.kinesis.clientlibrary.interfaces.IRecordProcessorFactory;
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;
 import com.jdbc.dao.JDBCMappingDAO;
-import com.jdbc.dao.MappingDAO;
+import com.kinesis.connectors.s3.buffer.FlushBuffer;
 import com.kinesis.connectors.s3.emitter.S3Emitter;
-import com.kinesis.datavis.kcl.processor.TwinCountingProcessorFactory;
 import com.kinesis.datavis.kcl.persistence.ddb.ImpressionCountPersister;
-import com.kinesis.datavis.model.dynamo.ImpressionCount;
+import com.kinesis.datavis.kcl.processor.TwinCountingProcessorFactory;
+import com.kinesis.datavis.kcl.processor.type.CommonTypeProcessor;
+import com.kinesis.datavis.kcl.processor.type.TypeProcessor;
 import com.kinesis.datavis.model.record.ImpressionRec;
 import com.kinesis.datavis.utils.AppUtils;
 import org.apache.commons.logging.Log;
@@ -49,14 +50,12 @@ public class ImpressionCounter extends CounterApp {
 
         DynamoDBMapper mapper = createMapper(applicationName, streamName, countsTableName, region);
 
-        ImpressionCountPersister persister = new ImpressionCountPersister(mapper);
-
-        MappingDAO mappingDAO = new JDBCMappingDAO();
+        TypeProcessor<ImpressionRec> typeProcessor = new CommonTypeProcessor<>(new JDBCMappingDAO(), new FlushBuffer<>());
 
         IRecordProcessorFactory recordProcessor =
-                new TwinCountingProcessorFactory<ImpressionRec, ImpressionCount>(ImpressionRec.class,
-                        persister,
-                        mappingDAO,
+                new TwinCountingProcessorFactory<>(ImpressionRec.class,
+                        new ImpressionCountPersister(mapper),
+                        typeProcessor,
                         new S3Emitter("impression"),
                         COMPUTE_RANGE_FOR_COUNTS_IN_MILLIS,
                         COMPUTE_INTERVAL_IN_MILLIS);

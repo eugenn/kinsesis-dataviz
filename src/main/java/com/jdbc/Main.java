@@ -24,15 +24,15 @@ public class Main {
 
 		JDBCMappingDAO jdbcPersonDAO = new JDBCMappingDAO();
 //		jdbcPersonDAO.getConnection();
-//		jdbcPersonDAO.batchInsert(recs);
+		jdbcPersonDAO.batchInsert(recs);
 
 //		jdbcPersonDAO.deleteAll();
 
 //		jdbcPersonDAO.insert(mapping1);
 
-//		Mapping mapping = jdbcPersonDAO.load("ddwwwwww22223234edewf");
+		Mapping mapping = jdbcPersonDAO.load("ddwwwwww22223234edewf");
 
-//		System.out.println(mapping);
+		System.out.println(mapping);
 
 //		System.out.println(jdbcPersonDAO.count());
 
