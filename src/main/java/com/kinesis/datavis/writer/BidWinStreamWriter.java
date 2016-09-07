@@ -72,7 +72,7 @@ public class BidWinStreamWriter {
 //        bidRequestIds.add("e268b3fa-d53b-4f73-bb2f-31f429831e4a"); //m
 //        bidRequestIds.add("fcc5f84b-c004-43c8-b25b-a2548614dff9"); //m
 //        bidRequestIds.add("9c9af2a7-15f7-4cd2-b810-444d54599881"); //m
-//        bidRequestIds.add("1673d571-9298-4d52-b586-099dd46488e3"); //m
+        bidRequestIds.add("8e7f090c-6710-4cd4-b872-c52d4af873c7"); //m
 
         List<Double> prices = new ArrayList<>();
         prices.add(Double.valueOf(1.00));

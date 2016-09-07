@@ -24,7 +24,6 @@ public class BidWinPutter implements Putter {
     private BidWinFactory bidWinFactory;
     private AmazonKinesis kinesis;
     private String streamName;
-    private int i = 0;
 
     private final ObjectMapper JSON = new ObjectMapper();
 
@@ -95,10 +94,10 @@ public class BidWinPutter implements Putter {
 
         PutRecordRequest putRecord = new PutRecordRequest();
         putRecord.setStreamName(streamName);
-        // We use the resource as the partition key so we can accurately calculate totals for a given resource
+
         putRecord.setPartitionKey(Ticker.getInstance().hashKey());
+
         putRecord.setData(ByteBuffer.wrap(bytes));
-        // Order is not important for this application so we do not send a SequenceNumberForOrdering
         putRecord.setSequenceNumberForOrdering(null);
 
         try {
@@ -116,6 +115,5 @@ public class BidWinPutter implements Putter {
             LOG.warn("Error sending record to Amazon Kinesis.", ex);
         }
 
-        System.out.println(i++ + "   " + winRec.getAudienceId());
     }
 }

@@ -2,9 +2,7 @@ package com.kinesis.datavis.producer.bidwin;
 
 import com.kinesis.datavis.model.record.BidWinRec;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -13,7 +11,6 @@ import java.util.concurrent.ThreadLocalRandom;
 public class BidWinFactory {
     private final List<Double> prices;
     private List<String> bidRequestIds;
-    private Map<String, String> mapping = new HashMap<>();
 
     /**
      * Create a new generator which will use the bidRequestIds and referrers provided.
@@ -27,11 +24,6 @@ public class BidWinFactory {
         this.bidRequestIds = bidRequestIds;
         this.prices = prices;
 
-//        mapping.put("b05361fe-4413-4a0e-92ae-cc2d9314ba16", "female");
-//        mapping.put("e268b3fa-d53b-4f73-bb2f-31f429831e4a", "male");
-//        mapping.put("fcc5f84b-c004-43c8-b25b-a2548614dff9", "male");
-//        mapping.put("9c9af2a7-15f7-4cd2-b810-444d54599881", "male");
-//        mapping.put("1673d571-9298-4d52-b586-099dd46488e3", "male");
     }
 
     /**
@@ -42,7 +34,7 @@ public class BidWinFactory {
      */
     public BidWinRec create() {
         String id = getRandomId();
-        BidWinRec winRec = new BidWinRec(id, "undefined", mapping.get(id), getRandomPrice());
+        BidWinRec winRec = new BidWinRec(getRandomId(), "undefined", "undefined", getRandomPrice());
 
         return winRec;
     }
