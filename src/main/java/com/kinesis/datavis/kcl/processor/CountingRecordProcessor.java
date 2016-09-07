@@ -189,16 +189,13 @@ public class CountingRecordProcessor<T, C> implements IRecordProcessor {
 
                 rec = typeProcessor.process(r, rec);
 
-
-
             } catch (IOException e) {
                 LOG.warn("Skipping record. Unable to parse record into HttpReferrerPair. Partition Key: "
                                 + r.getPartitionKey() + ". Sequence Number: " + r.getSequenceNumber(),
                         e);
                 continue;
             }
-            // Increment the windowCounter for the new pair. This is synchronized because there is another thread reading from
-            // the windowCounter to compute running totals every interval.
+
             synchronized (windowCounter) {
                 windowCounter.increment(rec);
             }

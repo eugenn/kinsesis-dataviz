@@ -30,7 +30,7 @@ public class CountingRecordProcessorFactory<T, C> implements IRecordProcessorFac
 
     private Class<T> recordType;
     private CountPersister<T, C> persister;
-    private TypeProcessor typeProcessor;
+    private TypeProcessor<T> typeProcessor;
     private IEmitter emitter;
     private int computeRangeInMillis;
     private int computeIntervalInMillis;

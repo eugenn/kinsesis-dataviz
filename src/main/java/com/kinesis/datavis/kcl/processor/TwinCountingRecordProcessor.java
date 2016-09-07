@@ -10,23 +10,19 @@ import com.amazonaws.services.kinesis.clientlibrary.types.ShutdownReason;
 import com.amazonaws.services.kinesis.model.Record;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jdbc.vo.Mapping;
 import com.kinesis.connectors.s3.buffer.IBuffer;
 import com.kinesis.connectors.s3.buffer.UnmodifiableBuffer;
 import com.kinesis.connectors.s3.emitter.IEmitter;
 import com.kinesis.datavis.kcl.counter.SlidingWindowTwinCounter;
 import com.kinesis.datavis.kcl.persistence.CountPersister;
-import com.kinesis.datavis.kcl.processor.type.CommonTypeProcessor;
 import com.kinesis.datavis.kcl.processor.type.TypeProcessor;
 import com.kinesis.datavis.kcl.timing.Clock;
 import com.kinesis.datavis.kcl.timing.NanoClock;
 import com.kinesis.datavis.kcl.timing.Timer;
-import com.kinesis.datavis.utils.ReflectionUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +70,7 @@ public class TwinCountingRecordProcessor<T, C> implements IRecordProcessor {
 
     private IEmitter<byte[]> emitter;
     private IBuffer<byte[]> buffer;
-    private CommonTypeProcessor<T> typeProcessor;
+    private TypeProcessor<T> typeProcessor;
 
 
     /**
@@ -99,7 +95,7 @@ public class TwinCountingRecordProcessor<T, C> implements IRecordProcessor {
         this.persister = persister;
         this.computeRangeInMillis = computeRangeInMillis;
         this.computeIntervalInMillis = computeIntervalInMillis;
-        this.typeProcessor = (CommonTypeProcessor<T>) typeProcessor;
+        this.typeProcessor = typeProcessor;
         this.emitter = emitter;
         this.buffer = typeProcessor.getBuffer();
 
@@ -178,20 +174,7 @@ public class TwinCountingRecordProcessor<T, C> implements IRecordProcessor {
             try {
                 rec = JSON.readValue(r.getData().array(), recordType);
 
-                Mapping mapping = typeProcessor.getMappingDAO().load(ReflectionUtil.getValue(rec, "getBidRequestId"));
-
-                if (mapping != null) {
-                    String bannerId = mapping.getBannerId();
-                    String audienceId = mapping.getAudienceId();
-
-                    ReflectionUtil.setValue(rec, "bannerId", bannerId);
-                    ReflectionUtil.setValue(rec, "audienceId", audienceId);
-
-                    String jsonPatched = typeProcessor.toJSON(bannerId, audienceId, r.getData().array());
-
-                    buffer.consumeRecord(jsonPatched.getBytes(Charset.forName("UTF-8")), r.getData().array().length, r.getSequenceNumber());
-
-                }
+                rec = typeProcessor.process(r, rec);
 
             } catch (IOException e) {
                 LOG.warn("Skipping record. Unable to parse record into HttpReferrerPair. Partition Key: "

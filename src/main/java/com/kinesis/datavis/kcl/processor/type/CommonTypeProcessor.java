@@ -24,11 +24,6 @@ public class CommonTypeProcessor<T> implements TypeProcessor<T> {
     }
 
     @Override
-    public T process(T obj) {
-        return null;
-    }
-
-    @Override
     public T process(Record r, T obj) {
 
         Mapping mapping = mappingDAO.load(ReflectionUtil.getValue(obj, "getBidRequestId"));

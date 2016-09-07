@@ -17,11 +17,11 @@ public class Cleaner  {
 
         ScheduledExecutorService ses = Executors.newSingleThreadScheduledExecutor();
 
-        ses.scheduleAtFixedRate((Runnable) this::doClean, 0, 1, TimeUnit.MINUTES);
+        ses.scheduleAtFixedRate((Runnable) this::doClean, 0, 1, TimeUnit.HOURS);
     }
 
     private void doClean() {
-        System.out.println("====================");
+        System.out.println("======Cleaning=========");
         System.out.println(mappingDAO.count());
 
         mappingDAO.deleteAll();
