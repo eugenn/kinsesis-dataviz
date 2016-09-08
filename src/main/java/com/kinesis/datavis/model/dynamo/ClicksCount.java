@@ -27,9 +27,6 @@ public class ClicksCount {
     private String host;
 
     @DynamoDBAttribute
-    private String bidRequestId;
-
-    @DynamoDBAttribute
     private String bannerId;
 
     @DynamoDBAttribute

@@ -48,13 +48,10 @@ public class BidRqCountPersister extends QueueRecordPersister implements CountPe
         for (Map.Entry<BidRequest, Long> count : objectCounts.entrySet()) {
             Date date = Calendar.getInstance(UTC).getTime();
 
-            BidRequest rec = count.getKey();
             BidRequestCount bdCount = countMap.get(date);
             if (bdCount == null) {
                 bdCount = new BidRequestCount();
                 bdCount.setHashKey(Ticker.getInstance().hashKey());
-//                bdCount.setWh(rec.getDevice().getWidth() + "x" + rec.getDevice().getHeight());
-//                bdCount.setBidRequestId(rec.getRequestId());
                 bdCount.setTimestamp(date);
                 bdCount.setHost(HostResolver.resolveHostname());
 

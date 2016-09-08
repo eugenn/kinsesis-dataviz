@@ -155,7 +155,7 @@ var UIHelper = function(data, graph) {
   // Controls the update loop.
   var running = true;
   // Set the active resource to query for counts when updating data.
-  var activeResource = "22222222222";
+  var activeResource = "11111111111";
   var activeAudience = "male";
 
   /**

@@ -47,7 +47,7 @@ public class ImpressionCounter extends CounterApp {
         String countsTableName = appProps.countTable();
         Region region = AppUtils.parseRegion(appProps.getRegion());
 
-        DynamoDBMapper mapper = createMapper(applicationName, streamName, countsTableName, region);
+        DynamoDBMapper mapper = createMapper(streamName, countsTableName, region);
 
         TypeProcessor<ImpressionRec> typeProcessor =
                 new CommonTypeProcessor<>(new JDBCMappingDAO(appProps.dbUrl(), appProps.dbUser(), appProps.dbPassword()), new FlushBuffer<>());

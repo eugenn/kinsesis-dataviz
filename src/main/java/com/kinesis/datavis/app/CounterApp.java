@@ -19,9 +19,6 @@ import com.kinesis.datavis.utils.StreamUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Properties;
 import java.util.UUID;
 
 /**
@@ -31,7 +28,7 @@ public class CounterApp {
     private static final Log LOG = LogFactory.getLog(BidRequestCounter.class);
 
 
-    public static DynamoDBMapper createMapper(String applicationName, String streamName, String countsTableName, Region region) {
+    public static DynamoDBMapper createMapper(String streamName, String countsTableName, Region region) {
         AWSCredentialsProvider credentialsProvider = new DefaultAWSCredentialsProviderChain();
 
         ClientConfiguration clientConfig = AppUtils.configureUserAgentForSample(new ClientConfiguration());

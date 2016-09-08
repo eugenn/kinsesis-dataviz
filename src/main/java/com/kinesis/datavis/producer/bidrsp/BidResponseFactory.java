@@ -19,8 +19,8 @@ public class BidResponseFactory {
 
     public BidResponse create() {
         Ext ext = Ext.builder().put("uniq_id", getRandomBannerId()).put("audience_id", getRandomAudienceIds()).build();
-        BidResponse winRec = BidResponse.builder().id(UUID.randomUUID().toString()).ext(ext).build();
-        return winRec;
+        BidResponse resp = BidResponse.builder().id(UUID.randomUUID().toString()).ext(ext).build();
+        return resp;
     }
 
     protected String getRandomBannerId() {

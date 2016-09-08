@@ -6,8 +6,6 @@ import com.kinesis.datavis.model.dynamo.ImpressionCount;
 import com.kinesis.datavis.model.record.ImpressionRec;
 import com.kinesis.datavis.utils.HostResolver;
 import com.kinesis.datavis.utils.Ticker;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.util.*;
 
@@ -15,9 +13,6 @@ import java.util.*;
  * Created by eugennekhai on 29/08/16.
  */
 public class ImpressionCountPersister extends QueueRecordPersister implements CountPersister<ImpressionRec, ImpressionCount> {
-    private static final Log LOG = LogFactory.getLog(BidRqCountPersister.class);
-    // Generate UTC timestamps
-    protected static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
     public ImpressionCountPersister(DynamoDBMapper dbMapper) {
         super(dbMapper);
@@ -40,6 +35,7 @@ public class ImpressionCountPersister extends QueueRecordPersister implements Co
         Iterator<Map.Entry<ImpressionRec, Double>> iter = objectSums.entrySet().iterator();
         Calendar cal = Calendar.getInstance(UTC);
 
+        int i = 1;
         for (Map.Entry<ImpressionRec, Long> count : objectCounts.entrySet()) {
 
             ImpressionRec rec = count.getKey();
@@ -59,7 +55,7 @@ public class ImpressionCountPersister extends QueueRecordPersister implements Co
                 countMap.put(rec, bdCount);
             }
 
-            bdCount.setTimestamp(cal.getTime());
+            bdCount.setTimestamp(new Date(cal.getTimeInMillis() + i++));
             bdCount.setCount(bdCount.getCount() + count.getValue());
             bdCount.setTotalPrice(totalPrice.getValue());
 

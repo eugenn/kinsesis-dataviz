@@ -94,10 +94,10 @@ public class BidResponsePutter implements Putter {
 
         PutRecordRequest putRecord = new PutRecordRequest();
         putRecord.setStreamName(streamName);
-        // We use the resource as the partition key so we can accurately calculate totals for a given resource
+
         putRecord.setPartitionKey(Ticker.getInstance().hashKey());
         putRecord.setData(ByteBuffer.wrap(bytes));
-        // Order is not important for this application so we do not send a SequenceNumberForOrdering
+
         putRecord.setSequenceNumberForOrdering(null);
 
         try {
@@ -107,12 +107,14 @@ public class BidResponsePutter implements Putter {
                 LOG.debug(String.format("Thread %s's Throughput exceeded. Waiting 10ms", Thread.currentThread().getName()));
             }
             try {
-                Thread.sleep(10);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         } catch (AmazonClientException ex) {
             LOG.warn("Error sending record to Amazon Kinesis.", ex);
         }
+
+        System.out.println(rec.getBannerId() + "    " + rec.getAudienceId());
     }
 }

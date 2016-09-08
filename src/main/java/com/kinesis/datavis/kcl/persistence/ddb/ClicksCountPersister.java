@@ -6,10 +6,9 @@ import com.kinesis.datavis.model.dynamo.ClicksCount;
 import com.kinesis.datavis.model.record.ClicksRec;
 import com.kinesis.datavis.utils.HostResolver;
 import com.kinesis.datavis.utils.Ticker;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,7 +16,6 @@ import java.util.Map;
  * Created by eugennekhai on 29/08/16.
  */
 public class ClicksCountPersister extends QueueRecordPersister implements CountPersister<ClicksRec, ClicksCount> {
-    private static final Log LOG = LogFactory.getLog(BidRqCountPersister.class);
 
     public ClicksCountPersister(DynamoDBMapper dbMapper) {
         super(dbMapper);
@@ -32,6 +30,7 @@ public class ClicksCountPersister extends QueueRecordPersister implements CountP
         Map<ClicksRec, ClicksCount> countMap = new HashMap<>();
         Calendar cal = Calendar.getInstance(UTC);
 
+        int i = 1;
         for (Map.Entry<ClicksRec, Long> count : objectCounts.entrySet()) {
             ClicksRec rec = count.getKey();
             ClicksCount bdCount = countMap.get(rec);
@@ -42,13 +41,12 @@ public class ClicksCountPersister extends QueueRecordPersister implements CountP
 
                 bdCount.setBannerId(rec.getBannerId());
                 bdCount.setAudienceId(rec.getAudienceId());
-                bdCount.setBidRequestId(rec.getBidRequestId());
                 bdCount.setHost(HostResolver.resolveHostname());
 
                 countMap.put(rec, bdCount);
             }
 
-            bdCount.setTimestamp(cal.getTime());
+            bdCount.setTimestamp(new Date(cal.getTimeInMillis() + i++));
             bdCount.setCount(bdCount.getCount() + count.getValue());
 
         }

@@ -81,7 +81,7 @@ public class BidRequestStreamWriter  {
 //        bidRequestIds.add("22222222222");
 //        bannerIds.add("33333333333");
 //        bidRequestIds.add("44444444444");
-        bidRequestIds.add("8e7f090c-6710-4cd4-b872-c52d4af873c7");
+        bidRequestIds.add("92b9b9d9-2d6d-454a-b80a-d6a318aca9ec");
 
         BidRequestFactory bdFactory = new BidRequestFactory(bidRequestIds, resources);
 

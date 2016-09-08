@@ -63,8 +63,8 @@ public class ClicksStreamWriter {
 //        bidRequestIds.add("3523784b-38f7-4afc-985a-62736dbdcbf1"); //f
 //        bidRequestIds.add("e268b3fa-d53b-4f73-bb2f-31f429831e4a"); //m
 //        bidRequestIds.add("fcc5f84b-c004-43c8-b25b-a2548614dff9"); //m
-        bidRequestIds.add("8e7f090c-6710-4cd4-b872-c52d4af873c7"); //m
-        bidRequestIds.add("fa6dbe44-eef0-472f-be2d-b4ddd4474afa"); //m
+//        bidRequestIds.add("e138ca82-b012-4fa8-9ca6-d574feca9892"); //m
+        bidRequestIds.add("b3dd522f-85bb-4369-b81c-35f672fe2684"); //m
 
         List<Double> prices = new ArrayList<>();
         prices.add(Double.valueOf(1.00));

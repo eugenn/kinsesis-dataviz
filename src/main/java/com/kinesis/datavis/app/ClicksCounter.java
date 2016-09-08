@@ -47,7 +47,7 @@ public class ClicksCounter extends CounterApp {
         String countsTableName = appProps.countTable();
         Region region = AppUtils.parseRegion(appProps.getRegion());
 
-        DynamoDBMapper mapper = createMapper(applicationName, streamName, countsTableName, region);
+        DynamoDBMapper mapper = createMapper(streamName, countsTableName, region);
 
         ClicksCountPersister persister = new ClicksCountPersister(mapper);
 

@@ -1,5 +1,6 @@
 package com.kinesis.datavis.utils;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -42,7 +43,7 @@ public class Ticker {
     }
 
     private void updateHashKey() {
-        LocalDateTime currentDate = LocalDateTime.now();
+        LocalDateTime currentDate = LocalDateTime.now(Clock.systemUTC());
         int m = currentDate.getMonthValue();
         int y = currentDate.getYear();
         int d = currentDate.getDayOfMonth();
@@ -52,7 +53,7 @@ public class Ticker {
     }
 
     private void updateS3Path() {
-        LocalDateTime currentDate = LocalDateTime.now();
+        LocalDateTime currentDate = LocalDateTime.now(Clock.systemUTC());
         int m = currentDate.getMonthValue();
         int y = currentDate.getYear();
         int d = currentDate.getDayOfMonth();

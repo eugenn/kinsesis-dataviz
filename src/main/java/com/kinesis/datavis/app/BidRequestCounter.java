@@ -64,7 +64,7 @@ public class BidRequestCounter extends CounterApp {
         String countsTableName = appProps.countTable();
         Region region = AppUtils.parseRegion(appProps.getRegion());
 
-        DynamoDBMapper mapper = createMapper(applicationName, streamName, countsTableName, region);
+        DynamoDBMapper mapper = createMapper(streamName, countsTableName, region);
 
         TypeProcessor<BidRequest> typeProcessor =
                 new BidRqProcessor(new JDBCMappingDAO(appProps.dbUrl(), appProps.dbUser(), appProps.dbPassword()), new FlushBuffer<>());
