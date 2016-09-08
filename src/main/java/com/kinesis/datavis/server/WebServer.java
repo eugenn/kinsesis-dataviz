@@ -30,8 +30,9 @@ public class WebServer {
      */
     public static void main(String[] args) throws Exception {
         Server server = new Server(Integer.parseInt(args[0]));
+        String type = args[1];
 
-        AppProperties appProps = new AppProperties("webserver", args[1]);
+        AppProperties appProps = new AppProperties(type, args[2]);
 
         String wwwroot = appProps.webRoot();
         String countsTableName = appProps.countTable();

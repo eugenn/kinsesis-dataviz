@@ -25,7 +25,7 @@ import com.kinesis.connectors.s3.emitter.S3Emitter;
 import com.kinesis.datavis.kcl.persistence.CountPersister;
 import com.kinesis.datavis.kcl.persistence.ddb.BidRqCountPersister;
 import com.kinesis.datavis.kcl.processor.CountingRecordProcessorFactory;
-import com.kinesis.datavis.kcl.processor.type.CommonTypeProcessor;
+import com.kinesis.datavis.kcl.processor.type.BidRqProcessor;
 import com.kinesis.datavis.kcl.processor.type.TypeProcessor;
 import com.kinesis.datavis.utils.AppProperties;
 import com.kinesis.datavis.utils.AppUtils;
@@ -67,7 +67,7 @@ public class BidRequestCounter extends CounterApp {
         DynamoDBMapper mapper = createMapper(applicationName, streamName, countsTableName, region);
 
         TypeProcessor<BidRequest> typeProcessor =
-                new CommonTypeProcessor<>(new JDBCMappingDAO(appProps.dbUrl(), appProps.dbUser(), appProps.dbPassword()), new FlushBuffer<>());
+                new BidRqProcessor(new JDBCMappingDAO(appProps.dbUrl(), appProps.dbUser(), appProps.dbPassword()), new FlushBuffer<>());
 
         IRecordProcessorFactory recordProcessor =
                 new CountingRecordProcessorFactory<>(BidRequest.class,

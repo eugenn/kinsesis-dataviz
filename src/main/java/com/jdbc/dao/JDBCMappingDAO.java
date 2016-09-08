@@ -24,7 +24,7 @@ public class JDBCMappingDAO implements MappingDAO {
         dataSource.setMaxIdle(50);
     }
 
-    public static Connection getConnection() throws SQLException {
+    private static Connection getConnection() throws SQLException {
         return dataSource.getConnection();
     }
 
@@ -77,12 +77,12 @@ public class JDBCMappingDAO implements MappingDAO {
                 preparedStatement.setTimestamp(4, mapping.getTimestamp());
                 preparedStatement.addBatch();
 
-                i++;
-                if (i % 1000 == 0 || i == mappings.size()) {
-                    preparedStatement.executeBatch(); // Execute every 1000 items.
+                if (++i % 50 == 0 || i == mappings.size()) {
+                    preparedStatement.executeBatch(); // Execute every 50 items.
                 }
 
             }
+            preparedStatement.executeBatch();
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -92,8 +92,8 @@ public class JDBCMappingDAO implements MappingDAO {
 
     @Override
     public void deleteAll() {
-        try (
-                Statement statement = getConnection().createStatement()) {
+        try (Connection conn = getConnection();
+                Statement statement = conn.createStatement()) {
             statement.execute(DELETE);
 
 

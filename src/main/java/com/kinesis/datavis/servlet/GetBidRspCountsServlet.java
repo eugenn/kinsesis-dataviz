@@ -87,7 +87,7 @@ public class GetBidRspCountsServlet extends HttpServlet {
 
 
         BidResponseCount hashKey = new BidResponseCount();
-        hashKey.setHashKey(Ticker.getInstance().hashKey());
+        hashKey.setHashKey(Ticker.getInstance().hashKey(audienceId));
 
         query.setHashKeyValues(hashKey);
 
