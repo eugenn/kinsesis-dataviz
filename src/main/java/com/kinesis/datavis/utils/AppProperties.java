@@ -32,7 +32,7 @@ public class AppProperties {
     }
 
     public String countTable() {
-        return props.get(type + ".counts.table").toString();
+        return props.get(type + ".counts-table").toString();
     }
 
     public String streamName() {

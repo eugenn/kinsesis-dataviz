@@ -21,7 +21,7 @@ import java.util.List;
  * Created by eugennekhai on 29/08/16.
  */
 public class BidResponseStreamWriter {
-    private static final Log LOG = LogFactory.getLog(BidWinStreamWriter.class);
+    private static final Log LOG = LogFactory.getLog(BidResponseStreamWriter.class);
 
     /**
      * Start a number of threads and send randomly generated {@link }s to a Kinesis Stream until the

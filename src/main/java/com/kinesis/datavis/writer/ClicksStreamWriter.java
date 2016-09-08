@@ -21,7 +21,7 @@ import java.util.List;
  * Created by eugennekhai on 29/08/16.
  */
 public class ClicksStreamWriter {
-    private static final Log LOG = LogFactory.getLog(BidWinStreamWriter.class);
+    private static final Log LOG = LogFactory.getLog(ClicksStreamWriter.class);
 
     /**
      * The amount of time to wait between records.

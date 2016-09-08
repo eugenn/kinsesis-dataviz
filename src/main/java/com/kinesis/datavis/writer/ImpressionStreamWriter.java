@@ -21,7 +21,7 @@ import java.util.List;
  * Created by eugennekhai on 29/08/16.
  */
 public class ImpressionStreamWriter {
-    private static final Log LOG = LogFactory.getLog(BidWinStreamWriter.class);
+    private static final Log LOG = LogFactory.getLog(ImpressionStreamWriter.class);
 
     /**
      * The amount of time to wait between records.
