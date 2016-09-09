@@ -10,6 +10,7 @@ import com.jdbc.vo.Mapping;
 import com.kinesis.connectors.s3.buffer.FlushBuffer;
 import com.kinesis.connectors.s3.emitter.S3Emitter;
 import com.kinesis.datavis.kcl.persistence.Cleaner;
+import com.kinesis.datavis.kcl.persistence.PersisterThread;
 import com.kinesis.datavis.kcl.persistence.ddb.BidResponseCountPersister;
 import com.kinesis.datavis.kcl.processor.CountingRecordProcessorFactory;
 import com.kinesis.datavis.kcl.processor.type.BidResponseProcessor;
@@ -62,7 +63,7 @@ public class BidResponseCounter extends CounterApp {
 
         Cleaner cleaner = new Cleaner(mappingDAO);
 
-        BlockingQueue<Mapping> mappingsBuff = new LinkedBlockingQueue<>(600000);
+        BlockingQueue<Mapping> mappingsBuff = new LinkedBlockingQueue<>(PersisterThread.MAX_COUNTS_IN_MEMORY * 2);
 
         TypeProcessor<BidResponse> typeProcessor = new BidResponseProcessor(mappingDAO, new FlushBuffer<>(), mappingsBuff);
 

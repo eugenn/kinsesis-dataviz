@@ -15,42 +15,42 @@ import java.util.concurrent.TimeUnit;
  */
 public class MappingThread<T> extends Thread {
     private static final Log LOG = LogFactory.getLog(PersisterThread.class);
-    private final BlockingQueue<T> counts;
+    private final BlockingQueue<T> eventsQueue;
     private MappingDAO mappingDAO;
 
-    public MappingThread(MappingDAO mappingDAO, BlockingQueue<T> counts) {
+    public MappingThread(MappingDAO mappingDAO, BlockingQueue<T> eventsQueue) {
         this.mappingDAO = mappingDAO;
-        this.counts = counts;
+        this.eventsQueue = eventsQueue;
     }
 
     @Override
     public void run() {
         // Create a reusable buffer to drain our queue into.
-        List<T> buffer = new ArrayList<>(PersisterThread.MAX_COUNTS_IN_MEMORY);
+        List<T> buffer = new ArrayList<>(PersisterThread.MAX_COUNTS_IN_MEMORY * 2);
 
-        // Continuously attempt to drain the queue and send counts to DynamoDB until this thread is interrupted
+        // Continuously attempt to drain the queue and send eventsQueue to DynamoDB until this thread is interrupted
         while (!Thread.currentThread().isInterrupted()) {
             try {
                 // Drain anything that's in the queue to the buffer and write the items to DynamoDB
                 sendQueueToDynamoDB(buffer);
 
-                synchronized(counts) {
-                    if (counts.isEmpty()) {
-                        counts.notify();
+                synchronized(eventsQueue) {
+                    if (eventsQueue.isEmpty()) {
+                        eventsQueue.notify();
                     }
                 }
 
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } finally {
-                // Clear the temporary buffer to release references to persisted counts
+                // Clear the temporary buffer to release references to persisted eventsQueue
                 buffer.clear();
             }
         }
     }
 
     /**
-     * Drain the queue of pending counts into the provided buffer and write those counts to DynamoDB. This blocks until
+     * Drain the queue of pending eventsQueue into the provided buffer and write those eventsQueue to DynamoDB. This blocks until
      * data is available in the queue.
      *
      * @param buffer A reusable buffer with sufficient space to drain the entire queue if necessary. This is provided as
@@ -59,10 +59,9 @@ public class MappingThread<T> extends Thread {
      */
     public void sendQueueToDynamoDB(List<T> buffer) throws InterruptedException {
         // Block while waiting for data
-        buffer.add(counts.take());
+        buffer.add(eventsQueue.take());
         // Drain as much of the queue as we can.
-        // DynamoDBMapper will handle splitting the batch sizes for us.
-        counts.drainTo(buffer);
+        eventsQueue.drainTo(buffer);
 
         try {
             long start = System.nanoTime();
@@ -71,13 +70,13 @@ public class MappingThread<T> extends Thread {
             mappingDAO.batchInsert((List<Mapping>) buffer);
 
             long end = System.nanoTime();
-            LOG.info(String.format("%d new counts sent to DynamoDB in %dms",
+            LOG.info(String.format("%d new eventsQueue sent to DynamoDB in %dms",
                     buffer.size(),
                     TimeUnit.NANOSECONDS.toMillis(end - start)));
 
 
         } catch (Exception ex) {
-            LOG.error("Error sending new counts to DynamoDB. The some counts may not be persisted.", ex);
+            LOG.error("Error sending new eventsQueue to DynamoDB. The some eventsQueue may not be persisted.", ex);
         }
     }
 }
