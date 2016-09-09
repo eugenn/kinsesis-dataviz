@@ -20,14 +20,17 @@ import java.util.List;
  */
 public class S3Emitter implements IEmitter<byte[]> {
     private static final Log LOG = LogFactory.getLog(S3Emitter.class);
-    protected final String s3Bucket = "kinesis-1122334455";
-    protected final String s3Endpoint = "https://s3.amazonaws.com";
+    protected String s3Bucket;
+    protected String s3Endpoint;
 
     protected final AmazonS3Client s3client;
     private String prefix;
 
-    public S3Emitter(String type) {
+    public S3Emitter(String type, String s3Bucket, String s3Endpoint) {
         this.prefix = "kinesis/" + type;
+        this.s3Bucket = s3Bucket;
+        this.s3Endpoint = s3Endpoint;
+
         DefaultAWSCredentialsProviderChain config = new DefaultAWSCredentialsProviderChain();
         s3client = new AmazonS3Client(config);
         if (s3Endpoint != null) {

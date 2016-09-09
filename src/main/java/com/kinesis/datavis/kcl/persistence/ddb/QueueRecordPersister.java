@@ -19,17 +19,9 @@ public class QueueRecordPersister<C> {
     // Generate UTC timestamps
     protected static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
-    /**
-     * This is used to limit the in memory queue. This number is the total counts we could generate for 10 unique
-     * resources in 10 minutes if our update interval is 100ms.
-     *
-     * 10 resources * 10 minutes * 60 seconds * 10 intervals per second = 60,000.
-     */
-    private static final int MAX_COUNTS_IN_MEMORY = 600000;
-
     // The queue holds all pending obj counts to be sent to DynamoDB.
     @Getter
-    public BlockingQueue<C> counts = new LinkedBlockingQueue<>(MAX_COUNTS_IN_MEMORY);
+    public BlockingQueue<C> counts = new LinkedBlockingQueue<>(PersisterThread.MAX_COUNTS_IN_MEMORY);
 
 
     public DynamoDBMapper mapper;

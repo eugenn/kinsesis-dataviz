@@ -15,8 +15,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class PersisterThread<T> extends Thread {
     private static final Log LOG = LogFactory.getLog(PersisterThread.class);
-    private static final int MAX_COUNTS_IN_MEMORY = 60000;
-    private final BlockingQueue<T> counts;
+    public static final int MAX_COUNTS_IN_MEMORY = 120000;
+    public final BlockingQueue<T> counts;
     private DynamoDBMapper mapper;
 
     public PersisterThread(DynamoDBMapper mapper, BlockingQueue<T> counts) {

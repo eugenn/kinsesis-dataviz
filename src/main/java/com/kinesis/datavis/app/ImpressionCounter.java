@@ -46,6 +46,8 @@ public class ImpressionCounter extends CounterApp {
         String streamName = appProps.streamName();
         String countsTableName = appProps.countTable();
         Region region = AppUtils.parseRegion(appProps.getRegion());
+        String s3Bucket = appProps.s3Bucket();
+        String s3Endpoint = appProps.s3Endpoint();
 
         DynamoDBMapper mapper = createMapper(streamName, countsTableName, region);
 
@@ -56,7 +58,7 @@ public class ImpressionCounter extends CounterApp {
                 new TwinCountingProcessorFactory<>(ImpressionRec.class,
                         new ImpressionCountPersister(mapper),
                         typeProcessor,
-                        new S3Emitter("impression"),
+                        new S3Emitter("impression", s3Bucket, s3Endpoint),
                         COMPUTE_RANGE_FOR_COUNTS_IN_MILLIS,
                         COMPUTE_INTERVAL_IN_MILLIS);
 

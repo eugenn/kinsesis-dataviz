@@ -50,6 +50,10 @@ public class BidResponseCounter extends CounterApp {
         String applicationName = appProps.appName();
         String streamName = appProps.streamName();
         String countsTableName = appProps.countTable();
+
+        String s3Bucket = appProps.s3Bucket();
+        String s3Endpoint = appProps.s3Endpoint();
+
         Region region = AppUtils.parseRegion(appProps.getRegion());
 
         DynamoDBMapper mapper = createMapper(streamName, countsTableName, region);
@@ -66,7 +70,7 @@ public class BidResponseCounter extends CounterApp {
                 new CountingRecordProcessorFactory<>(BidResponse.class,
                         new BidResponseCountPersister(mapper),
                         typeProcessor,
-                        new S3Emitter("bdresponse"),
+                        new S3Emitter("bdresponse", s3Bucket, s3Endpoint),
                         COMPUTE_RANGE_FOR_COUNTS_IN_MILLIS,
                         COMPUTE_INTERVAL_IN_MILLIS);
 

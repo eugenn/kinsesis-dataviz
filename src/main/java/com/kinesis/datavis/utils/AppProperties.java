@@ -65,4 +65,12 @@ public class AppProperties {
     public String getRegion() {
         return props.get("aws.region").toString();
     }
+
+    public String s3Bucket() {
+        return props.get("s3.bucket").toString();
+    }
+
+    public String s3Endpoint() {
+        return props.get("s3.endpoint").toString();
+    }
 }

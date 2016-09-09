@@ -15,7 +15,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class MappingThread<T> extends Thread {
     private static final Log LOG = LogFactory.getLog(PersisterThread.class);
-    private static final int MAX_COUNTS_IN_MEMORY = 60000;
     private final BlockingQueue<T> counts;
     private MappingDAO mappingDAO;
 
@@ -27,7 +26,7 @@ public class MappingThread<T> extends Thread {
     @Override
     public void run() {
         // Create a reusable buffer to drain our queue into.
-        List<T> buffer = new ArrayList<>(MAX_COUNTS_IN_MEMORY);
+        List<T> buffer = new ArrayList<>(PersisterThread.MAX_COUNTS_IN_MEMORY);
 
         // Continuously attempt to drain the queue and send counts to DynamoDB until this thread is interrupted
         while (!Thread.currentThread().isInterrupted()) {
