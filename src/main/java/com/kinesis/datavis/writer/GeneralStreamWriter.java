@@ -27,7 +27,7 @@ public class GeneralStreamWriter implements StreamWriter {
      * We want to send at most 10 records per second per thread so we'll delay 100ms between records.
      * This keeps the overall cost low for this sample.
      */
-    private static final long DELAY_BETWEEN_RECORDS_IN_MILLIS = 400;
+    private static final long DELAY_BETWEEN_RECORDS_IN_MILLIS = 20;
 
     public void doWrite() throws InterruptedException {
         ExecutorService es = Executors.newCachedThreadPool();

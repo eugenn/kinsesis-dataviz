@@ -25,7 +25,7 @@ public class QueueRecordPersister<C> {
      *
      * 10 resources * 10 minutes * 60 seconds * 10 intervals per second = 60,000.
      */
-    private static final int MAX_COUNTS_IN_MEMORY = 60000;
+    private static final int MAX_COUNTS_IN_MEMORY = 600000;
 
     // The queue holds all pending obj counts to be sent to DynamoDB.
     @Getter

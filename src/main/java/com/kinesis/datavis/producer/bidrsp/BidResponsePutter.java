@@ -115,6 +115,6 @@ public class BidResponsePutter implements Putter {
             LOG.warn("Error sending record to Amazon Kinesis.", ex);
         }
 
-        System.out.println(rec.getBannerId() + "    " + rec.getAudienceId());
+//        System.out.println(rec.getBannerId() + "    " + rec.getAudienceId());
     }
 }

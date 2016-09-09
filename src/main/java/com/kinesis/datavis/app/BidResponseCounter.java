@@ -58,7 +58,7 @@ public class BidResponseCounter extends CounterApp {
 
         Cleaner cleaner = new Cleaner(mappingDAO);
 
-        BlockingQueue<Mapping> mappingsBuff = new LinkedBlockingQueue<>(60000);
+        BlockingQueue<Mapping> mappingsBuff = new LinkedBlockingQueue<>(600000);
 
         TypeProcessor<BidResponse> typeProcessor = new BidResponseProcessor(mappingDAO, new FlushBuffer<>(), mappingsBuff);
 
