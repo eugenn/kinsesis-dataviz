@@ -43,7 +43,7 @@ public class BidRequestCounter extends CounterApp {
     private static final Log LOG = LogFactory.getLog(BidRequestCounter.class);
 
     // Count occurrences over a range of 10 seconds
-    private static final int COMPUTE_RANGE_FOR_COUNTS_IN_MILLIS = 1000;
+    private static final int COMPUTE_RANGE_FOR_COUNTS_IN_MILLIS = 10000;
     // Update the counts every 1 second
     private static final int COMPUTE_INTERVAL_IN_MILLIS = 1000;
 
