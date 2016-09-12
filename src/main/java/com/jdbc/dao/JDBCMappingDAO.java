@@ -77,8 +77,8 @@ public class JDBCMappingDAO implements MappingDAO {
                 preparedStatement.setTimestamp(4, mapping.getTimestamp());
                 preparedStatement.addBatch();
 
-                if (++i % 1000 == 0 || i == mappings.size()) {
-                    preparedStatement.executeBatch(); // Execute every 1000 items.
+                if (++i % 20 == 0 || i == mappings.size()) {
+                    preparedStatement.executeBatch(); // Execute every 20 items.
                 }
 
             }
