@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by eugennekhai on 30/08/16.
  */
-public class TwinCountingRecordProcessor<T, C> implements IRecordProcessor {
+public class PairCountingRecordProcessor<T, C> implements IRecordProcessor {
     private static final Log LOG = LogFactory.getLog(CountingRecordProcessor.class);
 
     // Lock to use for our timer
@@ -82,7 +82,7 @@ public class TwinCountingRecordProcessor<T, C> implements IRecordProcessor {
      * @param computeRangeInMillis    Range to compute distinct counts across
      * @param computeIntervalInMillis Interval between computing total count for the overall time range.
      */
-    public TwinCountingRecordProcessor(CountingRecordProcessorConfig config,
+    public PairCountingRecordProcessor(CountingRecordProcessorConfig config,
                                        Class<T> recordType,
                                        CountPersister<T, C> persister,
                                        TypeProcessor<T> typeProcessor,

@@ -9,7 +9,7 @@ import com.kinesis.datavis.kcl.processor.type.TypeProcessor;
 /**
  * Created by eugennekhai on 30/08/16.
  */
-public class TwinCountingProcessorFactory<T, C> implements IRecordProcessorFactory {
+public class PairCountingProcessorFactory<T, C> implements IRecordProcessorFactory {
 
     private Class<T> recordType;
     private CountPersister<T, C> persister;
@@ -25,7 +25,7 @@ public class TwinCountingProcessorFactory<T, C> implements IRecordProcessorFacto
      *
      * @see #(Class, CountPersister, int, int)
      */
-    public TwinCountingProcessorFactory(Class<T> recordType,
+    public PairCountingProcessorFactory(Class<T> recordType,
                                         CountPersister<T, C> persister,
                                         TypeProcessor<T> typeProcessor,
                                         IEmitter emitter,
@@ -48,7 +48,7 @@ public class TwinCountingProcessorFactory<T, C> implements IRecordProcessorFacto
      * @throws IllegalArgumentException if computeRangeInMillis or computeIntervalInMillis are not greater than 0 or
      *                                  computeRangeInMillis is not evenly divisible by computeIntervalInMillis.
      */
-    public TwinCountingProcessorFactory(Class<T> recordType,
+    public PairCountingProcessorFactory(Class<T> recordType,
                                         CountPersister<T, C> persister,
                                         TypeProcessor<T> typeProcessor,
                                         IEmitter emitter,
@@ -70,7 +70,7 @@ public class TwinCountingProcessorFactory<T, C> implements IRecordProcessorFacto
      */
     @Override
     public IRecordProcessor createProcessor() {
-        return new TwinCountingRecordProcessor<>(config,
+        return new PairCountingRecordProcessor<>(config,
                 recordType,
                 persister,
                 typeProcessor,

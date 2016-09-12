@@ -8,7 +8,7 @@ import com.jdbc.dao.JDBCMappingDAO;
 import com.kinesis.connectors.s3.buffer.FlushBuffer;
 import com.kinesis.connectors.s3.emitter.S3Emitter;
 import com.kinesis.datavis.kcl.persistence.ddb.ImpressionCountPersister;
-import com.kinesis.datavis.kcl.processor.TwinCountingProcessorFactory;
+import com.kinesis.datavis.kcl.processor.PairCountingProcessorFactory;
 import com.kinesis.datavis.kcl.processor.type.CommonTypeProcessor;
 import com.kinesis.datavis.kcl.processor.type.TypeProcessor;
 import com.kinesis.datavis.model.record.ImpressionRec;
@@ -55,7 +55,7 @@ public class ImpressionCounter extends CounterApp {
                 new CommonTypeProcessor<>(new JDBCMappingDAO(appProps.dbUrl(), appProps.dbUser(), appProps.dbPassword()), new FlushBuffer<>());
 
         IRecordProcessorFactory recordProcessor =
-                new TwinCountingProcessorFactory<>(ImpressionRec.class,
+                new PairCountingProcessorFactory<>(ImpressionRec.class,
                         new ImpressionCountPersister(mapper),
                         typeProcessor,
                         new S3Emitter("impression", s3Bucket, s3Endpoint),
