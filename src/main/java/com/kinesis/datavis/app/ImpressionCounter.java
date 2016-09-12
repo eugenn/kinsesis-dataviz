@@ -25,8 +25,8 @@ import java.net.UnknownHostException;
 public class ImpressionCounter extends CounterApp {
     private static final Log LOG = LogFactory.getLog(BidWinCounter.class);
 
-    // Count occurrences of HTTP referrer pairs over a range of 10 seconds
-    private static final int COMPUTE_RANGE_FOR_COUNTS_IN_MILLIS = 10000;
+    // Count occurrences of  a range of 1 seconds
+    private static final int COMPUTE_RANGE_FOR_COUNTS_IN_MILLIS = 1000;
     // Update the counts every 1 second
     private static final int COMPUTE_INTERVAL_IN_MILLIS = 1000;
 
