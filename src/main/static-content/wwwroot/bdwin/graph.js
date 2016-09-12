@@ -143,7 +143,7 @@ var Graph = function() {
  */
 var UIHelper = function(data, graph) {
   // How frequently should we poll for new data and update the graph?
-  var updateIntervalInMillis = 400;
+  var updateIntervalInMillis = 1000;
   // How often should the top N display be updated?
   var intervalsPerTopNUpdate = 5;
   // How far back should we fetch data at every interval?
